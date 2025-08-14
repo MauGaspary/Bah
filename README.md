@@ -96,14 +96,14 @@ import { Button } from '@/components/ui/button'
 **Card (Cartão):**
 
 ```tsx
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-<Card>
+;<Card>
   <CardHeader>
     <CardTitle>Título</CardTitle>
   </CardHeader>
   <CardContent>Conteúdo do card</CardContent>
-</Card>;
+</Card>
 ```
 
 ### Adicionando Novos Componentes
