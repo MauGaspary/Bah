@@ -1,53 +1,134 @@
-# React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+# BAH Frontend
 
-Este projeto é um template moderno para desenvolvimento web usando as tecnologias mais atuais disponíveis.
+Aplicação **Comandos Docker disponíveis:**
 
-## 🚀 Stack Tecnológica
+````bash
+# Desenvolvimento
+npm run docker:dev                 # Sobe o container em background (recomendado)
+npm run docker:dev:attached       # Sobe o container "grudado" no terminal
+npm run docker:stop               # Pausa os containers (mantém dados)
+npm run docker:down               # Para e remove containers (mantém imagens)
+npm run docker:logs               # Visualiza logs do frontend
+npm run docker:shell              # Acessa shell do container
 
-- **React 19** - Biblioteca para construção de interfaces de usuário
-- **TypeScript** - Superset tipado do JavaScript
-- **Vite** - Build tool e servidor de desenvolvimento ultra-rápido
-- **Tailwind CSS v4** - Framework CSS utility-first
-- **shadcn/ui** - Coleção de componentes UI reutilizáveis e acessíveis
-- **ESLint** - Ferramenta de linting para manter a qualidade do código
+# Limpeza
+npm run docker:clean              # Remove TUDO (containers, volumes, imagens)
+```projeto BAH desenvolvida com React, TypeScript, Vite e Tailwind CSS.
 
-## 📦 Instalação
+## 🚀 Métodos de Desenvolvimento
+
+Você pode escolher entre **duas formas** de rodar o projeto:
+
+### 📦 Método 1: Docker (Recomendado para novos desenvolvedores)
+
+**Pré-requisitos:**
+- Docker
+- Docker Compose
+
+**Configuração rápida:**
+```bash
+# Clone o repositório
+git clone <url-do-repositorio>
+cd bah-frontend
+
+# Suba o ambiente Docker
+npm run docker:dev
+
+# Acesse: http://localhost:5173
+````
+
+**Comandos Docker disponíveis:**
 
 ```bash
-npm install
+# Desenvolvimento
+npm run docker:dev                 # Sobe o container em modo desenvolvimento
+npm run docker:dev:detached       # Suba em background (detached)
+npm run docker:stop               # Para os containers
+npm run docker:logs               # Visualiza logs do frontend
+npm run docker:shell              # Acessa shell do container
+
+# Limpeza
+npm run docker:clean              # Remove containers, volumes e imagens
 ```
 
-## 🛠️ Scripts Disponíveis
+### 💻 Método 2: Desenvolvimento Local
+
+**Pré-requisitos:**
+
+- Node.js 24+
+- npm ou yarn
+
+**Configuração:**
 
 ```bash
-# Executar servidor de desenvolvimento
+# Clone o repositório
+git clone <url-do-repositorio>
+cd bah-frontend
+
+# Instale dependências
+npm install
+
+# Rode em desenvolvimento
 npm run dev
 
-# Fazer build para produção
-npm run build
-
-# Visualizar build de produção
-npm run preview
-
-# Executar linting
-npm run lint
+# Acesse: http://localhost:5173
 ```
 
-## 🎨 Tailwind CSS v4
+**Comandos disponíveis:**
 
-Este projeto usa o Tailwind CSS v4 com as seguintes configurações:
+```bash
+npm run dev        # Servidor de desenvolvimento
+npm run build      # Build para produção
+npm run preview    # Preview do build
+npm run lint       # Verificar código
+npm run lint:fix   # Corrigir problemas do linter
+```
 
-- **PostCSS Plugin**: `@tailwindcss/postcss`
-- **Configuração**: `tailwind.config.js`
-- **CSS Principal**: `src/index.css`
+## 🎨 Design System
 
-## 🧩 shadcn/ui
+O projeto usa tokens de design personalizados definidos em `src/index.css`:
 
-O projeto está configurado com shadcn/ui incluindo:
+### Cores BAH
 
-- **Componentes instalados**: Button, Card
-- **Utilitários**: Função `cn()` para merge de classes CSS
-- **Tema**: New York style com cor base Neutral
+- `bg-bah-blue` - Azul principal (#41edee)
+- `bg-bah-green` - Verde (#c7d871)
+- `bg-bah-purple` - Roxo (#542e82)
+- `bg-bah-red` - Vermelho (#fe716f)
+
+### Fontes
+
+- `font-kanit` - Títulos e destaques
+- `font-sf-pro` - Texto geral
+- `font-mulish` - Alternativa
+
+### Componentes
+
+- **Button**: Componente padrão com variantes `primary`, `success`, `secondary`, `purple`
+- **Card**: Layout de cartões com bordas arredondadas
+
+## 🔄 Fluxo de Desenvolvimento Docker
+
+```bash
+# 🌅 Começar o dia / sessão de desenvolvimento
+npm run docker:dev              # Roda em background, libera o terminal
+
+# 💻 Desenvolver normalmente...
+# Ver logs se necessário
+npm run docker:logs             # Em outro terminal ou aba
+
+# 🔍 Debug se precisar
+npm run docker:shell            # Acessa o container
+
+# 🌙 Parar temporariamente (mantém tudo)
+npm run docker:stop             # Pausa, dados preservados
+
+# 🔄 Continuar de onde parou
+npm run docker:dev              # Retoma rapidamente
+
+# 🧹 Limpeza completa (quando algo der errado)
+npm run docker:clean            # Remove tudo, recomeça do zero
+```
+
 - **Ícones**: Lucide React
 
 ### Adicionando novos componentes:
