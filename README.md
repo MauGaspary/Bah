@@ -1,143 +1,112 @@
 # BAH Frontend
 
-Aplicação **Comandos Docker disponíveis:**
+Frontend do projeto BAH desenvolvido com tecnologias modernas para uma experiência de desenvolvimento eficiente e produtiva.
 
-````bash
-# Desenvolvimento
-npm run docker:dev                 # Sobe o container em background (recomendado)
-npm run docker:dev:attached       # Sobe o container "grudado" no terminal
-npm run docker:stop               # Pausa os containers (mantém dados)
-npm run docker:down               # Para e remove containers (mantém imagens)
-npm run docker:logs               # Visualiza logs do frontend
-npm run docker:shell              # Acessa shell do container
+## 🛠️ Tecnologias
 
-# Limpeza
-npm run docker:clean              # Remove TUDO (containers, volumes, imagens)
-```projeto BAH desenvolvida com React, TypeScript, Vite e Tailwind CSS.
+- **React 19** - Biblioteca para interfaces de usuário
+- **TypeScript** - JavaScript com tipagem estática
+- **Vite** - Build tool moderna e rápida
+- **Tailwind CSS v4** - Framework CSS utilitário
+- **shadcn/ui** - Componentes acessíveis e customizáveis
+- **Lucide React** - Biblioteca de ícones
+- **Docker** - Containerização para desenvolvimento
 
-## 🚀 Métodos de Desenvolvimento
+## � Iniciando o Desenvolvimento
 
-Você pode escolher entre **duas formas** de rodar o projeto:
+### Pré-requisitos
 
-### 📦 Método 1: Docker (Recomendado para novos desenvolvedores)
+- Docker e Docker Compose instalados
+- Git configurado
 
-**Pré-requisitos:**
-- Docker
-- Docker Compose
+### Passo a Passo
 
-**Configuração rápida:**
+1. **Clone o repositório:**
+
 ```bash
-# Clone o repositório
 git clone <url-do-repositorio>
 cd bah-frontend
+```
 
-# Suba o ambiente Docker
-npm run docker:dev
-
-# Acesse: http://localhost:5173
-````
-
-**Comandos Docker disponíveis:**
+2. **Execute o setup automático (APENAS NA PRIMEIRA VEZ):**
 
 ```bash
-# Desenvolvimento
-npm run docker:dev                 # Sobe o container em modo desenvolvimento
-npm run docker:dev:detached       # Suba em background (detached)
-npm run docker:stop               # Para os containers
-npm run docker:logs               # Visualiza logs do frontend
+chmod +x setup.sh
+./setup.sh
+```
+
+- Escolha "1" para Docker (recomendado)
+- O script vai verificar dependências e configurar tudo automaticamente
+
+3. **Acesse a aplicação:**
+
+- Frontend: http://localhost:5173
+
+> **⚠️ IMPORTANTE:** O `setup.sh` é APENAS para quem acabou de clonar o repositório. No dia a dia, use simplesmente `npm run docker:dev`!
+
+### Comandos Docker Disponíveis
+
+**Para uso diário (após o primeiro setup):**
+
+```bash
+npm run docker:dev                 # Sobe em background (comando do dia a dia)
+npm run docker:stop               # Pausa containers (mantém dados)
+npm run docker:logs               # Visualiza logs
+```
+
+**Comandos adicionais:**
+
+```bash
+npm run docker:dev:attached       # Sobe "grudado" no terminal (debug)
+npm run docker:down               # Para e remove containers
 npm run docker:shell              # Acessa shell do container
-
-# Limpeza
-npm run docker:clean              # Remove containers, volumes e imagens
-```
-
-### 💻 Método 2: Desenvolvimento Local
-
-**Pré-requisitos:**
-
-- Node.js 24+
-- npm ou yarn
-
-**Configuração:**
-
-```bash
-# Clone o repositório
-git clone <url-do-repositorio>
-cd bah-frontend
-
-# Instale dependências
-npm install
-
-# Rode em desenvolvimento
-npm run dev
-
-# Acesse: http://localhost:5173
-```
-
-**Comandos disponíveis:**
-
-```bash
-npm run dev        # Servidor de desenvolvimento
-npm run build      # Build para produção
-npm run preview    # Preview do build
-npm run lint       # Verificar código
-npm run lint:fix   # Corrigir problemas do linter
+npm run docker:clean              # Remove TUDO (emergência)
 ```
 
 ## 🎨 Design System
 
-O projeto usa tokens de design personalizados definidos em `src/index.css`:
+### Tokens de Design (BAH)
 
-### Cores BAH
+**Cores principais:**
 
-- `bg-bah-blue` - Azul principal (#41edee)
-- `bg-bah-green` - Verde (#c7d871)
-- `bg-bah-purple` - Roxo (#542e82)
-- `bg-bah-red` - Vermelho (#fe716f)
+- `bg-bah-blue` - Azul BAH (#41edee)
+- `bg-bah-green` - Verde BAH (#c7d871)
+- `bg-bah-purple` - Roxo BAH (#542e82)
+- `bg-bah-red` - Vermelho BAH (#fe716f)
 
-### Fontes
+**Tipografia:**
 
 - `font-kanit` - Títulos e destaques
 - `font-sf-pro` - Texto geral
-- `font-mulish` - Alternativa
+- `font-mulish` - Texto alternativo
 
-### Componentes
+### Componentes Disponíveis
 
-- **Button**: Componente padrão com variantes `primary`, `success`, `secondary`, `purple`
-- **Card**: Layout de cartões com bordas arredondadas
+**Button (Botão):**
 
-## 🔄 Fluxo de Desenvolvimento Docker
+```tsx
+import { Button } from '@/components/ui/button'
 
-```bash
-# 🌅 Começar o dia / sessão de desenvolvimento
-npm run docker:dev              # Roda em background, libera o terminal
-
-# 💻 Desenvolver normalmente...
-# Ver logs se necessário
-npm run docker:logs             # Em outro terminal ou aba
-
-# 🔍 Debug se precisar
-npm run docker:shell            # Acessa o container
-
-# 🌙 Parar temporariamente (mantém tudo)
-npm run docker:stop             # Pausa, dados preservados
-
-# 🔄 Continuar de onde parou
-npm run docker:dev              # Retoma rapidamente
-
-# 🧹 Limpeza completa (quando algo der errado)
-npm run docker:clean            # Remove tudo, recomeça do zero
+<Button variant="primary">Primário</Button>
+<Button variant="success">Sucesso</Button>
+<Button variant="secondary">Secundário</Button>
+<Button variant="purple">Roxo</Button>
 ```
 
-- **Ícones**: Lucide React
+**Card (Cartão):**
 
-### Adicionando novos componentes:
+```tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-```bash
-npx shadcn@latest add [nome-do-componente]
+<Card>
+  <CardHeader>
+    <CardTitle>Título</CardTitle>
+  </CardHeader>
+  <CardContent>Conteúdo do card</CardContent>
+</Card>;
 ```
 
-Exemplos:
+### Adicionando Novos Componentes
 
 ```bash
 npx shadcn@latest add input
@@ -145,109 +114,105 @@ npx shadcn@latest add dialog
 npx shadcn@latest add dropdown-menu
 ```
 
+## � Git Flow
+
+### Estrutura de Branches
+
+- `main` - Branch principal (produção)
+- `dev` - Branch de desenvolvimento
+- `feature/nome-da-funcionalidade` - Novas funcionalidades
+- `bugfix/nome-do-bug` - Correções de bugs
+
+### Fluxo de Trabalho
+
+1. **Começar uma nova funcionalidade:**
+
+```bash
+# Ir para dev e pegar atualizações
+git checkout dev
+git pull origin dev
+
+# Criar nova branch
+git checkout -b feature/minha-funcionalidade
+```
+
+2. **Fazer commits:**
+
+```bash
+# Adicionar arquivos modificados
+git add .
+
+# Fazer commit com mensagem descritiva
+git commit -m "feat: adicionar componente de login"
+```
+
+3. **Enviar para o repositório:**
+
+```bash
+git push origin feature/minha-funcionalidade
+```
+
+4. **Criar Pull Request:**
+
+- Acesse o GitHub/GitLab
+- Clique em "New Pull Request"
+- Aponte para a branch `dev`
+- Descreva as alterações
+- Aguarde revisão
+
+### Tipos de Commit (Convenção)
+
+- `feat:` - Nova funcionalidade
+- `fix:` - Correção de bug
+- `docs:` - Documentação
+- `style:` - Formatação de código
+- `refactor:` - Refatoração
+- `test:` - Testes
+
+**Exemplos:**
+
+```bash
+git commit -m "feat: adicionar botão de salvar"
+git commit -m "fix: corrigir validação do formulário"
+git commit -m "docs: atualizar README"
+```
+
+### Comandos Git Essenciais
+
+```bash
+git status                    # Ver arquivos modificados
+git add .                     # Adicionar todos os arquivos
+git add arquivo.txt           # Adicionar arquivo específico
+git commit -m "mensagem"      # Fazer commit
+git push                      # Enviar para repositório
+git pull                      # Baixar atualizações
+git checkout branch-name      # Trocar de branch
+git branch                    # Listar branches
+git branch -d branch-name     # Deletar branch local
+```
+
 ## 📁 Estrutura do Projeto
 
 ```
 src/
 ├── components/
-│   └── ui/              # Componentes shadcn/ui
+│   └── ui/              # Componentes do design system
 ├── lib/
-│   └── utils.ts         # Utilitários (função cn)
-├── assets/              # Recursos estáticos
+│   └── utils.ts         # Funções utilitárias
+├── assets/              # Imagens, ícones, etc.
 ├── App.tsx             # Componente principal
 ├── main.tsx            # Ponto de entrada
-└── index.css           # Estilos globais + Tailwind
+└── index.css           # Estilos globais + tokens BAH
 ```
-
-## 🔧 Configurações
-
-### TypeScript
-
-- Path mapping configurado (`@/*` → `./src/*`)
-- Configuração em `tsconfig.app.json` e `tsconfig.json`
-
-### Vite
-
-- Alias de importação configurado
-- Plugin React habilitado
-
-### PostCSS
-
-- Plugin Tailwind CSS v4
-- Autoprefixer para compatibilidade entre browsers
-
-## 📖 Exemplos de Uso
-
-### Usando componentes shadcn/ui:
-
-```tsx
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-function ExampleComponent() {
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Título do Card</CardTitle>
-        <CardDescription>Descrição do card</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Button variant="default" size="lg">
-          Clique aqui
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-```
-
-### Usando Tailwind CSS:
-
-```tsx
-function ResponsiveLayout() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Layout Responsivo
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Conteúdo */}
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-## 🎯 Próximos Passos
-
-1. **Adicionar mais componentes**: Explore a [documentação do shadcn/ui](https://ui.shadcn.com/docs)
-2. **Configurar tema personalizado**: Customize as cores e estilos no `tailwind.config.js`
-3. **Adicionar testes**: Considere usar Vitest + Testing Library
-4. **Configurar CI/CD**: Setup para deploy automatizado
 
 ## 📚 Recursos Úteis
 
-- [Documentação do Tailwind CSS v4](https://tailwindcss.com/docs)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- [Vite Guide](https://vitejs.dev/guide/)
-- [React Documentation](https://react.dev/)
+- [Lucide Icons](https://lucide.dev/icons/)
+- [Git Tutorial](https://git-scm.com/docs/gittutorial)
+- [React Docs](https://react.dev/)
 
-## 🔧 Configuração Avançada do ESLint
+---
 
-Para aplicações em produção, você pode configurar regras de lint mais rigorosas. Consulte a [documentação do ESLint](https://eslint.org/docs) para mais detalhes.
-
-## 📋 Versões das Dependências
-
-- **React**: ^19.1.1
-- **TypeScript**: ~5.8.3
-- **Vite**: ^7.1.0
-- **Tailwind CSS**: ^4.1.11
-- **shadcn/ui**: Mais recente
+💡 **Dica:** Sempre teste suas alterações localmente antes de fazer push!
