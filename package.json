@@ -6,9 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
-    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --fix",
-    "preview": "vite preview"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "docker:dev": "./scripts/detect-docker-compose.sh up --build -d",
+    "docker:dev:attached": "./scripts/detect-docker-compose.sh up --build",
+    "docker:stop": "./scripts/detect-docker-compose.sh stop",
+    "docker:down": "./scripts/detect-docker-compose.sh down",
+    "docker:clean": "./scripts/detect-docker-compose.sh down -v --rmi all",
+    "docker:logs": "./scripts/detect-docker-compose.sh logs -f bah-frontend",
+    "docker:shell": "./scripts/detect-docker-compose.sh exec bah-frontend sh"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
@@ -20,6 +27,7 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
     "@rocketseat/eslint-config": "^2.2.2",
     "@tailwindcss/postcss": "^4.1.11",

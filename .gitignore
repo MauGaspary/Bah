@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Docker
+.env.docker
+docker-compose.override.yml
+docker-compose.log
+.docker/
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Scripts executáveis devem ser commitados
+# !scripts/

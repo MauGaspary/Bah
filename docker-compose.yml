@@ -1,0 +1,29 @@
+services:
+  # Serviço principal do frontend
+  bah-frontend:
+    build: .
+    container_name: bah-frontend-dev
+    ports:
+      - "5173:5173"  # Porta do Vite
+    volumes:
+      # Volume para hot reload - monta o código local no container
+      - .:/app
+      # Volume para node_modules (evita conflitos entre host e container)
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+    stdin_open: true
+    tty: true
+    networks:
+      - bah-network
+
+  # Opcional: Adicionar outros serviços futuros aqui
+  # Exemplo: backend, banco de dados, redis, etc.
+
+networks:
+  bah-network:
+    driver: bridge
+
+volumes:
+  node_modules:

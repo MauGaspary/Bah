@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
               {/* Texto padrão */}
               <Button
                 variant="purple"
-                onClick={() => alert("Iniciativas salvas!")}
+                onClick={() => alert('Iniciativas salvas!')}
               >
                 Salvar iniciativas
               </Button>
@@ -51,7 +51,7 @@ function App() {
               {/* Texto customizado */}
               <Button
                 variant="purple"
-                onClick={() => alert("Dados exportados!")}
+                onClick={() => alert('Dados exportados!')}
               >
                 Salvar iniciativas
               </Button>
@@ -60,7 +60,7 @@ function App() {
               <Button
                 variant="purple"
                 disabled
-                onClick={() => alert("Não deveria executar")}
+                onClick={() => alert('Não deveria executar')}
               >
                 Botão Desabilitado
               </Button>
@@ -69,7 +69,7 @@ function App() {
               <Button
                 variant="purple"
                 disabled
-                onClick={() => alert("Não deveria executar")}
+                onClick={() => alert('Não deveria executar')}
               >
                 Botão Desabilitado
               </Button>
@@ -107,7 +107,7 @@ function App() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
