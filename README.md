@@ -110,24 +110,11 @@ Siga estas práticas para manter consistência, qualidade e facilidade de manute
 
 - Arquitetura de componentes
   - Componentes UI devem ser pequenos, isolados e reutilizáveis (`src/components/ui`).
-  - Separe lógica (hooks) de apresentação (componentes puros).
   - Exporte tipos/props quando relevante para reaproveitamento.
 
 - Tipagem
   - Prefira tipos explícitos em TypeScript para props e funções públicas.
   - Evite `any` salvo quando realmente necessário; documente a razão.
-
-- Testes
-  - Adicione testes unitários nas funções críticas e componentes com interações.
-  - Recomenda-se usar `vitest` + `@testing-library/react` (podemos adicionar se quiser).
-
-- Acessibilidade (a11y)
-  - Sempre adicionar `label`/`aria-*` quando necessário.
-  - Verifique contrastes, foco por teclado e leitura por leitores de tela.
-
-- Performance e imagens
-  - Otimize imagens e use formatos modernos (WebP) quando possível.
-  - Evite renderizações desnecessárias; memoize quando fizer sentido.
 
 - Segurança
   - Nunca commite credenciais ou arquivos `.env`.
@@ -136,10 +123,6 @@ Siga estas práticas para manter consistência, qualidade e facilidade de manute
 - Atualização de dependências
   - Use `npm outdated` para checar pacotes obsoletos e atualize com cuidado.
   - Teste o app após updates maiores de dependências (major releases).
-
-- Documentação e PR
-  - Atualize `README.md` e `components.json` quando adicionar novos componentes.
-  - Em PRs, descreva o que foi testado e os passos para validar localmente.
 
 Comandos úteis
 
