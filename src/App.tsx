@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button'
 
 function App() {
   return (
-    <div className="min-h-screen bg-background-secondary p-8">
+    <div className="min-h-screen bg-background-secondary">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-large-title font-kanit text-label-primary mb-2">
+          <h1 className="text-large-title font-kanit text-label-primary bg-black">
             BAH App
           </h1>
           <p className="text-body-regular font-sf-pro text-label-secondary">
@@ -36,7 +36,7 @@ function App() {
 
             {/* Custom Component Demo */}
             <div className="space-y-3">
-              <h4 className="text-callout-semibold font-sf-pro-text text-white">
+              <h4 className="text-callout-semibold font-sf-pro-text text-black">
                 Componentes Customizados:
               </h4>
 
