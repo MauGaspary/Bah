@@ -92,6 +92,71 @@ npx shadcn@latest add dialog
 npx shadcn@latest add dropdown-menu
 ```
 
+## ✅ Boas práticas
+
+Siga estas práticas para manter consistência, qualidade e facilidade de manutenção no projeto.
+
+- Commits e mensagens
+  - Use mensagens claras e no formato convencional: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`.
+  - Faça commits pequenos e atômicos; um objetivo por commit.
+
+- Branching
+  - Trabalhe em branches a partir de `dev` (ex.: `feature/minha-funcionalidade`, `fix/bug-x`).
+  - Faça Pull Requests pequenos com descrição e checklist do que foi feito.
+
+- Código e estilo
+  - Rode antes de commitar: `npm run format` (Prettier) e `npm run lint:fix` (ESLint).
+  - Configure seu editor para aplicar Prettier ao salvar e respeitar as regras do ESLint.
+
+- Arquitetura de componentes
+  - Componentes UI devem ser pequenos, isolados e reutilizáveis (`src/components/ui`).
+  - Separe lógica (hooks) de apresentação (componentes puros).
+  - Exporte tipos/props quando relevante para reaproveitamento.
+
+- Tipagem
+  - Prefira tipos explícitos em TypeScript para props e funções públicas.
+  - Evite `any` salvo quando realmente necessário; documente a razão.
+
+- Testes
+  - Adicione testes unitários nas funções críticas e componentes com interações.
+  - Recomenda-se usar `vitest` + `@testing-library/react` (podemos adicionar se quiser).
+
+- Acessibilidade (a11y)
+  - Sempre adicionar `label`/`aria-*` quando necessário.
+  - Verifique contrastes, foco por teclado e leitura por leitores de tela.
+
+- Performance e imagens
+  - Otimize imagens e use formatos modernos (WebP) quando possível.
+  - Evite renderizações desnecessárias; memoize quando fizer sentido.
+
+- Segurança
+  - Nunca commite credenciais ou arquivos `.env`.
+  - Use variáveis de ambiente e mantenha `*.local` e `.env.*` no `.gitignore`.
+
+- Atualização de dependências
+  - Use `npm outdated` para checar pacotes obsoletos e atualize com cuidado.
+  - Teste o app após updates maiores de dependências (major releases).
+
+- Documentação e PR
+  - Atualize `README.md` e `components.json` quando adicionar novos componentes.
+  - Em PRs, descreva o que foi testado e os passos para validar localmente.
+
+Comandos úteis
+
+```bash
+# Rodar localmente
+npm install
+npm run dev
+
+# Formatar e lintar (rodar antes de commitar)
+npm run format
+npm run lint
+
+# Build e preview
+npm run build
+npm run preview
+```
+
 ## � Git Flow
 
 ### Estrutura de Branches
