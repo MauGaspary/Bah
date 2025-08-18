@@ -11,14 +11,7 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "format": "npm run prettier:fix && npm run lint:fix",
-    "preview": "vite preview",
-    "docker:dev": "./scripts/detect-docker-compose.sh up --build -d",
-    "docker:dev:attached": "./scripts/detect-docker-compose.sh up --build",
-    "docker:stop": "./scripts/detect-docker-compose.sh stop",
-    "docker:down": "./scripts/detect-docker-compose.sh down",
-    "docker:clean": "./scripts/detect-docker-compose.sh down -v --rmi all",
-    "docker:logs": "./scripts/detect-docker-compose.sh logs -f bah-frontend",
-    "docker:shell": "./scripts/detect-docker-compose.sh exec bah-frontend sh"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

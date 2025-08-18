@@ -12,56 +12,35 @@ Frontend do projeto BAH desenvolvido com tecnologias modernas para uma experiên
 - **Lucide React** - Biblioteca de ícones
 - **Docker** - Containerização para desenvolvimento
 
-## � Iniciando o Desenvolvimento
+## 🚀 Iniciando o Desenvolvimento (local)
 
 ### Pré-requisitos
 
-- Docker e Docker Compose instalados
+- Node.js (>=18) e npm
 - Git configurado
 
 ### Passo a Passo
 
-1. **Clone o repositório:**
+1. Clone o repositório:
 
 ```bash
 git clone <url-do-repositorio>
 cd bah-frontend
 ```
 
-2. **Execute o setup automático (APENAS NA PRIMEIRA VEZ):**
+2. Instale dependências:
 
 ```bash
-chmod +x setup.sh
-./setup.sh
+npm install
 ```
 
-- Escolha "1" para Docker (recomendado)
-- O script vai verificar dependências e configurar tudo automaticamente
-
-3. **Acesse a aplicação:**
-
-- Frontend: http://localhost:5173
-
-> **⚠️ IMPORTANTE:** O `setup.sh` é APENAS para quem acabou de clonar o repositório. No dia a dia, use simplesmente `npm run docker:dev`!
-
-### Comandos Docker Disponíveis
-
-**Para uso diário (após o primeiro setup):**
+3. Rode em modo desenvolvimento:
 
 ```bash
-npm run docker:dev                 # Sobe em background (comando do dia a dia)
-npm run docker:stop               # Pausa containers (mantém dados)
-npm run docker:logs               # Visualiza logs
+npm run dev
 ```
 
-**Comandos adicionais:**
-
-```bash
-npm run docker:dev:attached       # Sobe "grudado" no terminal (debug)
-npm run docker:down               # Para e remove containers
-npm run docker:shell              # Acessa shell do container
-npm run docker:clean              # Remove TUDO (emergência)
-```
+O aplicativo ficará disponível em `http://localhost:5173` por padrão.
 
 ## 🎨 Design System
 
@@ -97,7 +76,6 @@ import { Button } from '@/components/ui/button'
 
 ```tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
 ;<Card>
   <CardHeader>
     <CardTitle>Título</CardTitle>

@@ -7,7 +7,7 @@ function App() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-large-title font-kanit text-label-primary bg-black">
+          <h1 className="text-large-title font-kanit text-label-primary">
             BAH App
           </h1>
           <p className="text-body-regular font-sf-pro text-label-secondary">
