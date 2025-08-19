@@ -10,7 +10,6 @@ Frontend do projeto BAH desenvolvido com tecnologias modernas para uma experiên
 - **Tailwind CSS v4** - Framework CSS utilitário
 - **shadcn/ui** - Componentes acessíveis e customizáveis
 - **Lucide React** - Biblioteca de ícones
-- **Docker** - Containerização para desenvolvimento
 
 ## 🚀 Iniciando o Desenvolvimento (local)
 
