@@ -1,3 +1,7 @@
+workflow:
+  rules:
+    - when: never
+
 image: node:22
 
 cache:
