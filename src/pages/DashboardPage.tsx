@@ -1,6 +1,7 @@
+import { useNavigate } from 'react-router-dom'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useNavigate } from 'react-router-dom'
 
 function DashboardPage() {
   const navigate = useNavigate()
@@ -9,8 +10,8 @@ function DashboardPage() {
     <div className="min-h-screen bg-background-secondary">
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <div className="flex items-center justify-between">
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => navigate('/')}
             className="mb-4"
           >

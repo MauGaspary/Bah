@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+
+import { Button } from '@/components/ui/button'
 
 function HomePage() {
   const navigate = useNavigate()
@@ -16,8 +17,8 @@ function HomePage() {
           </p>
         </div>
 
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={() => navigate('/dashboard')}
           className="px-8 py-3"
         >
