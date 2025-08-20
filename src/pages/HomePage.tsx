@@ -13,14 +13,14 @@ function HomePage() {
             BAH
           </h1>
           <p className="text-body-regular font-sf-pro text-label-secondary max-w-md">
-            Bem-vindo ao sistema BAH. Uma aplicação simples e intuitiva.
+            Bem-vindo ao sistema BAH.
           </p>
         </div>
 
         <Button
           variant="primary"
           onClick={() => navigate('/dashboard')}
-          className="px-8 py-3"
+          className="px-8 py-3 cursor-pointer"
         >
           Acessar Sistema
         </Button>
