@@ -13,7 +13,7 @@ function DashboardPage() {
           <Button
             variant="secondary"
             onClick={() => navigate('/')}
-            className="mb-4"
+            className="mb-4 cursor-pointer"
           >
             ← Voltar
           </Button>
@@ -52,14 +52,18 @@ function DashboardPage() {
 
               <Button
                 variant="purple"
-                onClick={() => alert('Iniciativas salvas!')}
+                onClick={() =>
+                  alert('Voce clicou no botão Salvar iniciativas!')
+                }
+                className="cursor-pointer"
               >
                 Salvar iniciativas
               </Button>
 
               <Button
                 variant="purple"
-                onClick={() => alert('Dados exportados!')}
+                onClick={() => alert('Voce clicou no botão Exportar dados!')}
+                className="cursor-pointer"
               >
                 Exportar dados
               </Button>
@@ -68,6 +72,7 @@ function DashboardPage() {
                 variant="purple"
                 disabled
                 onClick={() => alert('Não deveria executar')}
+                className="cursor-not-allowed"
               >
                 Botão Desabilitado
               </Button>
