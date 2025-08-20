@@ -1,0 +1,51 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--strict]
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.3.2
+    hooks:
+      - id: pylint
+        args: [--rcfile=.pylintrc]
+        exclude: ^migrations_example/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [pydantic, fastapi]
+        exclude: ^migrations_example/
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        description: "test code with Pytest"
+        entry: pipenv run pytest --cov=app --cov-fail-under=85
+        language: system
+        types: [python]
+        pass_filenames: false
