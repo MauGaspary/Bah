@@ -7,7 +7,6 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center space-y-8">
-        {/* Logo/Título */}
         <div className="space-y-4">
           <h1 className="text-large-title font-kanit text-label-primary">
             BAH
@@ -17,7 +16,6 @@ function HomePage() {
           </p>
         </div>
 
-        {/* Botão principal */}
         <Button 
           variant="primary" 
           onClick={() => navigate('/dashboard')}

@@ -8,7 +8,6 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background-secondary">
       <div className="max-w-4xl mx-auto space-y-6 p-6">
-        {/* Header com botão voltar */}
         <div className="flex items-center justify-between">
           <Button 
             variant="secondary" 
@@ -19,7 +18,6 @@ function DashboardPage() {
           </Button>
         </div>
 
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-large-title font-kanit text-label-primary">
             BAH App
@@ -29,7 +27,6 @@ function DashboardPage() {
           </p>
         </div>
 
-        {/* Example Card */}
         <Card className="rounded-card bg-white shadow-md border border-stroke-primary">
           <CardHeader>
             <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
@@ -41,14 +38,12 @@ function DashboardPage() {
               Este é um exemplo de como usar os design tokens na aplicação.
             </p>
 
-            {/* Buttons */}
             <div className="flex gap-3 flex-wrap">
               <Button variant="primary">Primário</Button>
               <Button variant="success">Sucesso</Button>
               <Button variant="secondary">Secundário</Button>
             </div>
 
-            {/* Custom Component Demo */}
             <div className="space-y-3">
               <h4 className="text-callout-semibold font-sf-pro-text text-black">
                 Componentes Customizados:
@@ -77,7 +72,6 @@ function DashboardPage() {
               </Button>
             </div>
 
-            {/* Status indicators */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-success rounded-full"></div>
@@ -101,7 +95,6 @@ function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <div className="text-center pt-4 border-t border-stroke-primary">
           <p className="text-footnote font-sf-pro text-label-tertiary">
             Design System BAH © 2025
