@@ -1,0 +1,41 @@
+image: node:22
+
+cache:
+  paths:
+    - node_modules/
+
+default:
+  before_script:
+    - corepack enable
+    - npm ci
+
+stages: [quality]
+
+lint:
+  stage: quality
+  script: [ "npm run lint" ]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+prettier:
+  stage: quality
+  script: [ "npm run format:check" ]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+typecheck:
+  stage: quality
+  script: [ "npx tsc -p tsconfig.json --noEmit" ]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+# (opcional) quando vocês adicionarem testes (Vitest), descomente:
+# test:
+#   stage: quality
+#   script: [ "npm run test -- --run" ]
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#     - if: '$CI_COMMIT_BRANCH'
