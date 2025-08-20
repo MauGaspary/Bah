@@ -1,67 +1,57 @@
-# Innovation Search API com IA
+# Bah – Plataforma de Inovação de Caxias do Sul
 
 
-# Instalar dependências local
-
-É preciso ter o python e o pip instalado
+# Desenvolvimento Local
 
 ```
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-.venv\Scripts\activate  # Windows
+# Instalar dependências
+pip install pipenv
+pipenv install --dev
 
-pip install -r requirements.txt
+# Configurar pre-commit hooks
+pipenv run pre-commit install
 ```
 
 # Rodar aplicação
 ```
-uvicorn app.main:app --reload
+pipenv run app
 ```
 
-
-# Comando de teste
+# Testes
 ```
-pytest tests/test_admin_example.py -v
+pipenv run test
+pipenv run test:cov
+```
+
+# Qualidade de código
+```
+pipenv run precommit
+pipenv run format:all
+pipenv run lint:all
+pipenv run pylint:all
 ```
 
 
 # Docker
 
-## Rodar com Docker Compose
+# Rodar aplicação
 ```
 docker compose up --build
-ou
-docker compose up --build -d
 ```
 
-## Parar e remover containers
+# Testes no Docker
 ```
-docker compose down  
-````
-
-## Rodar apenas o app
-```
-docker build -t bah-backend .
-docker run -p 8000:8000 bah-backend
+docker compose exec app pytest tests --cov=app
 ```
 
-
-
-
-
-# Migrations
-
-## Gerar nova migration
+# Ferramentas de qualidade no Docker
 ```
-alembic revision --autogenerate -m "description"
+docker compose exec app black .
+docker compose exec app pylint app
+docker compose exec app pre-commit run --all-files
 ```
 
-## Aplicar migrations
+# Parar aplicação
 ```
-alembic upgrade head
-```
-
-## Reverter migration
-```
-alembic downgrade -1
+docker compose down
 ```
