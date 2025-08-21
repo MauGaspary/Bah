@@ -94,6 +94,42 @@ docker compose run --rm quality
 docker compose run --rm ci
 ```
 
+### Migrations
+
+#### Comandos
+
+```Bash
+# Criar nova migration
+pipenv run migrate:create
+# ou: alembic revision --autogenerate -m "descrição"
+
+# Aplicar migrations
+pipenv run migrate
+# ou: alembic upgrade head
+
+# Ver status das migrations
+pipenv run migrate:current
+# ou: alembic current
+
+# Ver histórico
+pipenv run migrate:history
+# ou: alembic history
+
+# Voltar migration (rollback)
+alembic downgrade -1
+```
+
+#### Caso queira testar e criar uma migration do zero - Configuração inicial para criar o migration
+
+```Bash
+# 1. Inicializar Alembic
+alembic init migrations
+
+# 2. Editar migrations/env.py e adicionar:
+# from app.models.admin_model_example import Base
+# target_metadata = Base.metadata
+```
+
 ### Parar aplicação
 
 ```Bash
