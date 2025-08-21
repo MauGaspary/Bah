@@ -5,3 +5,12 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Coverage
+.coverage
+coverage.*
+htmlcov/
+
+# Cache
+.mypy_cache/
+.pytest_cache/
