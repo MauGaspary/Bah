@@ -66,18 +66,32 @@ docker compose up --build
 ### Testes no Docker
 
 ```Bash
-docker compose exec app pytest tests --cov=app
+docker compose run --rm test
+
+# Testes com cobertura
+docker compose run --rm test-cov
 ```
 
 ### Ferramentas de qualidade no Docker
 
 ```Bash
-docker compose exec app black .
+# Formatação de código
+docker compose run --rm format
 
-docker compose exec app pylint app
+# Análise de código
+docker compose run --rm lint
 
-#Não funciona corretamente
-docker compose exec app pre-commit run --all-files
+# Verificação de tipos
+docker compose run --rm mypy
+
+# Todas as verificações anteriores em um só comando
+docker compose run --rm quality
+```
+
+### Testes + qualidade (pipeline completo)
+
+```Bash
+docker compose run --rm ci
 ```
 
 ### Parar aplicação

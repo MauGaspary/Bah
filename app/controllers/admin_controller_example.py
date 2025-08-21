@@ -7,9 +7,13 @@ class AdminController:
         self.service = AdminService()
 
     def create_admin(self, admin_data: AdminCreate) -> AdminResponse:
-        """Lógica do controller para criar admin"""
         return self.service.create_admin(admin_data)
 
     def get_all_admins(self) -> list[AdminResponse]:
-        """Lógica do controller para listar admins"""
         return self.service.get_all_admins()
+
+    def get_admin_by_id(self, admin_id: int) -> AdminResponse:
+        return self.service.get_admin_by_id(admin_id)
+
+    def get_admin_by_email(self, admin_email: str) -> AdminResponse:
+        return self.service.get_admin_by_email(admin_email)

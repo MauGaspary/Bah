@@ -17,3 +17,15 @@ class AdminService:
 
     def get_all_admins(self):
         return self.repository.get_all()
+
+    def get_admin_by_id(self, admin_id: int):
+        admin = self.repository.get_admin_by_id(admin_id)
+        if not admin:
+            raise HTTPException(status_code=404, detail="Admin não encontrado")
+        return admin
+
+    def get_admin_by_email(self, admin_email: int):
+        admin = self.repository.get_admin_by_email(admin_email)
+        if not admin:
+            raise HTTPException(status_code=404, detail="Admin não encontrado")
+        return admin

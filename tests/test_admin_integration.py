@@ -1,13 +1,8 @@
-import os
-import sys
-
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.repositories.admin_repository_example import admins_db
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 client = TestClient(app)
 

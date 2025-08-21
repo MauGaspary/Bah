@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -8,3 +6,52 @@ services:
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  test:
+    build: .
+    volumes:
+      - .:/app
+    command: pytest tests -vv --show-capture=all
+    profiles: ["tools"]
+
+  test-cov:
+    build: .
+    volumes:
+      - .:/app
+    command: pytest --cov=app --cov-report=term-missing --cov-fail-under=85 tests
+    profiles: ["tools"]
+
+  format:
+    build: .
+    volumes:
+      - .:/app
+    command: black .
+    profiles: ["tools"]
+
+  lint:
+    build: .
+    volumes:
+      - .:/app
+    command: pylint app
+    profiles: ["tools"]
+
+  mypy:
+    build: .
+    volumes:
+      - .:/app
+    command: mypy app
+    profiles: ["tools"]
+
+  quality:
+    build: .
+    volumes:
+      - .:/app
+    command: sh -c "black . && isort --profile black . && pylint app"
+    profiles: ["tools"]
+
+  ci:
+    build: .
+    volumes:
+      - .:/app
+    command: sh -c "pytest --cov=app --cov-report=term-missing --cov-fail-under=85 tests && black --check . && isort --check-only --profile black . && pylint app && mypy app"
+    profiles: ["tools"]
