@@ -24,7 +24,7 @@ python_version = "3.12"
 [scripts]
 app = "uvicorn app.main:app --reload"
 test = "pytest tests -vv --show-capture=all"
-"test:cov" = "pytest --cov=app --cov-fail-under=85 tests"
+"test:cov" = "pytest --cov=app --cov-report=term-missing --cov-fail-under=85 tests"
 "test:cov:html" = "pytest --cov=app --cov-report=html tests"
 "lint:all" = "pylint app tests"
 "pylint:all" = "pylint app"

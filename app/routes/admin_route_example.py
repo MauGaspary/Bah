@@ -15,3 +15,13 @@ def create_admin(admin: AdminCreate):
 @router.get("/", response_model=list[AdminResponse])
 def get_admins():
     return controller.get_all_admins()
+
+
+@router.get("/id/{admin_id}", response_model=AdminResponse)
+def get_admin_by_id(admin_id: int):
+    return controller.get_admin_by_id(admin_id)
+
+
+@router.get("/email/{admin_email}", response_model=AdminResponse)
+def get_admin_by_email(admin_email: str):
+    return controller.get_admin_by_email(admin_email)
