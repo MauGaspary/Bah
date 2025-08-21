@@ -31,14 +31,14 @@ repos:
     hooks:
       - id: pylint
         args: [--rcfile=.pylintrc]
-        exclude: ^migrations_example/
+        exclude: ^migrations/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
         additional_dependencies: [pydantic, fastapi]
-        exclude: ^migrations_example/
+        exclude: ^migrations/
 
   - repo: local
     hooks:
