@@ -1,58 +1,88 @@
 # Bah – Plataforma de Inovação de Caxias do Sul
 
+## Desenvolvimento Local
 
-# Desenvolvimento Local
+### Instalar dependências
 
-```
-# Instalar dependências
+```Bash
 pip install pipenv
-pipenv install --dev
 
-# Configurar pre-commit hooks
+pipenv install --dev
+```
+
+### Ativar virtual environment
+
+#### Mac e Linux
+
+```Bash
+source .venv/bin/activate
+```
+
+#### Windows
+
+```Shell
+.venv\Scripts\activate
+```
+
+### Configurar pre-commit hooks
+
+```Bash
 pipenv run pre-commit install
 ```
 
-# Rodar aplicação
-```
+### Rodar aplicação Local
+
+```Bash
 pipenv run app
 ```
 
-# Testes
-```
+### Testes
+
+```Bash
 pipenv run test
 pipenv run test:cov
 ```
 
-# Qualidade de código
-```
+### Qualidade de código
+
+```Bash
 pipenv run precommit
+
 pipenv run format:all
+
 pipenv run lint:all
+
 pipenv run pylint:all
 ```
 
+## Docker
 
-# Docker
+### Rodar aplicação com Docker
 
-# Rodar aplicação
-```
+```Bash
 docker compose up --build
 ```
 
-# Testes no Docker
-```
+### Testes no Docker
+
+```Bash
 docker compose exec app pytest tests --cov=app
 ```
 
-# Ferramentas de qualidade no Docker
-```
+### Ferramentas de qualidade no Docker
+
+```Bash
 docker compose exec app black .
+
 docker compose exec app pylint app
+
+#Não funciona corretamente
 docker compose exec app pre-commit run --all-files
 ```
 
-# Parar aplicação
-```
+### Parar aplicação
+
+```Bash
 docker compose down
 ```
 

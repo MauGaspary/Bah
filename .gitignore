@@ -8,6 +8,7 @@ __pycache__/
 
 # Coverage
 .coverage
+coverage.*
 htmlcov/
 
 # Cache

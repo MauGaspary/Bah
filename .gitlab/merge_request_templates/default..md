@@ -1,4 +1,4 @@
-## 📝 Descrição
+# 📝 Descrição
 
 ## ✨ Tipo de Alteração
 
@@ -7,13 +7,11 @@
 - [ ] 🔧 Refatoração de código (code refactoring)
 - [ ] 📚 Atualização de documentação (documentation update)
 
-
 ## 🧪 Como foi testado?
 
 - [ ] Teste unitário
 - [ ] Teste de integração
 - [ ] Teste manual em ambiente de desenvolvimento
-
 
 ## ✅ Checklist de Auto-revisão
 
@@ -22,7 +20,6 @@
 - [ ] A documentação relevante foi atualizada.
 - [ ] Meus testes cobrem as alterações feitas.
 - [ ] Todas as novas dependências foram adicionadas e documentadas.
-
 
 ## 🖼️ Screenshots (se aplicável)
 
