@@ -1,33 +1,29 @@
-from datetime import datetime
-
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
+from app.models.admin_model_example import Admin
 from app.schemas.admin_schema_example import AdminCreate
-
-admins_db: list[dict] = []
 
 
 class AdminRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
     def create(self, admin_data: AdminCreate):
         if self.get_admin_by_email(admin_data.email):
             raise HTTPException(status_code=400, detail="Email já está em uso")
 
-        new_admin = {
-            "id": len(admins_db) + 1,
-            "username": admin_data.username,
-            "email": admin_data.email,
-            "created_at": datetime.now(),
-        }
-        admins_db.append(new_admin)
-        return new_admin
+        db_admin = Admin(username=admin_data.username, email=admin_data.email)
+        self.db.add(db_admin)
+        self.db.commit()
+        self.db.refresh(db_admin)
+        return db_admin
 
     def get_all(self):
-        return admins_db
+        return self.db.query(Admin).all()
 
     def get_admin_by_id(self, admin_id: int):
-        return next((admin for admin in admins_db if admin["id"] == admin_id), None)
+        return self.db.query(Admin).filter(Admin.id == admin_id).first()
 
     def get_admin_by_email(self, admin_email: str):
-        return next(
-            (admin for admin in admins_db if admin["email"] == admin_email), None
-        )
+        return self.db.query(Admin).filter(Admin.email == admin_email).first()
