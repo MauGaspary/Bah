@@ -2,15 +2,17 @@
 
 ## Desenvolvimento Local
 
-### Instalar dependências
+### Instalar pipenv
 
 ```Bash
 pip install pipenv
-
-pipenv install --dev
 ```
 
 ### Ativar virtual environment
+
+```Bash
+python -m venv .venv
+```
 
 #### Mac e Linux
 
@@ -22,6 +24,12 @@ source .venv/bin/activate
 
 ```Shell
 .venv\Scripts\activate
+```
+
+### Instalar dependências do projeto
+
+```Bash
+pipenv install --dev
 ```
 
 ### Configurar pre-commit hooks
@@ -47,90 +55,76 @@ pipenv run test:cov
 
 ```Bash
 pipenv run precommit
-
-pipenv run format:all
-
-pipenv run lint:all
-
-pipenv run pylint:all
 ```
 
-## Docker
+### Setup do banco
 
-### Rodar aplicação com Docker
+```Bash
+pipenv run migrate
+pipenv run seed
+pipenv run app
+```
+
+### Banco Local
+
+- Usa SQLite (`bah.db`) no diretório raiz
+
+### Comandos Úteis
+
+```Bash
+# Migrations
+pipenv run migrate:create   # Nova migration
+pipenv run migrate          # Aplicar migrations
+pipenv run migrate:current  # Status
+pipenv run migrate:history  # Histórico
+
+# Seed
+pipenv run seed             # Popular dados iniciais
+```
+
+## Desenvolvimento com Docker
+
+### Rodar App
 
 ```Bash
 docker compose up --build
+
+# Testar endpoints
+bash test_endpoints.sh
 ```
 
-### Testes no Docker
+### Serviços Individuais
 
 ```Bash
+# Apenas banco
+docker compose up db
+
+# Aplicar migrations
+docker compose run --rm migrate
+
+# Executar seed
+docker compose run --rm seed
+```
+
+### Ferramentas de Qualidade
+
+```Bash
+# Testes
 docker compose run --rm test
-
-# Testes com cobertura
 docker compose run --rm test-cov
-```
 
-### Ferramentas de qualidade no Docker
-
-```Bash
-# Formatação de código
-docker compose run --rm format
-
-# Análise de código
-docker compose run --rm lint
-
-# Verificação de tipos
-docker compose run --rm mypy
-
-# Todas as verificações anteriores em um só comando
+# Qualidade de código
 docker compose run --rm quality
 ```
 
-### Testes + qualidade (pipeline completo)
+### Configuração do Banco (Docker)
 
-```Bash
-docker compose run --rm ci
-```
+- **Host**: localhost:5432
+- **Database**: bah_db
+- **User**: bah_user
+- **Password**: bah_password
 
-### Migrations
-
-#### Comandos
-
-```Bash
-# Criar nova migration
-pipenv run migrate:create
-# ou: alembic revision --autogenerate -m "descrição"
-
-# Aplicar migrations
-pipenv run migrate
-# ou: alembic upgrade head
-
-# Ver status das migrations
-pipenv run migrate:current
-# ou: alembic current
-
-# Ver histórico
-pipenv run migrate:history
-# ou: alembic history
-
-# Voltar migration (rollback)
-alembic downgrade -1
-```
-
-#### Caso queira testar e criar uma migration do zero - Configuração inicial para criar o migration
-
-```Bash
-# 1. Inicializar Alembic
-alembic init migrations
-
-# 2. Editar migrations/env.py e adicionar:
-# from app.models.admin_model_example import Base
-# target_metadata = Base.metadata
-```
-
-### Parar aplicação
+## Parar Docker
 
 ```Bash
 docker compose down
@@ -213,27 +207,38 @@ git branch                    # Listar branches
 git branch -d branch-name     # Deletar branch local
 ```
 
-## 📁 Estrutura do Projeto
+## API Endpoints
 
+Com a aplicação rodando:
+
+```bash
+# Listar admins
+curl http://localhost:8000/admin/
+
+# Criar admin
+curl -X POST http://localhost:8000/admin/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "novo.admin", "email": "novo@bah.com.br"}'
+
+# Buscar por ID
+curl http://localhost:8000/admin/id/1
+
+# Buscar por email
+curl http://localhost:8000/admin/email/admin@bah.com.br
 ```
-src/
-├── components/
-│   └── ui/              # Componentes do design system
-├── lib/
-│   └── utils.ts         # Funções utilitárias
-├── assets/              # Imagens, ícones, etc.
-├── App.tsx             # Componente principal
-├── main.tsx            # Ponto de entrada
-└── index.css           # Estilos globais + tokens BAH
-```
+
+### Dados de Seed
+
+- admin@bah.com.br
+- joao.silva@bah.com.br
+- maria.santos@bah.com.br
 
 ## 📚 Recursos Úteis
 
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- [Lucide Icons](https://lucide.dev/icons/)
+- [FastAPI Docs](https://fastapi.tiangolo.com/)
+- [SQLAlchemy Docs](https://docs.sqlalchemy.org/)
+- [Alembic Docs](https://alembic.sqlalchemy.org/)
 - [Git Tutorial](https://git-scm.com/docs/gittutorial)
-- [React Docs](https://react.dev/)
 
 ---
 
