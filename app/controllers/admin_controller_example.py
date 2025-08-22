@@ -1,10 +1,12 @@
+from sqlalchemy.orm import Session
+
 from app.schemas.admin_schema_example import AdminCreate, AdminResponse
 from app.services.admin_service_example import AdminService
 
 
 class AdminController:
-    def __init__(self):
-        self.service = AdminService()
+    def __init__(self, db: Session):
+        self.service = AdminService(db)
 
     def create_admin(self, admin_data: AdminCreate) -> AdminResponse:
         return self.service.create_admin(admin_data)
