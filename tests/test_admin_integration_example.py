@@ -1,43 +1,7 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.config.database import get_db
-from app.main import app
-from app.models.admin_model_example import Base
-
-# Banco de teste em memória
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def setup_database():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-
 class TestAdminIntegration:
     """Testes de integração para o módulo Admin"""
 
-    def test_create_and_retrieve_admin_flow(self):
+    def test_create_and_retrieve_admin_flow(self, client):
         """Testa o fluxo completo de criação e recuperação de admin"""
         admin_data = {"username": "admin_test", "email": "admin@test.com"}
 
@@ -60,7 +24,7 @@ class TestAdminIntegration:
         assert admins_list[0]["id"] == created_admin["id"]
         assert admins_list[0]["username"] == admin_data["username"]
 
-    def test_multiple_admins_creation(self):
+    def test_multiple_admins_creation(self, client):
         """Testa criação de múltiplos admins"""
         admins_data = [
             {"username": "admin1", "email": "admin1@test.com"},
@@ -87,13 +51,13 @@ class TestAdminIntegration:
         returned_ids = [admin["id"] for admin in admins_list]
         assert set(created_ids) == set(returned_ids)
 
-    def test_empty_admin_list(self):
+    def test_empty_admin_list(self, client):
         """Testa listagem quando não há admins"""
         response = client.get("/admin/")
         assert response.status_code == 200
         assert response.json() == []
 
-    def test_admin_data_validation(self):
+    def test_admin_data_validation(self, client):
         """Testa validação de dados do admin"""
         # Teste com email inválido
         invalid_data = {
@@ -105,7 +69,7 @@ class TestAdminIntegration:
         assert response.status_code == 400
         assert "Formato de email inválido" in response.json()["detail"]
 
-    def test_admin_creation_with_special_characters(self):
+    def test_admin_creation_with_special_characters(self, client):
         """Testa criação de admin com formatos válidos de email"""
         admin_data = {
             "username": "admin_test_123",
@@ -119,7 +83,7 @@ class TestAdminIntegration:
         assert created_admin["username"] == admin_data["username"]
         assert created_admin["email"] == admin_data["email"]
 
-    def test_duplicate_email_validation(self):
+    def test_duplicate_email_validation(self, client):
         """Testa validação de email duplicado"""
         admin_data = {"username": "admin1", "email": "test@example.com"}
 
@@ -134,7 +98,7 @@ class TestAdminIntegration:
         assert response2.status_code == 400
         assert "Email já está em uso" in response2.json()["detail"]
 
-    def test_same_username_different_email_allowed(self):
+    def test_same_username_different_email_allowed(self, client):
         """Testa que usernames iguais são permitidos com emails diferentes"""
         admin_data1 = {"username": "admin_comum", "email": "test1@example.com"}
         admin_data2 = {"username": "admin_comum", "email": "test2@example.com"}
@@ -155,7 +119,7 @@ class TestAdminIntegration:
         assert created_admin1["email"] != created_admin2["email"]
         assert created_admin1["id"] != created_admin2["id"]
 
-    def test_invalid_email_format_validation(self):
+    def test_invalid_email_format_validation(self, client):
         """Testa validação de formato de email inválido"""
         invalid_emails = [
             "invalid-email",
