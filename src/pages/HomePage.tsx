@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import Header from '@/components/ui/Header/Header'
 
 function HomePage() {
   const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
+      <Header variant="default" />
       <div className="text-center space-y-8">
         <div className="space-y-4">
           <h1 className="text-large-title font-kanit text-label-primary">
