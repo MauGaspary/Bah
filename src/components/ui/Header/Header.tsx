@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react'
 import * as React from 'react'
+import { Input } from '../Searchbar/Searchbar'
 
 interface HeaderProps {
-  variant?: 'default' | 'secondary' | string
+  variant?: 'default' | 'secondary'
   withSearchBar?: boolean
-  hasBackButton?: boolean
-  className?: string
   logo?: string
-  onBack?: () => void
-  onSearch?: (query: string) => void
 }
 
 interface NavigationItem {
@@ -34,22 +31,6 @@ const MenuIcon = () => (
   </svg>
 )
 
-const CloseIcon = () => (
-  <svg
-    className="h-6 w-6"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-)
-
 const SearchIcon = () => (
   <svg
     className="h-4 w-4"
@@ -66,33 +47,10 @@ const SearchIcon = () => (
   </svg>
 )
 
-const ArrowLeftIcon = () => (
-  <svg
-    className="h-5 w-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 19l-7-7 7-7"
-    />
-  </svg>
-)
-
-function Header({
-  variant = 'default',
-  withSearchBar = false,
-  hasBackButton = false,
-  className = '',
-  logo = '/src/assets/logo.png',
-  onBack,
-  onSearch,
-}: HeaderProps) {
+function Header({ variant = 'default', withSearchBar = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const optionsItems: NavigationItem[] = [
     {
@@ -120,70 +78,63 @@ function Header({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const handleNavigation = (path: string) => {
     window.location.href = path
     setIsMobileMenuOpen(false)
   }
 
-  const handleBackClick = () => {
-    if (onBack) {
-      onBack()
-    } else {
-      window.history.back()
-    }
-  }
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (onSearch) {
-      onSearch(searchQuery)
-    }
-  }
-
   const getVariantStyles = () => {
     if (variant === 'default') {
-      return 'bg-gradient-to-r from-purple-800 to-purple-900 text-white'
+      return 'bg-bah-purple'
     }
-    return 'bg-white text-gray-900 shadow-sm'
-  }
-
-  const getMenuButtonStyles = () => {
-    if (variant === 'default') {
-      return 'text-white hover:bg-white hover:bg-opacity-10'
-    }
-    return 'text-gray-700 hover:bg-gray-100'
+    return 'bg-white'
   }
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full ${getVariantStyles()} ${className}`}
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled ? 'bg-bah-purple' : 'bg-white shadow-lg'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Left side - Back button and Logo */}
-          <div className="flex items-center space-x-4">
-            {hasBackButton && (
-              <button
-                onClick={handleBackClick}
-                className={`p-2 rounded-md transition-colors ${getMenuButtonStyles()}`}
-                aria-label="Voltar"
-              >
-                <ArrowLeftIcon />
-              </button>
-            )}
-
-            <div className="flex-shrink-0">
-              <img src={logo} alt="Logo" className="h-8 w-auto" />
-            </div>
+          {/* Left side - Logo */}
+          <div className="flex items-center justify space-x-4 relative w-20 h-16 mt-4">
+            {/* Logo branca (estado inicial) */}
+            <img
+              src="/src/assets/bah-bg-white.png"
+              alt="Logo"
+              className={`h-12 w-auto transition-all duration-300 absolute top-0 left-0 ${
+                isScrolled ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+              }`}
+            />
+            {/* Logo roxa (estado após scroll) */}
+            <img
+              src="/src/assets/bah-bg-purple.png"
+              alt="Logo"
+              className={`h-12 w-auto transition-all duration-200 absolute top-0 left-0 ${
+                isScrolled ? 'opacity-100 scale-100' : 'opacity-0 scale-100'
+              }`}
+            />
           </div>
 
           {/* Center - Search Bar (Desktop) */}
           {withSearchBar && (
             <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <form onSubmit={handleSearch} className="relative w-full">
-                <input
+              <form className="relative w-full">
+                <Input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Pesquisar iniciativas"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -192,39 +143,15 @@ function Header({
               </form>
             </div>
           )}
-
-          {/* Right side - Navigation and Menu */}
-          <div className="flex items-center space-x-4">
-            <nav className="hidden md:flex space-x-8">
-              {optionsItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavigation(item.path)}
-                  className="px-4 py-2 text-sm font-medium  transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`p-2 rounded-md transition-colors ${getMenuButtonStyles()}`}
-              >
-                {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Mobile Search Bar */}
-        {withSearchBar && (
-          <div className="md:hidden pb-4">
-            <form onSubmit={handleSearch} className="relative">
-              <input
+        {withSearchBar && isScrolled && (
+          <div className="md:hidden pb-4 animate-in slide-in-from-top-2 duration-300">
+            <form className="relative">
+              <Input
                 type="text"
-                placeholder="Buscar..."
+                placeholder="Pesquisar iniciativas"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -236,32 +163,6 @@ function Header({
           </div>
         )}
       </div>
-
-      {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div
-            className={`px-2 pt-2 pb-3 space-y-1 border-t ${
-              variant === 'secondary'
-                ? 'bg-purple-800 border-purple-700'
-                : 'bg-white border-gray-200'
-            }`}
-          >
-            {optionsItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleNavigation(item.path)}
-                className={`block w-full text-left px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                  variant === 'secondary'
-                    ? 'text-white hover:bg-purple-700'
-                    : 'text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </header>
   )
 }
