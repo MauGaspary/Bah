@@ -14,3 +14,6 @@ app.include_router(admin_router_example, prefix="/admin", tags=["admin"])
 @app.get("/")
 def root():
     return {"message": "Bah – Plataforma de Inovação de Caxias do Sul"}
+
+def create_app():
+    return app
