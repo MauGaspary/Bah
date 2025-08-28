@@ -150,7 +150,7 @@ function Header({ variant = 'default' }: HeaderProps) {
         )}
 
         {/* Navigation Buttons (direita) */}
-        <nav className="flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-6">
           {optionsItems.map(item => (
             <button
               key={item.id}
