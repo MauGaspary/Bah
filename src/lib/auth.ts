@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 export interface LoginResponse {
   access_token: string
@@ -14,7 +15,10 @@ export interface LoginCredentials {
   password: string
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
+export async function login(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -31,7 +35,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return data
 }
 
-export function make_token(payload: Record<string, any>): string {
+export function make_token(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
   const payloadEncoded = btoa(JSON.stringify(payload))
   const signature = btoa('mock-signature')
@@ -39,20 +43,19 @@ export function make_token(payload: Record<string, any>): string {
   return `${header}.${payloadEncoded}.${signature}`
 }
 
-export function verify_token(token: string): any {
-  try {
-    // Mock simples para testes
-    if (token && token.includes('.')) {
-      const parts = token.split('.')
-      if (parts.length === 3) {
-        const payload = JSON.parse(atob(parts[1]))
-        return payload
+export function verify_token(token: string): Record<string, unknown> {
+  if (token && token.includes('.')) {
+    const parts = token.split('.')
+    if (parts.length === 3) {
+      const decoded = atob(parts[1])
+      try {
+        const payload = JSON.parse(decoded)
+        if (payload && typeof payload === 'object') return payload as Record<string, unknown>
+      } catch {
       }
     }
-    throw new Error('Invalid token')
-  } catch (error) {
-    throw new Error('Invalid token')
   }
+  throw new Error('Invalid token')
 }
 
 export function extract_token(authHeader: string | null): string | null {

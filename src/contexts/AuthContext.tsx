@@ -5,6 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react'
+
 import { is_authenticated, login as authLogin } from '@/lib/auth'
 
 interface User {
@@ -33,41 +34,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Verifica se há um usuário logado ao inicializar
     const checkAuth = () => {
-      try {
-        const token = localStorage.getItem('access_token')
-        const userData = localStorage.getItem('user')
+      const token = localStorage.getItem('access_token')
+      const userData = localStorage.getItem('user')
 
-        if (token && userData && is_authenticated()) {
-          const user = JSON.parse(userData)
-          setUser(user)
-          setIsAuthenticated(true)
-        }
-      } catch (error) {
-        console.error('Erro ao verificar autenticação:', error)
-        logout()
-      } finally {
-        setIsLoading(false)
+      if (token && userData && is_authenticated()) {
+        const user = JSON.parse(userData)
+        setUser(user)
+        setIsAuthenticated(true)
       }
+      setIsLoading(false)
     }
 
     checkAuth()
   }, [])
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await authLogin(email, password)
-      const userData = response.user
+    const response = await authLogin(email, password)
+    const userData = response.user
 
-      localStorage.setItem('access_token', response.access_token)
-      localStorage.setItem('user', JSON.stringify(userData))
+    localStorage.setItem('access_token', response.access_token)
+    localStorage.setItem('user', JSON.stringify(userData))
 
-      setUser(userData)
-      setIsAuthenticated(true)
-    } catch (error) {
-      throw error
-    }
+    setUser(userData)
+    setIsAuthenticated(true)
   }
 
   const logout = () => {

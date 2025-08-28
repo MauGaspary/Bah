@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
 
-import HomePage from './pages/HomePage'
+import { AuthProvider } from './contexts/AuthContext'
 import DashboardPage from './pages/DashboardPage'
+import HomePage from './pages/HomePage'
 import LoginAdminPage from './pages/LoginAdminPage'
 
 function App() {
