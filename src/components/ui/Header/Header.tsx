@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
-import * as React from 'react'
+
 import { Input } from '../Searchbar/Searchbar'
 
 interface HeaderProps {
-  variant?: 'default' | 'secondary'
+  variant?: 'default' | 'secondary' | 'custom'
   logo?: string
+  customColors?: {
+    headerBg?: string
+    searchIconMobile?: string
+    searchIconDesktop?: string
+    buttonHover?: string
+    mobileMenuBg?: string
+  }
 }
 
 interface NavigationItem {
@@ -13,7 +20,7 @@ interface NavigationItem {
   path: string
 }
 
-function Header({ variant = 'default' }: HeaderProps) {
+function Header({ variant = 'default', customColors }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
@@ -48,12 +55,11 @@ function Header({ variant = 'default' }: HeaderProps) {
 
   useEffect(() => {
     const handleResize = () => {
-      // Não abrir automaticamente a sidebar em mobile
-      // Apenas fechar se mudar para desktop
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false)
       }
     }
+
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -85,11 +91,26 @@ function Header({ variant = 'default' }: HeaderProps) {
     setIsMobileMenuOpen(false)
   }
 
-  const getVariantStyles = () => {
-    if (variant === 'default') {
-      return 'bg-bah-purple'
+  const getColors = () => {
+    if (variant === 'custom' && customColors) {
+      return {
+        headerBg: customColors.headerBg || 'var(--color-bah-purple)',
+        searchIconMobile:
+          customColors.searchIconMobile || 'var(--color-bah-green)',
+        searchIconDesktop:
+          customColors.searchIconDesktop || 'var(--color-bah-purple)',
+        buttonHover: customColors.buttonHover || 'var(--color-bah-green)',
+        mobileMenuBg: customColors.mobileMenuBg || 'var(--color-bah-purple)',
+      }
     }
-    return 'bg-white'
+
+    return {
+      headerBg: 'var(--color-bah-purple)',
+      searchIconMobile: 'var(--color-bah-green)',
+      searchIconDesktop: 'var(--color-bah-purple)',
+      buttonHover: 'var(--color-bah-green)',
+      mobileMenuBg: 'var(--color-bah-purple)',
+    }
   }
 
   const SearchIcon = () => (
@@ -107,13 +128,14 @@ function Header({ variant = 'default' }: HeaderProps) {
     <>
       <header
         className={`fixed top-0 z-50 w-full h-20 transition-all duration-300 flex items-center justify-center ${
-          isScrolled ? 'bg-bah-purple' : 'bg-white shadow-lg'
+          isScrolled ? 'bg-white shadow-lg' : 'bg-white shadow-lg'
         } `}
+        style={{
+          backgroundColor: isScrolled ? getColors().headerBg : 'white',
+        }}
       >
         <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between">
-          {/* Logo (esquerda) */}
           <div className="flex items-center relative w-20 h-16">
-            {/* Logo branca (estado inicial) */}
             <img
               src="/src/assets/bah-bg-white.png"
               alt="Logo"
@@ -121,7 +143,6 @@ function Header({ variant = 'default' }: HeaderProps) {
                 isScrolled ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
               }`}
             />
-            {/* Logo roxa (estado após scroll) */}
             <img
               src="/src/assets/bah-bg-purple.png"
               alt="Logo"
@@ -131,64 +152,63 @@ function Header({ variant = 'default' }: HeaderProps) {
             />
           </div>
 
-          {/* Search Bar (centro) - Só aparece após scroll e em desktop */}
           {isScrolled && (
-            <div className="hidden md:flex flex-1 max-w-sm mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-full bg-white rounded-full overflow-hidden">
+            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300">
+              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0">
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 px-6 py-3 text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none"
+                  className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0"
                 />
-                <div className="bg-bah-purple w-6 h-6 rounded-full flex items-center justify-center mx-2">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer"
+                  style={{
+                    backgroundColor:
+                      window.innerWidth < 768
+                        ? getColors().searchIconMobile
+                        : getColors().searchIconDesktop,
+                  }}
+                >
                   <SearchIcon />
                 </div>
               </form>
             </div>
           )}
 
-          {/* Navigation Buttons (direita) */}
           {isScrolled && (
             <nav className="hidden md:flex items-center space-x-6">
               {optionsItems.map(item => (
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.path)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green hover:underline cursor-pointer transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-white hover:underline cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1"
+                  style={{
+                    color: 'white',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = getColors().buttonHover
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = 'white'
+                  }}
                 >
                   {item.label}
                 </button>
               ))}
             </nav>
           )}
-
-          {/* Mobile Search Bar - Só aparece após scroll e em mobile */}
-          {isScrolled && (
-            <div className="md:hidden flex-1 max-w-sm mx-4 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 h-11 bg-white rounded-full overflow-hidden ml-10">
-                <Input
-                  type="text"
-                  placeholder="Pesquisar iniciativas"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 px-2 py-3 text-xs text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-4"
-                />
-                <div className="bg-bah-green w-6 h-6 rounded-full flex items-center justify-center mx-2">
-                  <SearchIcon />
-                </div>
-              </form>
-            </div>
-          )}
         </div>
       </header>
 
-      {/* Botão Hambúrguer Fixo - Só aparece em mobile */}
       <button
-        className={`md:hidden fixed top-5 right-4 transition-colors z-50 bg-transparent p-2 rounded-full ${
-          isScrolled ? 'text-bah-green' : 'text-bah-purple '
-        }`}
+        className="md:hidden fixed top-5 right-4 transition-colors z-50 bg-transparent p-2 rounded-full"
+        style={{
+          color: isScrolled
+            ? getColors().buttonHover
+            : 'var(--color-bah-purple)',
+        }}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
         <svg
@@ -208,18 +228,26 @@ function Header({ variant = 'default' }: HeaderProps) {
         </svg>
       </button>
 
-      {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden backdrop-blur-sm">
-          {/* Sidebar - 70% da tela, cor bg-bah-purple */}
-          <div className="fixed right-0 top-0 h-full w-[70%] bg-bah-purple shadow-xl animate-in slide-in-from-right duration-300">
+          <div
+            className="fixed right-0 top-0 h-full w-[70%] shadow-xl animate-in slide-in-from-right duration-300"
+            style={{
+              backgroundColor: getColors().mobileMenuBg,
+            }}
+          >
             <div className="flex flex-col h-full">
-              {/* Header da Sidebar */}
               <div className="flex items-center justify-between p-6 border-b border-white/20">
                 <h2 className="text-xl font-semibold text-white">Menu</h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-white hover:text-bah-green transition-colors"
+                  className="text-white transition-colors"
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = getColors().buttonHover
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = 'white'
+                  }}
                 >
                   <svg
                     className="w-6 h-6"
@@ -237,14 +265,19 @@ function Header({ variant = 'default' }: HeaderProps) {
                 </button>
               </div>
 
-              {/* Conteúdo da Sidebar */}
               <nav className="flex-1 p-6">
                 <ul className="space-y-4">
                   {optionsItems.map(item => (
                     <li key={item.id}>
                       <button
                         onClick={() => handleNavigation(item.path)}
-                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-bah-green rounded-lg transition-all duration-200 text-lg font-medium"
+                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-lg font-medium"
+                        onMouseEnter={e => {
+                          e.currentTarget.style.color = getColors().buttonHover
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.color = 'white'
+                        }}
                       >
                         {item.label}
                       </button>
