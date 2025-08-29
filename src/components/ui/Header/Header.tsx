@@ -24,6 +24,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isSearchIconHovered, setIsSearchIconHovered] = useState(false)
 
   const optionsItems: NavigationItem[] = [
     {
@@ -163,13 +164,21 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0"
                 />
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer"
+                  className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer transition-all duration-300"
                   style={{
                     backgroundColor:
                       window.innerWidth < 768
                         ? getColors().searchIconMobile
                         : getColors().searchIconDesktop,
+                    transform: isSearchIconHovered
+                      ? 'scale(110%)'
+                      : 'scale(100%)',
+                    boxShadow: isSearchIconHovered
+                      ? '0 4px 12px rgba(0,0,0,0.15)'
+                      : 'none',
                   }}
+                  onMouseEnter={() => setIsSearchIconHovered(true)}
+                  onMouseLeave={() => setIsSearchIconHovered(false)}
                 >
                   <SearchIcon />
                 </div>
@@ -183,7 +192,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.path)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:underline cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1"
+                  className="px-3 py-2 text-sm font-medium text-white hover:underline cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
                   style={{
                     color: 'white',
                   }}
@@ -271,7 +280,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                     <li key={item.id}>
                       <button
                         onClick={() => handleNavigation(item.path)}
-                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-lg font-medium"
+                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-lg font-medium font-mulish"
                         onMouseEnter={e => {
                           e.currentTarget.style.color = getColors().buttonHover
                         }}
