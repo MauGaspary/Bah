@@ -13,17 +13,6 @@ interface NavigationItem {
   path: string
 }
 
-const SearchIcon = () => (
-  <svg className="h-4 w-4 " fill="none" stroke="white" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-    />
-  </svg>
-)
-
 function Header({ variant = 'default' }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -70,9 +59,21 @@ function Header({ variant = 'default' }: HeaderProps) {
   }, [])
 
   useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMobileMenuOpen])
+
+  useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 50)
+      setIsScrolled(scrollTop > 500)
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -91,12 +92,23 @@ function Header({ variant = 'default' }: HeaderProps) {
     return 'bg-white'
   }
 
+  const SearchIcon = () => (
+    <svg className="h-4 w-4 " fill="none" stroke="white" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      />
+    </svg>
+  )
+
   return (
     <>
       <header
         className={`fixed top-0 z-50 w-full h-20 transition-all duration-300 flex items-center justify-center ${
           isScrolled ? 'bg-bah-purple' : 'bg-white shadow-lg'
-        }`}
+        } `}
       >
         <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo (esquerda) */}
@@ -144,7 +156,7 @@ function Header({ variant = 'default' }: HeaderProps) {
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.path)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:text-green-400 hover:underline cursor-pointer transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green hover:underline cursor-pointer transition-colors"
                 >
                   {item.label}
                 </button>
@@ -155,15 +167,15 @@ function Header({ variant = 'default' }: HeaderProps) {
           {/* Mobile Search Bar - Só aparece após scroll e em mobile */}
           {isScrolled && (
             <div className="md:hidden flex-1 max-w-sm mx-4 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-2/3 bg-white rounded-full overflow-hidden ml-10">
+              <form className="flex items-center w-45 h-11 bg-white rounded-full overflow-hidden ml-10">
                 <Input
                   type="text"
                   placeholder="Pesquisar iniciativas"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 px-2 py-3 text-xs text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold "
+                  className="flex-1 px-2 py-3 text-xs text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-4"
                 />
-                <div className="bg-bah-purple w-6 h-6 rounded-full flex items-center justify-center mx-2">
+                <div className="bg-bah-green w-6 h-6 rounded-full flex items-center justify-center mx-2">
                   <SearchIcon />
                 </div>
               </form>
@@ -174,7 +186,9 @@ function Header({ variant = 'default' }: HeaderProps) {
 
       {/* Botão Hambúrguer Fixo - Só aparece em mobile */}
       <button
-        className="md:hidden fixed top-4 right-4 text-white hover:text-green-400 transition-colors z-50 bg-transparent p-2 rounded-full"
+        className={`md:hidden fixed top-5 right-4 transition-colors z-50 bg-transparent p-2 rounded-full ${
+          isScrolled ? 'text-bah-green' : 'text-bah-purple '
+        }`}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
         <svg
@@ -196,16 +210,16 @@ function Header({ variant = 'default' }: HeaderProps) {
 
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-40 md:hidden backdrop-blur-sm">
           {/* Sidebar - 70% da tela, cor bg-bah-purple */}
-          <div className="fixed right-0 top-0 h-full w-[70%] bg-bah-purple shadow-xl transform transition-transform duration-800 ease-in-out">
+          <div className="fixed right-0 top-0 h-full w-[70%] bg-bah-purple shadow-xl animate-in slide-in-from-right duration-300">
             <div className="flex flex-col h-full">
               {/* Header da Sidebar */}
               <div className="flex items-center justify-between p-6 border-b border-white/20">
                 <h2 className="text-xl font-semibold text-white">Menu</h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-white hover:text-green-400 transition-colors"
+                  className="text-white hover:text-bah-green transition-colors"
                 >
                   <svg
                     className="w-6 h-6"
@@ -230,7 +244,7 @@ function Header({ variant = 'default' }: HeaderProps) {
                     <li key={item.id}>
                       <button
                         onClick={() => handleNavigation(item.path)}
-                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-green-400 rounded-lg transition-all duration-200 text-lg font-medium"
+                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-bah-green rounded-lg transition-all duration-200 text-lg font-medium"
                       >
                         {item.label}
                       </button>
