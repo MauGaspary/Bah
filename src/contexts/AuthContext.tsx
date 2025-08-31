@@ -51,13 +51,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = async (email: string, password: string) => {
     const response = await authLogin(email, password)
-    const userData = response.user
-
-    localStorage.setItem('access_token', response.access_token)
-    localStorage.setItem('user', JSON.stringify(userData))
-
-    setUser(userData)
-    setIsAuthenticated(true)
+    if (response && response.user && response.access_token) {
+      const userData = response.user
+      localStorage.setItem('access_token', response.access_token)
+      localStorage.setItem('user', JSON.stringify(userData))
+      setUser(userData)
+      setIsAuthenticated(true)
+    } else {
+      throw new Error('Resposta de login inválida: usuário ou token ausente')
+    }
   }
 
   const logout = () => {

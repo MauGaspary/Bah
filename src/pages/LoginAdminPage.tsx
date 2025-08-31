@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -53,11 +54,25 @@ function LoginAdminPage() {
 
   return (
     <div className="min-h-screen flex relative">
-      <div className="absolute bottom-6 left-4 z-10 transform -translate-x-8 translate-y-6">
+      <div
+        className="absolute pointer-events-none select-none"
+        style={{
+          left: '0',
+          bottom: '0vw',
+          maxWidth: '14vw',
+          minWidth: '120px',
+        }}
+      >
         <img
           src="/src/assets/Bah Projeto Group 9.png"
           alt="Decorative Element"
-          className="w-65 h-80"
+          style={{
+            width: '100%',
+            height: 'auto',
+            minWidth: '120px',
+            maxWidth: '340px',
+            opacity: 0.95,
+          }}
         />
       </div>
 
@@ -86,14 +101,18 @@ function LoginAdminPage() {
                     {...field}
                     trailing={
                       field.value ? (
-                        <button
-                          type="button"
+                        <span
+                          role="button"
+                          tabIndex={0}
                           onClick={clearEmail}
-                          className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-400 cursor-pointer"
-                          aria-label="Clear email"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') clearEmail()
+                          }}
+                          className="w-6 h-6 flex items-center justify-center cursor-pointer text-gray-500 hover:text-gray-700"
+                          aria-label="Limpar email"
                         >
-                          ×
-                        </button>
+                          <X className="w-4 h-4" />
+                        </span>
                       ) : null
                     }
                   />
@@ -141,12 +160,6 @@ function LoginAdminPage() {
                 }
                 label="Remember Me"
               />
-              <button
-                type="button"
-                className="text-red-500 text-sm hover:text-red-700 cursor-pointer"
-              >
-                Forgot Password?
-              </button>
             </div>
 
             {error && (
