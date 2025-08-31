@@ -1,8 +1,16 @@
+import pytest
+
+
+@pytest.mark.integration
 class TestAdminIntegration:
     """Testes de integração para o módulo Admin"""
 
     def test_create_and_retrieve_admin_flow(self, client):
         """Testa o fluxo completo de criação e recuperação de admin"""
+        initial_response = client.get("/admin/")
+        assert initial_response.status_code == 200
+        assert len(initial_response.json()) == 0
+
         admin_data = {"username": "admin_test", "email": "admin@test.com"}
 
         # 1. Criar admin
@@ -26,6 +34,10 @@ class TestAdminIntegration:
 
     def test_multiple_admins_creation(self, client):
         """Testa criação de múltiplos admins"""
+        initial_response = client.get("/admin/")
+        assert initial_response.status_code == 200
+        assert len(initial_response.json()) == 0
+
         admins_data = [
             {"username": "admin1", "email": "admin1@test.com"},
             {"username": "admin2", "email": "admin2@test.com"},

@@ -55,7 +55,10 @@ class TestSettings:
         settings = get_test_settings()
 
         # Validar configurações específicas de teste
-        assert settings.database_url == "sqlite:///:memory:"
+        assert (
+            "postgresql://" in settings.database_url
+            or settings.database_url == "sqlite:///:memory:"
+        )
         assert settings.database_echo is False
         assert settings.log_level == "WARNING"
         assert settings.debug is False

@@ -24,6 +24,9 @@ class Settings:
     enable_database: bool = True
     enable_logging_setup: bool = True
 
+    jwt_secret: str = "your-secret-key"
+    jwt_ttl_seconds: int = 3600
+
 
 def get_development_settings() -> Settings:
     """Configurações para desenvolvimento."""
@@ -39,12 +42,14 @@ def get_development_settings() -> Settings:
 def get_test_settings() -> Settings:
     """Configurações para testes."""
     return Settings(
-        database_url="sqlite:///:memory:",
+        database_url="postgresql://test_user:test_pass@localhost:5432/test_bah_db",
         database_echo=False,
         log_level="WARNING",
         debug=False,
         testing=True,
         enable_logging_setup=False,
+        jwt_secret="fake-test-secret-key",
+        jwt_ttl_seconds=60,
     )
 
 
@@ -61,4 +66,12 @@ def get_production_settings() -> Settings:
 
 def get_settings() -> Settings:
     """Retorna as configurações baseadas no ambiente."""
+    import os
+
+    env = os.getenv("APP_ENV", "development").lower()
+
+    if env == "test":
+        return get_test_settings()
+    if env == "production":
+        return get_production_settings()
     return get_development_settings()

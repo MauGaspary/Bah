@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.config.settings import Settings
 from app.routes.admin_route_example import router as admin_router_example
@@ -42,7 +43,7 @@ def create_app(settings=None):
         lifespan=lifespan,
         title="Bah – Plataforma de Inovação de Caxias do Sul API",
         version="1.0.0",
-        docs_url="/",
+        docs_url="/docs",
     )
 
     app.state.settings = settings
@@ -51,7 +52,7 @@ def create_app(settings=None):
 
     @app.get("/")
     def root():
-        return {"message": "Bah – Plataforma de Inovação de Caxias do Sul"}
+        return RedirectResponse(url="/docs")
 
     return app
 
