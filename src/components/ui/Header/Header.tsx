@@ -134,8 +134,8 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
           </div>
 
           {isScrolled && (
-            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 max-[500px]: mr-10">
+            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300 max-[500px]: mr-10">
+              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 ">
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
