@@ -49,16 +49,11 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
   }, [isMobileMenuOpen])
 
   useEffect(() => {
-    const heroSection = document.getElementById('hero-section')
+    const homeSection = document.getElementById('home-section')
 
-    if (!heroSection) {
-      const handleScroll = () => {
-        const scrollTop = window.scrollY
-        setIsScrolled(scrollTop > 100)
-      }
-
-      window.addEventListener('scroll', handleScroll)
-      return () => window.removeEventListener('scroll', handleScroll)
+    if (!homeSection) {
+      setIsScrolled(true)
+      return
     }
 
     const observer = new IntersectionObserver(
@@ -68,7 +63,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
       { threshold: 0, rootMargin: '-20px 0px 0px 0px' }
     )
 
-    observer.observe(heroSection)
+    observer.observe(homeSection)
     return () => observer.disconnect()
   }, [])
 
@@ -121,7 +116,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
         }}
       >
         <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center relative w-20 h-16">
+          <div className="flex items-center relative w-20 h-16 ">
             <img
               src="/src/assets/bah-bg-white.png"
               alt="Logo"
@@ -140,7 +135,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
 
           {isScrolled && (
             <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0">
+              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 max-[500px]: mr-10">
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
@@ -177,7 +172,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.path)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:underline hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
+                  className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
                 >
                   {item.label}
                 </button>

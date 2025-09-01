@@ -9,7 +9,7 @@ function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background-secondary">
+      <div className="min-h-screen bg-background-secondary" id="home-section">
         <div className="max-w-4xl mx-auto space-y-6 p-6">
           <div className="flex items-center justify-between">
             <Button
@@ -112,7 +112,7 @@ function HomePage() {
       </div>
 
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Header variant="default" />
+        <Header variant="secondary" />
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-large-title font-kanit text-label-primary">
