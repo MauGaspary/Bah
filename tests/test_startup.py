@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.config.settings import Settings, get_test_settings
 from app.main import create_app
+from tests.helpers import request
 
 
 def test_startup_executes_with_lifespan():
@@ -16,7 +17,7 @@ def test_startup_executes_with_lifespan():
     with TestClient(app) as client:
         assert app.state.settings.testing is True
 
-        response = client.get("/admin/")
+        response = request(client, "GET", "/admin/")
         assert response.status_code == 200
 
 
@@ -31,7 +32,7 @@ def test_logging_setup_message():
     with redirect_stdout(captured_output):
         app = create_app(settings)
         with TestClient(app) as client:
-            client.get("/")
+            request(client, "GET", "/")
 
     output = captured_output.getvalue()
     assert "Configurando logging - Level: DEBUG" in output

@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.config.settings import Settings, get_test_settings
 from app.main import create_app
+from tests.helpers import request
 
 
 def test_lifespan_startup_executes():
@@ -25,7 +26,7 @@ def test_lifespan_startup_executes():
     with TestClient(app) as client:
         # Verificar se a aplicação está respondendo
         # Nota: O endpoint "/" retorna HTML (docs), vamos testar outro endpoint
-        response = client.get("/admin/")
+        response = request(client, "GET", "/admin/")
 
         # Validar resposta do endpoint admin
         assert response.status_code == 200
@@ -60,7 +61,7 @@ def test_different_settings():
 
     # Testar funcionamento com configurações diferentes
     with TestClient(app) as client:
-        response = client.get("/")
+        response = request(client, "GET", "/")
         assert response.status_code == 200
 
         # Validar se configurações foram aplicadas

@@ -51,6 +51,22 @@ pipenv run test
 pipenv run test:cov
 ```
 
+#### Helpers de Teste
+
+O projeto inclui helpers para padronizar requests nos testes:
+
+```python
+from tests.helpers import request, request_auth
+
+# Request básico
+response = request(client, "POST", "/admin/", json=data)
+
+# Request autenticado
+response = request_auth(client, "GET", "/admin/protected", token="jwt-token")
+```
+
+Veja [TESTING.md](TESTING.md) para documentação completa.
+
 ### Qualidade de código
 
 ```Bash

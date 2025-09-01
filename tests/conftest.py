@@ -7,6 +7,7 @@ from app.config.database import get_db
 from app.config.settings import get_test_settings
 from app.main import create_app
 from app.models.admin_model_example import Base
+from tests.helpers import request
 
 # Banco para testes unitários
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -45,7 +46,7 @@ def setup_database():
 def admin_global(client):
     """Fixture que cria um admin para usar em testes"""
     admin_data = {"username": "test_admin", "email": "test_admin@example.com"}
-    response = client.post("/admin/", json=admin_data)
+    response = request(client, "POST", "/admin/", json=admin_data)
     return response.json()
 
 
