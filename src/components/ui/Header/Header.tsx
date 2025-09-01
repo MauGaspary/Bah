@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { Input } from '../Searchbar/Searchbar'
+
+import { optionsItems } from './NavigationsItens'
 
 interface HeaderProps {
   variant?: 'default' | 'secondary' | 'custom'
@@ -14,45 +17,13 @@ interface HeaderProps {
   }
 }
 
-interface NavigationItem {
-  id: string
-  label: string
-  path: string
-}
-
 function Header({ variant = 'default', customColors }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchIconHovered, setIsSearchIconHovered] = useState(false)
 
-  const optionsItems: NavigationItem[] = [
-    {
-      id: 'calendario',
-      label: 'Calendário',
-      path: '/calendario',
-    },
-    {
-      id: 'jornada',
-      label: 'Jornada',
-      path: '/jornada',
-    },
-    {
-      id: 'sobre nos',
-      label: 'Sobre nós',
-      path: '/sobre-nos',
-    },
-    {
-      id: 'nossos-valores',
-      label: 'Nossos Valores',
-      path: '/nossos-valores',
-    },
-    {
-      id: 'contato',
-      label: 'Contato',
-      path: '/contato',
-    },
-  ]
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,17 +49,31 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
   }, [isMobileMenuOpen])
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 500)
+    const heroSection = document.getElementById('hero-section')
+
+    if (!heroSection) {
+      const handleScroll = () => {
+        const scrollTop = window.scrollY
+        setIsScrolled(scrollTop > 100)
+      }
+
+      window.addEventListener('scroll', handleScroll)
+      return () => window.removeEventListener('scroll', handleScroll)
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsScrolled(!entry.isIntersecting)
+      },
+      { threshold: 0, rootMargin: '-20px 0px 0px 0px' }
+    )
+
+    observer.observe(heroSection)
+    return () => observer.disconnect()
   }, [])
 
   const handleNavigation = (path: string) => {
-    window.location.href = path
+    navigate(path)
     setIsMobileMenuOpen(false)
   }
 
@@ -147,7 +132,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
             <img
               src="/src/assets/bah-bg-purple.png"
               alt="Logo"
-              className={`h-16 w-auto transition-all duration-200 absolute top-0 left-0 ${
+              className={`h-14 w-auto transition-all duration-200 absolute top-1 left-0 ${
                 isScrolled ? 'opacity-100 scale-100' : 'opacity-0 scale-100'
               }`}
             />
@@ -192,16 +177,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.path)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:underline cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
-                  style={{
-                    color: 'white',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.color = getColors().buttonHover
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.color = 'white'
-                  }}
+                  className="px-3 py-2 text-sm font-medium text-white hover:underline hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
                 >
                   {item.label}
                 </button>
@@ -250,13 +226,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                 <h2 className="text-xl font-semibold text-white">Menu</h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-white transition-colors"
-                  onMouseEnter={e => {
-                    e.currentTarget.style.color = getColors().buttonHover
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.color = 'white'
-                  }}
+                  className="text-white transition-colors hover:text-bah-green"
                 >
                   <svg
                     className="w-6 h-6"
@@ -280,13 +250,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                     <li key={item.id}>
                       <button
                         onClick={() => handleNavigation(item.path)}
-                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200 text-lg font-medium font-mulish"
-                        onMouseEnter={e => {
-                          e.currentTarget.style.color = getColors().buttonHover
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.color = 'white'
-                        }}
+                        className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-bah-green rounded-lg transition-all duration-200 text-lg font-medium font-mulish"
                       >
                         {item.label}
                       </button>
