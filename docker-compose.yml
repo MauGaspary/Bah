@@ -86,7 +86,18 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bah.com.br
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8081:80"
     depends_on:
       db:
         condition: service_healthy

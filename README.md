@@ -60,7 +60,7 @@ pipenv run precommit
 ### Setup do banco
 
 ```Bash
-pipenv run migrate
+pipenv run migrate (se necessário)
 pipenv run seed
 pipenv run app
 ```
@@ -72,7 +72,7 @@ pipenv run app
 ### Comandos Úteis
 
 ```bash
-# Migrations
+# Migrations (se necessário)
 alembic revision --autogenerate -m "nome_da_migration"      # Nova migration (detecta mudanças automaticamente)
 alembic upgrade head                                        # Aplicar todas as migrations pendentes
 alembic current                                             # Ver migration atual
@@ -174,11 +174,291 @@ docker compose up db -d
 - **User**: bah_user
 - **Password**: bah_password
 
+### Interface Web para Banco de Dados
+
+O projeto inclui duas opções de UI para visualizar e gerenciar o banco:
+
+#### 1. Adminer (Simples e rápido)
+
+```bash
+# Iniciar com o banco
+docker compose up db adminer -d
+```
+
+- **URL**: http://localhost:8080
+- **Sistema**: PostgreSQL
+- **Servidor**: db
+- **Usuário**: bah_user
+- **Senha**: bah_password
+- **Base de dados**: bah_db
+
+#### 2. pgAdmin (Interface mais robusta)
+
+```bash
+# Iniciar com o banco
+docker compose up db pgadmin -d
+```
+
+- **URL**: http://localhost:8081
+- **Email**: admin@bah.com.br
+- **Senha**: admin123
+
+Depois adicione o servidor PostgreSQL:
+- **Host**: db
+- **Port**: 5432
+- **Database**: bah_db
+- **Username**: bah_user
+- **Password**: bah_password
+
 ## Parar Docker
 
 ```Bash
 docker compose down
 ```
+
+## API Endpoints
+
+A API FastAPI já vem configurada e pronta para uso. Com a aplicação rodando:
+
+```bash
+# Listar admins
+curl http://localhost:8000/admin/
+
+# Criar admin
+curl -X POST http://localhost:8000/admin/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "novo.admin", "email": "novo@bah.com.br"}'
+
+# Buscar por ID
+curl http://localhost:8000/admin/id/1
+
+# Buscar por email
+curl http://localhost:8000/admin/email/admin@bah.com.br
+```
+
+### Documentação Geral
+
+Com a aplicação rodando, acesse:
+- **Swagger UI**: http://localhost:8000/
+- **ReDoc**: http://localhost:8000/redoc
+
+### Dados de Seed
+
+- admin@bah.com.br
+- joao.silva@bah.com.br
+- maria.santos@bah.com.br
+
+## 🏗️ Arquitetura do Projeto
+
+### Estrutura de Pastas
+
+```
+bah-backend/
+├── app/                          # Código principal da aplicação
+│   ├── config/                   # Configurações (banco, settings)
+│   │   └── database.py          # Configuração do SQLAlchemy
+│   ├── controllers/             # Controladores (lógica de apresentação)
+│   ├── models/                  # Modelos SQLAlchemy (entidades do banco)
+│   ├── repositories/            # Camada de acesso a dados
+│   ├── routes/                  # Definição das rotas FastAPI
+│   ├── schemas/                 # Schemas Pydantic (validação/serialização)
+│   ├── services/                # Regras de negócio
+│   ├── scripts/                 # Scripts utilitários (seed, etc)
+│   ├── utils/                   # Funções auxiliares
+│   └── main.py                  # Ponto de entrada da aplicação
+├── migrations/                   # Migrations do Alembic
+├── tests/                       # Testes automatizados
+│   ├── integration/             # Testes de integração
+│   └── conftest.py             # Configurações dos testes
+├── docker-compose.yml           # Orquestração de containers
+├── Dockerfile                   # Imagem Docker da aplicação
+├── Pipfile                      # Dependências Python (pipenv)
+└── pyproject.toml              # Configurações de ferramentas
+```
+
+### Padrão de Arquitetura (Clean Architecture)
+
+O projeto segue uma arquitetura em camadas inspirada na Clean Architecture:
+
+#### 1. **Routes** (Camada de Apresentação)
+
+- Define os endpoints da API
+- Recebe requisições HTTP
+- Valida dados de entrada via Pydantic
+- Chama os Controllers
+
+#### 2. **Controllers** (Camada de Controle)
+
+- Orquestra as operações
+- Gerencia dependências (injeção do banco)
+- Chama os Services
+- Trata respostas para a API
+
+#### 3. **Services** (Camada de Negócio)
+
+- Contém as regras de negócio
+- Validações específicas do domínio
+- Orquestra chamadas aos Repositories
+- Trata exceções de negócio
+
+#### 4. **Repositories** (Camada de Dados)
+
+- Acesso direto ao banco de dados
+- Operações CRUD
+- Queries específicas
+- Abstrai detalhes do SQLAlchemy
+
+#### 5. **Models** (Entidades)
+
+- Definição das tabelas (SQLAlchemy)
+- Relacionamentos entre entidades
+- Constraints do banco
+
+#### 6. **Schemas** (Contratos de Dados)
+
+- Validação de entrada (Pydantic)
+- Serialização de saída
+- Documentação automática da API
+
+### Fluxo de uma Requisição
+
+```
+1. Cliente HTTP → Route (FastAPI)
+2. Route → Controller (injeção de dependências)
+3. Controller → Service (regras de negócio)
+4. Service → Repository (acesso aos dados)
+5. Repository → Database (SQLAlchemy)
+6. Database → Repository → Service → Controller → Route → Cliente
+```
+
+### Exemplo Prático: Criar Admin
+
+```python
+# 1. Route recebe a requisição
+@router.post("/", response_model=AdminResponse)
+def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
+    controller = AdminController(db)
+    return controller.create_admin(admin)
+
+# 2. Controller orquestra
+class AdminController:
+    def create_admin(self, admin_data: AdminCreate) -> AdminResponse:
+        return self.service.create_admin(admin_data)
+
+# 3. Service aplica regras de negócio
+class AdminService:
+    def create_admin(self, admin_data: AdminCreate):
+        if not validate_email(admin_data.email):
+            raise HTTPException(status_code=400, detail="Email inválido")
+        return self.repository.create(admin_data)
+
+# 4. Repository acessa o banco
+class AdminRepository:
+    def create(self, admin_data: AdminCreate):
+        db_admin = Admin(username=admin_data.username, email=admin_data.email)
+        self.db.add(db_admin)
+        self.db.commit()
+        return db_admin
+```
+
+## 🔧 Tecnologias Utilizadas
+
+- **FastAPI**: Framework web moderno e rápido
+- **SQLAlchemy**: ORM para Python
+- **Alembic**: Migrations de banco de dados
+- **Pydantic**: Validação e serialização de dados
+- **PostgreSQL**: Banco de dados principal (produção)
+- **SQLite**: Banco de dados local (desenvolvimento)
+- **Docker**: Containerização
+- **Pytest**: Framework de testes
+- **Black/isort**: Formatação de código
+- **Pylint**: Análise estática de código
+
+## 📋 Como Contribuir
+
+### Implementar (seguindo a arquitetura)
+
+1. **Model** - Definir entidade no banco
+2. **Schema** - Criar contratos Pydantic
+3. **Repository** - Implementar acesso aos dados
+4. **Service** - Adicionar regras de negócio
+5. **Controller** - Orquestrar operações
+6. **Route** - Expor endpoints
+7. **Tests** - Criar testes unitários e integração
+
+### Migration (se necessário)
+
+```bash
+# Criar migration
+alembic revision --autogenerate -m "descrição_da_mudança"
+
+# Aplicar migration
+pipenv run migrate
+```
+
+### 3. Padrões de Código
+
+#### Nomenclatura
+
+- **Arquivos**: `snake_case.py`
+- **Classes**: `PascalCase`
+- **Funções/Variáveis**: `snake_case`
+- **Constantes**: `UPPER_CASE`
+
+#### Estrutura de Arquivos
+
+```python
+# exemplo_model.py
+from sqlalchemy import Column, Integer, String
+from app.models.base import Base
+
+class Exemplo(Base):
+    __tablename__ = "exemplos"
+
+    id = Column(Integer, primary_key=True)
+    nome = Column(String, nullable=False)
+```
+
+#### Testes
+
+```python
+# test_exemplo.py
+def test_criar_exemplo(client):
+    response = client.post("/exemplo/", json={"nome": "teste"})
+    assert response.status_code == 201
+    assert response.json()["nome"] == "teste"
+```
+
+### 4. Checklist de Contribuição
+
+- [ ] Código segue os padrões estabelecidos
+- [ ] Testes criados e passando (cobertura > 80%)
+- [ ] Documentação atualizada se necessário
+- [ ] Migration criada se houver mudanças no banco
+- [ ] Pre-commit hooks passando
+- [ ] Branch atualizada com `dev`
+- [ ] Pull Request com descrição clara
+
+## 🚀 Deploy e Ambientes
+
+### Desenvolvimento Local
+
+- SQLite como banco
+- Servidor de desenvolvimento do uvicorn
+- Hot reload ativado
+
+### Testes
+
+- Banco em memória (SQLite)
+- Fixtures para dados de teste
+- Isolamento entre testes
+
+### Produção (Docker)
+
+- PostgreSQL como banco
+- Containers orquestrados
+- Migrations automáticas
+- Health checks configurados
 
 ## � Git Flow
 
@@ -257,37 +537,13 @@ git branch                    # Listar branches
 git branch -d branch-name     # Deletar branch local
 ```
 
-## API Endpoints
-
-A API FastAPI já vem configurada e pronta para uso. Com a aplicação rodando:
-
-```bash
-# Listar admins
-curl http://localhost:8000/admin/
-
-# Criar admin
-curl -X POST http://localhost:8000/admin/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "novo.admin", "email": "novo@bah.com.br"}'
-
-# Buscar por ID
-curl http://localhost:8000/admin/id/1
-
-# Buscar por email
-curl http://localhost:8000/admin/email/admin@bah.com.br
-```
-
-### Dados de Seed
-
-- admin@bah.com.br
-- joao.silva@bah.com.br
-- maria.santos@bah.com.br
-
 ## 📚 Recursos Úteis
 
 - [FastAPI Docs](https://fastapi.tiangolo.com/)
 - [SQLAlchemy Docs](https://docs.sqlalchemy.org/)
 - [Alembic Docs](https://alembic.sqlalchemy.org/)
+- [Pydantic Docs](https://docs.pydantic.dev/)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Git Tutorial](https://git-scm.com/docs/gittutorial)
 
 ---
