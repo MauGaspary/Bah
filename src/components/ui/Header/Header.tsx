@@ -134,14 +134,14 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
           </div>
 
           {isScrolled && (
-            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300 max-[500px]: mr-10">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 ">
+            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300">
+              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 max-[500px]:max-w-[200px] max-[500px]:ml-2">
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0"
+                  className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0 max-[500px]:placeholder:text-xs"
                 />
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer transition-all duration-300"
@@ -191,21 +191,37 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
         }}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3 12h18" />
-          <path d="M3 18h18" />
-          <path d="M3 6h18" />
-        </svg>
+        {!isMobileMenuOpen ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 12h18" />
+            <path d="M3 18h18" />
+            <path d="M3 6h18" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        )}
       </button>
 
       {isMobileMenuOpen && (
@@ -217,26 +233,8 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
             }}
           >
             <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-6 border-b border-white/20">
+              <div className="flex items-center justify-center p-6 border-b border-white/20">
                 <h2 className="text-xl font-semibold text-white">Menu</h2>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-white transition-colors hover:text-bah-green"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
               </div>
 
               <nav className="flex-1 p-6">
