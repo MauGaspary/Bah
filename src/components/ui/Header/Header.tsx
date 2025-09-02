@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 
 import { Input } from '../Searchbar/Searchbar'
 
@@ -27,7 +28,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false)
       }
     }
@@ -134,20 +135,20 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
           </div>
 
           {isScrolled && (
-            <div className="flex-1 max-w-sm mx-4 md:mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-10 md:ml-0 max-[500px]:max-w-[200px] max-[500px]:ml-2">
+            <div className="flex-1 max-w-sm mx-4 md:mx-20 lg:mx-8 animate-in slide-in-from-top-2 duration-300">
+              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-4 md:ml-4 lg:ml-0 max-[500px]:max-w-[250px] max-[500px]:ml-6">
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0 max-[500px]:placeholder:text-xs"
+                  className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0 max-[500px]:placeholder:text-xs truncate placeholder:truncate"
                 />
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer transition-all duration-300"
                   style={{
                     backgroundColor:
-                      window.innerWidth < 768
+                      window.innerWidth < 1024
                         ? getColors().searchIconMobile
                         : getColors().searchIconDesktop,
                     transform: isSearchIconHovered
@@ -167,7 +168,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
           )}
 
           {isScrolled && (
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="hidden lg:flex items-center space-x-6">
               {optionsItems.map(item => (
                 <button
                   key={item.id}
@@ -183,7 +184,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
       </header>
 
       <button
-        className="md:hidden fixed top-5 right-4 transition-colors z-50 bg-transparent p-2 rounded-full"
+        className="lg:hidden fixed top-5 right-4 transition-colors z-50 bg-transparent p-2 rounded-full"
         style={{
           color: isScrolled
             ? getColors().buttonHover
@@ -191,41 +192,11 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
         }}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
-        {!isMobileMenuOpen ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 12h18" />
-            <path d="M3 18h18" />
-            <path d="M3 6h18" />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        )}
+        {!isMobileMenuOpen ? <Menu size={26} /> : <X size={26} />}
       </button>
 
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden backdrop-blur-sm">
+        <div className="fixed inset-0 z-40 lg:hidden backdrop-blur-sm">
           <div
             className="fixed right-0 top-0 h-full w-[70%] shadow-xl animate-in slide-in-from-right duration-300"
             style={{
