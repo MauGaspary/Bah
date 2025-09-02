@@ -71,15 +71,26 @@ pipenv run app
 
 ### Comandos Úteis
 
-```Bash
+```bash
 # Migrations
-pipenv run migrate:create   # Nova migration
-pipenv run migrate          # Aplicar migrations
-pipenv run migrate:current  # Status
-pipenv run migrate:history  # Histórico
+alembic revision --autogenerate -m "nome_da_migration"      # Nova migration (detecta mudanças automaticamente)
+alembic upgrade head                                        # Aplicar todas as migrations pendentes
+alembic current                                             # Ver migration atual
+alembic history                                             # Ver histórico de migrations
+alembic revision -m "nome_da_migration"                     # Criar migration manual
+alembic downgrade -1                                        # Reverter para migration anterior
+alembic downgrade <revision_id>                             # Reverter para migration específica
 
 # Seed
 pipenv run seed             # Popular dados iniciais
+```
+
+**Exemplos de nomes de migration:**
+
+```bash
+alembic revision --autogenerate -m "create_users_table"
+alembic revision --autogenerate -m "add_email_column_to_users"
+alembic revision --autogenerate -m "create_indexes_for_performance"
 ```
 
 ## Desenvolvimento com Docker
@@ -88,9 +99,6 @@ pipenv run seed             # Popular dados iniciais
 
 ```Bash
 docker compose up --build
-
-# Testar endpoints
-bash test_endpoints.sh
 ```
 
 ### Serviços Individuais
@@ -115,6 +123,48 @@ docker compose run --rm test-cov
 
 # Qualidade de código
 docker compose run --rm quality
+```
+
+### Acessar Banco PostgreSQL
+
+#### 1. Conectar ao container do banco
+
+```bash
+docker compose exec db psql -U bah_user -d bah_db
+```
+
+#### 2. Comandos dentro do PostgreSQL
+
+```sql
+# Listar todas as tabelas
+\dt
+
+# Ver dados da tabela admins
+SELECT * FROM admins;
+
+# Ver estrutura da tabela admins
+\d admins
+
+# Ver informações do banco
+\l
+
+# Ver todos os esquemas
+\dn
+
+# Sair do PostgreSQL
+\q
+```
+
+#### 4. Verificar se o container está rodando
+
+```bash
+docker compose ps
+```
+
+Se o container não estiver rodando, inicie com:
+
+```bash
+docker compose up db -d
 ```
 
 ### Configuração do Banco (Docker)
@@ -209,7 +259,7 @@ git branch -d branch-name     # Deletar branch local
 
 ## API Endpoints
 
-Com a aplicação rodando:
+A API FastAPI já vem configurada e pronta para uso. Com a aplicação rodando:
 
 ```bash
 # Listar admins
