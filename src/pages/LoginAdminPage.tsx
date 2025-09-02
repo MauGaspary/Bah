@@ -55,24 +55,14 @@ function LoginAdminPage() {
   return (
     <div className="min-h-screen flex relative">
       <div
-        className="absolute pointer-events-none select-none"
-        style={{
-          left: '0',
-          bottom: '0vw',
-          maxWidth: '14vw',
-          minWidth: '120px',
-        }}
+        className="absolute pointer-events-none select-none left-0 bottom-0 
+             w-[200px] max-w-[14vw] min-w-[120px] opacity-95
+             max-[1400px]:w-[140px] max-[1024px]:w-[100px]"
       >
         <img
           src="/src/assets/Bah Projeto Group 9.png"
           alt="Decorative Element"
-          style={{
-            width: '100%',
-            height: 'auto',
-            minWidth: '120px',
-            maxWidth: '340px',
-            opacity: 0.95,
-          }}
+          className="w-full h-auto"
         />
       </div>
 
