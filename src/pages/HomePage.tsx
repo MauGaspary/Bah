@@ -10,7 +10,7 @@ function HomePage() {
     <>
       <Header variant="default" />
       <div
-        className="min-h-screen h-full bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center bg-no-repeat bg-fixed w-full flex items-center justify-center"
+        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
         id="home-section"
       >
         <div className="container mx-auto px-4 py-8 md:py-20">
@@ -19,7 +19,7 @@ function HomePage() {
             alt="logo"
             className="w-32 md:w-40 h-24 md:h-30 mb-3 mx-auto hidden md:block"
           />
-          <div className="flex items-center justify-center w-100 md:w-110 mx-auto ">
+          <div className="flex items-center justify-center w-full max-w-[28rem] mx-auto">
             <h1 className="text-white text-5xl md:text-4xl text-center mb-6 md:mb-4 font-mulish max-w-4xl mx-auto px-4">
               Conecte-se à{' '}
               <span className="font-bold italic md:not-italic md:font-normal">
