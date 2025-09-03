@@ -25,5 +25,5 @@ class AuthController:
         return {
             "access_token": token,
             "token_type": "Bearer",
-            "expires_in": JWT_TTL #diferente do JWT_TTL
+            "expires_in": JWT_TTL
         }
