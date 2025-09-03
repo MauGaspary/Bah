@@ -72,7 +72,7 @@ function DashboardPage() {
                 variant="purple"
                 disabled
                 onClick={() => alert('Não deveria executar')}
-                className="cursor-not-allowed"
+                className="cursor-pointer"
               >
                 Botão Desabilitado
               </Button>
