@@ -14,6 +14,7 @@ alembic = "~=1.13.1"
 pyjwt = "*"
 python-dotenv = "*"
 pytest = "*"
+bcrypt = "~=4.0.1"
 
 [dev-packages]
 black = "~=24.10.0"
