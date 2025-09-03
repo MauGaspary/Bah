@@ -6,6 +6,13 @@ import { Input } from '@/components/ui/Searchbar/Searchbar'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const tags = [
+    { name: 'Aceleração', value: 'aceleracao' },
+    { name: 'Projetos', value: 'projetos' },
+    { name: 'Investidores', value: 'investidores' },
+    { name: 'Coworking', value: 'coworking' },
+    { name: 'Mentorias', value: 'mentorias' },
+  ]
   return (
     <>
       <Header variant="default" />
@@ -49,21 +56,14 @@ function HomePage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
-            <button className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200">
-              Aceleração
-            </button>
-            <button className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200">
-              Projetos
-            </button>
-            <button className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200">
-              Investidores
-            </button>
-            <button className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200">
-              Coworking
-            </button>
-            <button className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200">
-              Mentorias
-            </button>
+            {tags.map(tag => (
+              <button
+                key={tag.value}
+                className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200"
+              >
+                {tag.name}
+              </button>
+            ))}
           </div>
         </div>
       </div>
