@@ -18,12 +18,12 @@ class AuthController:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         if not self.hasher.verify(password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=401, detail="Invalid credentials password")
         
         token = sign(sub=str(user.id), email=user.email)
 
         return {
             "access_token": token,
             "token_type": "Bearer",
-            "expires_in": 1800 #diferente do JWT_TTL
+            "expires_in": JWT_TTL #diferente do JWT_TTL
         }

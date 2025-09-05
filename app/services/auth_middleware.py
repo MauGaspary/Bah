@@ -1,7 +1,7 @@
 from fastapi import Request, HTTPException
 from functools import wraps
 
-from services.jwt_service import verify
+from app.services.jwt_service import verify
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, InvalidIssuerError, DecodeError
 
 def jwt_required(func):
