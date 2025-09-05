@@ -13,6 +13,15 @@ app = FastAPI(
 
 app.include_router(admin_router_example, prefix="/admin", tags=["admin"])
 app.include_router(auth_router)
+app.include_router(test_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     CORSMiddleware,
