@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.user_model import User
-from app.services.security import hash_password
+from app.utils.passwordHasher import PasswordHasher
 
 
 class UserRepository:
@@ -17,7 +17,7 @@ class UserRepository:
 
     def create(self, email: str, password: str, name: Optional[str] = None) -> User:
         email_norm = email.strip()
-        user = User(email=email_norm, password_hash=hash_password(password), name=name)
+        user = User(email=email_norm, password_hash=PasswordHasher.hash(password), name=name)
         self.session.add(user)
         self.session.flush()  # gera id
         return user
