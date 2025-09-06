@@ -1,21 +1,8 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from 'react'
-
-import { is_authenticated, login as authLogin } from '@/lib/auth'
-
-interface User {
-  id: string
-  email: string
-  name: string
-}
+import { createContext, useContext, useState, type ReactNode } from 'react'
+import { login as authLogin } from '@/lib/auth'
 
 interface AuthContextType {
-  user: User | null
+  token: string | null
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
@@ -24,66 +11,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-interface AuthProviderProps {
-  children: ReactNode
-}
+interface AuthProviderProps { children: ReactNode }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('access_token')
-      const userData = localStorage.getItem('user')
-
-      if (token && userData && is_authenticated()) {
-        const user = JSON.parse(userData)
-        setUser(user)
-        setIsAuthenticated(true)
-      }
-      setIsLoading(false)
-    }
-
-    checkAuth()
-  }, [])
+  const [isLoading, setIsLoading] = useState(false)
 
   const login = async (email: string, password: string) => {
-    const response = await authLogin(email, password)
-    if (response && response.user && response.access_token) {
-      const userData = response.user
-      localStorage.setItem('access_token', response.access_token)
-      localStorage.setItem('user', JSON.stringify(userData))
-      setUser(userData)
+    setIsLoading(true)
+    try {
+      const res = await authLogin(email, password)
+      if (!res.access_token) throw new Error('Token ausente')
+      setToken(res.access_token)
       setIsAuthenticated(true)
-    } else {
-      throw new Error('Resposta de login inválida: usuário ou token ausente')
+      localStorage.setItem('access_token', res.access_token)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const logout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user')
-    setUser(null)
+    setToken(null)
     setIsAuthenticated(false)
   }
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-  }
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ token, isAuthenticated, isLoading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider')
-  }
+  if (!context) throw new Error('useAuth deve ser usado dentro de um AuthProvider')
   return context
 }
