@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.services.jwt_service import verify
 from app.config.settings import JWT_TTL
+import bcrypt
 
 client = TestClient(app)
 
@@ -16,7 +17,7 @@ INVALID_USER = {
     "password": "qualquer"
 }
 
-def test_login_success():
+def test_login_success(test_user):
     response = client.post("/auth/login", json=VALID_USER)
     assert response.status_code == 200
     

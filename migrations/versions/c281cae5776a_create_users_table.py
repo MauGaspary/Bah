@@ -11,6 +11,9 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+from sqlalchemy import text
+
 # revision identifiers, used by Alembic.
 revision: str = "c281cae5776a"
 down_revision: Union[str, None] = "6511b434f4cd"
@@ -19,7 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE EXTENSION IF NOT EXISTS pgcrypto;")
+    conn = op.get_bind()
+    if conn.dialect.name == "postgresql":
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS pgcrypto;"))
 
     op.create_table(
         "users",
