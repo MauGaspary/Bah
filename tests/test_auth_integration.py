@@ -26,7 +26,7 @@ def test_login_success(test_user):
     assert data["token_type"] == "Bearer"
     assert data["expires_in"] == JWT_TTL
     
-    # verificar token com verify
+    
     claims = verify(data["access_token"])
     assert claims["email"] == VALID_USER["email"]
 

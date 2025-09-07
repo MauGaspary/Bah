@@ -38,10 +38,10 @@ def verify(token: str) -> dict:
     
     
     except ExpiredSignatureError:
-        raise #token expirou
+        raise 
     except InvalidSignatureError:
-        raise #assinatura invalida
+        raise 
     except InvalidIssuerError:
-        raise #emissor invalido
+        raise 
     except DecodeError:
-        raise #formato invalido do token
+        raise 

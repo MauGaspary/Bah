@@ -62,7 +62,7 @@ def test_user():
     hasher = PasswordHasher()
 
     user = User(
-        id=uuid.uuid4(),  # ← Gerar UUID aqui
+        id=uuid.uuid4(), 
         email="teste@gmail.com",
         password_hash=hasher.hash("senha123"),
         name="Usuario Teste"

@@ -9,7 +9,7 @@ DATABASE_URL = os.environ.get(
 )
 
 
-@pytest.fixture()  # <- escopo por teste
+@pytest.fixture() 
 def conn():
     engine = sa.create_engine(DATABASE_URL, future=True)
     with engine.begin() as c:

@@ -28,9 +28,3 @@ def jwt_required(func):
         return await func(request, *args, **kwargs)
     
     return wrapper
-
-
-#para uso usar @jwt_required antes do handler
-#usar dados dentro do request.state.user
-#exemplos: request.state.user["userId"]
-#          request.state.user["email"]

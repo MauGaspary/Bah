@@ -19,5 +19,5 @@ class UserRepository:
         email_norm = email.strip()
         user = User(email=email_norm, password_hash=PasswordHasher.hash(password), name=name)
         self.session.add(user)
-        self.session.flush()  # gera id
+        self.session.flush() 
         return user
