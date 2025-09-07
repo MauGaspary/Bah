@@ -31,7 +31,7 @@ class Settings:
 def get_development_settings() -> Settings:
     """Configurações para desenvolvimento."""
     return Settings(
-        database_url="sqlite:///bah.db",
+        database_url="postgresql://bah_user:bah_password@localhost:5432/bah_db",
         database_echo=True,
         log_level="DEBUG",
         debug=True,
@@ -42,7 +42,7 @@ def get_development_settings() -> Settings:
 def get_test_settings() -> Settings:
     """Configurações para testes."""
     return Settings(
-        database_url="postgresql://test_user:test_pass@localhost:5432/test_bah_db",
+        database_url="postgresql://bah_user:bah_password@localhost:5432/bah_db",
         database_echo=False,
         log_level="WARNING",
         debug=False,

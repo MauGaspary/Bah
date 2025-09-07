@@ -8,11 +8,10 @@ from sqlalchemy import engine_from_config, pool
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the sqlalchemy.url from environment variable if not already set
-if not config.get_main_option("sqlalchemy.url"):
-    config.set_main_option(
-        "sqlalchemy.url", os.getenv("DATABASE_URL", "sqlite:///./bah.db")
-    )
+# Set the sqlalchemy.url from environment variable if available
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

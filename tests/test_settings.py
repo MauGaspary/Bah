@@ -42,7 +42,7 @@ class TestSettings:
         settings = get_development_settings()
 
         # Validar configurações específicas de desenvolvimento
-        assert settings.database_url == "sqlite:///bah.db"
+        assert "postgresql://" in settings.database_url
         assert settings.database_echo is True
         assert settings.log_level == "DEBUG"
         assert settings.debug is True
