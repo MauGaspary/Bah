@@ -1,6 +1,13 @@
+import os
+os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
+os.environ["TESTCONTAINERS_HOST_OVERRIDE"] = "host.docker.internal"
+
 import pytest
+from testcontainers.postgres import PostgresContainer
 
-
-def pytest_configure(config):
-    """Configure pytest markers"""
-    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+@pytest.fixture(scope="session")
+def postgres_container():
+    with PostgresContainer("postgres:15") as postgres:
+        url = postgres.get_connection_url().replace("localhost", "host.docker.internal")
+        postgres.get_connection_url = lambda: url
+        yield postgres

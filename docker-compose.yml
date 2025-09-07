@@ -52,24 +52,24 @@ services:
 
   test:
     build: .
+    privileged: true
     volumes:
       - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
     command: pytest tests -vv --show-capture=all
-    profiles: ["tools"]
-
   test-cov:
     build: .
+    privileged: true
     volumes:
       - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
     command: pytest --cov=app --cov-report=term-missing --cov-fail-under=80 tests
-    profiles: ["tools"]
 
   quality:
     build: .
     volumes:
       - .:/app
     command: sh -c "black . && isort --profile black . && pylint app && mypy app"
-    profiles: ["tools"]
 
   stack:
     build: .
@@ -80,7 +80,6 @@ services:
     command: sh -c "echo 'App iniciada' && tail -f /dev/null"
     depends_on:
       - app
-    profiles: ["stack"]
 
 volumes:
   postgres_data:
