@@ -6,7 +6,8 @@ disable=
     too-few-public-methods,
     unused-argument,
     import-error,
-    line-too-long
+    line-too-long,
+    too-many-positional-arguments
 
 [FORMAT]
 max-line-length=88

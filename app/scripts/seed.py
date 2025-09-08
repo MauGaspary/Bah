@@ -2,6 +2,8 @@
 import os
 import sys
 
+from sqlalchemy import text
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.config.database import SessionLocal
@@ -12,12 +14,22 @@ def seed_admins():
     db = SessionLocal()
 
     try:
+        result = db.execute(
+            text(
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'admins')"
+            )
+        )
+        table_exists = result.scalar()
+
+        if not table_exists:
+            print("Tabela 'admins' não existe. Execute as migrations primeiro.")
+            return
+
         existing_count = db.query(Admin).count()
         if existing_count > 0:
             print(f"Seed já executado. Encontrados {existing_count} admins.")
             return
 
-        # Dados de exemplo
         admins_data = [
             {
                 "username": "pedro",

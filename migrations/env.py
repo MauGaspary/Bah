@@ -8,21 +8,29 @@ from sqlalchemy import engine_from_config, pool
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the sqlalchemy.url from environment variable
-config.set_main_option(
-    "sqlalchemy.url", os.getenv("DATABASE_URL", "sqlite:///./bah.db")
-)
+# Set the sqlalchemy.url from environment variable if available
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+
+from app.models.admin_model_example import Admin
+
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from app.models.admin_model_example import Base
+from app.models.base import Base
+from app.models.contato_model import Contato
+from app.models.iniciativa_horario_model import IniciativaHorario
+from app.models.iniciativa_model import Iniciativa
+from app.models.iniciativa_tag_model import IniciativaTag
+from app.models.organizador_model import Organizador
+from app.models.tag_model import Tag
+from app.models.usuario_model import Usuario
 
 target_metadata = Base.metadata
 

@@ -1,7 +1,9 @@
-from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime
 import uuid
-from app.config.database import Base
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, String, Text
+
+from app.models.base import Base
 
 
 class Contato(Base):

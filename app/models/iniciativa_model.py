@@ -1,10 +1,10 @@
-from datetime import datetime
-from sqlalchemy import (
-    Column, String, Text, Boolean, DateTime, ForeignKey
-)
-from sqlalchemy.orm import relationship
 import uuid
-from app.config.database import Base
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy.orm import relationship
+
+from app.models.base import Base
 
 
 class Iniciativa(Base):
@@ -13,8 +13,10 @@ class Iniciativa(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     titulo = Column(String, nullable=False, index=True)
     descricao = Column(Text, nullable=False)
-    descricao_vetor = Column(Text, nullable=False) 
-    organizador_id = Column(String, ForeignKey("organizadores.id"), nullable=False, index=True)
+    descricao_vetor = Column(Text, nullable=False)
+    organizador_id = Column(
+        String, ForeignKey("organizadores.id"), nullable=False, index=True
+    )
     link = Column(Text, nullable=False)
     destaque = Column(Boolean, nullable=False, default=False, index=True)
     local = Column(String)
