@@ -1,11 +1,8 @@
 from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.orm import DeclarativeBase
 
-
-class Base(DeclarativeBase):
-    pass
+from app.config.database import Base
 
 
 class Admin(Base):

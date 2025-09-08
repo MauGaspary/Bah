@@ -9,6 +9,7 @@ pipenv run test:cov  # com coverage
 
 # Docker
 docker compose run --rm test
+docker compose run --rm test-cov # com coverage
 ```
 
 ## Helpers de Teste

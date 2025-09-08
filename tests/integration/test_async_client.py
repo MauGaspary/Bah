@@ -17,9 +17,8 @@ async def test_public_route_responds_200(async_client):
 async def test_async_client_with_lifespan(async_client):
     """Testa que AsyncClient funciona com lifespan"""
     async with async_client as client:
-        # Testar múltiplas requisições para garantir que lifespan está ativo
         response1 = await client.get("/")
         response2 = await client.get("/admin/")
 
-        assert response1.status_code == 307  # Redirect
-        assert response2.status_code == 200  # Admin route
+        assert response1.status_code == 307
+        assert response2.status_code == 200

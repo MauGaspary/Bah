@@ -17,7 +17,6 @@ def seed_admins():
             print(f"Seed já executado. Encontrados {existing_count} admins.")
             return
 
-        # Dados de exemplo
         admins_data = [
             {
                 "username": "pedro",

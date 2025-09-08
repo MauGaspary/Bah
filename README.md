@@ -104,9 +104,6 @@ pipenv run seed             # Popular dados iniciais
 
 ```Bash
 docker compose up --build
-
-# Testar endpoints
-bash test_endpoints.sh
 ```
 
 ### Serviços Individuais

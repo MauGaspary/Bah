@@ -8,7 +8,6 @@ from testcontainers.postgres import PostgresContainer
 from app.config.database import get_db
 from app.config.integration_settings import get_integration_test_settings
 from app.main import create_app
-from app.models.admin_model_example import Base
 
 
 @pytest.fixture(scope="session")
@@ -24,7 +23,6 @@ def test_engine(postgres_container):
     database_url = postgres_container.get_connection_url()
     engine = create_engine(database_url)
 
-    # Executar migrations usando Alembic
     from tests.scripts.setup_test_db import setup_test_database
 
     setup_test_database(database_url)
@@ -43,17 +41,14 @@ def testing_session_local(test_engine):
 def db_session(test_engine):
     """Sessão de banco com transação e rollback"""
 
-    # Criar conexão e transação
     connection = test_engine.connect()
     transaction = connection.begin()
 
-    # Criar sessão usando a conexão
     session_factory = sessionmaker(bind=connection)
     session = session_factory()
 
     yield session
 
-    # Cleanup
     session.close()
     transaction.rollback()
     connection.close()

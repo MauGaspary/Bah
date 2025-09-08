@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Script para setup do banco de teste"""
-
 import sys
 
 from alembic import command

@@ -17,16 +17,14 @@ def test_startup_executes_with_lifespan(client):
 
 def test_logging_setup_message():
     """Testa que a mensagem de configuração de logging é exibida"""
-    # Criar settings com logging habilitado e sem banco
     settings = Settings(
         enable_logging_setup=True,
         log_level="DEBUG",
         testing=False,
-        enable_database=False,  # Desabilita banco para evitar conexão
+        enable_database=False,
         database_url="sqlite:///:memory:",
     )
 
-    # Capturar stdout
     captured_output = io.StringIO()
 
     with redirect_stdout(captured_output):

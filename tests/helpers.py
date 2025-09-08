@@ -1,5 +1,3 @@
-"""Helpers para testes - padronização de requests"""
-
 from typing import Any, Dict, Optional
 
 from fastapi.testclient import TestClient
@@ -13,21 +11,6 @@ def request(
     headers: Optional[Dict[str, str]] = None,
     **kwargs,
 ):
-    """
-    Helper para requests padronizados.
-
-    Args:
-        client: TestClient do FastAPI
-        method: Método HTTP (GET, POST, PUT, DELETE, etc.)
-        path: Caminho da API
-        json: Dados JSON para o body
-        headers: Headers customizados
-        **kwargs: Argumentos adicionais para o request
-
-    Returns:
-        Response object
-    """
-    # Padronizar Content-Type quando há body
     if json is not None:
         if headers is None:
             headers = {}
@@ -47,25 +30,9 @@ def request_auth(
     headers: Optional[Dict[str, str]] = None,
     **kwargs,
 ):
-    """
-    Helper para requests autenticados.
-
-    Args:
-        client: TestClient do FastAPI
-        method: Método HTTP (GET, POST, PUT, DELETE, etc.)
-        path: Caminho da API
-        token: Token de autenticação
-        json: Dados JSON para o body
-        headers: Headers customizados
-        **kwargs: Argumentos adicionais para o request
-
-    Returns:
-        Response object
-    """
     if headers is None:
         headers = {}
 
-    # Injetar Authorization Bearer
     headers["Authorization"] = f"Bearer {token}"
 
     return request(

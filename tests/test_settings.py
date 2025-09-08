@@ -1,5 +1,3 @@
-import pytest
-
 from app.config.settings import (
     Settings,
     get_development_settings,
@@ -16,7 +14,6 @@ class TestSettings:
         """Testa criação básica da dataclass Settings."""
         settings = Settings()
 
-        # Verificar valores padrão
         assert settings.database_url is None
         assert settings.database_echo is False
         assert settings.log_level == "INFO"
@@ -41,7 +38,6 @@ class TestSettings:
         """Testa configurações de desenvolvimento."""
         settings = get_development_settings()
 
-        # Validar configurações específicas de desenvolvimento
         assert "postgresql://" in settings.database_url
         assert settings.database_echo is True
         assert settings.log_level == "DEBUG"
@@ -54,7 +50,6 @@ class TestSettings:
         """Testa configurações de teste."""
         settings = get_test_settings()
 
-        # Validar configurações específicas de teste
         assert (
             "postgresql://" in settings.database_url
             or settings.database_url == "sqlite:///:memory:"
@@ -64,13 +59,12 @@ class TestSettings:
         assert settings.debug is False
         assert settings.testing is True
         assert settings.enable_database is True
-        assert settings.enable_logging_setup is False  # Desabilitado em testes
+        assert settings.enable_logging_setup is False
 
     def test_get_production_settings(self):
         """Testa configurações de produção."""
         settings = get_production_settings()
 
-        # Validar configurações específicas de produção
         assert "postgresql://" in settings.database_url
         assert settings.database_echo is False
         assert settings.log_level == "INFO"
@@ -84,7 +78,6 @@ class TestSettings:
         settings = get_settings()
         dev_settings = get_development_settings()
 
-        # Deve retornar as mesmas configurações de desenvolvimento
         assert settings.database_url == dev_settings.database_url
         assert settings.debug == dev_settings.debug
         assert settings.testing == dev_settings.testing
@@ -95,7 +88,6 @@ class TestSettings:
         test_settings = get_test_settings()
         prod_settings = get_production_settings()
 
-        # Todos devem ter os mesmos atributos
         for settings in [dev_settings, test_settings, prod_settings]:
             assert hasattr(settings, "database_url")
             assert hasattr(settings, "database_echo")
@@ -105,7 +97,6 @@ class TestSettings:
             assert hasattr(settings, "enable_database")
             assert hasattr(settings, "enable_logging_setup")
 
-            # Tipos devem estar corretos
             assert isinstance(settings.debug, bool)
             assert isinstance(settings.testing, bool)
             assert isinstance(settings.enable_database, bool)

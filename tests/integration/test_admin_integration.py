@@ -15,7 +15,6 @@ class TestAdminIntegration:
 
         admin_data = {"username": "admin_test", "email": "admin@test.com"}
 
-        # 1. Criar admin
         create_response = request(client, "POST", "/admin/", json=admin_data)
         assert create_response.status_code == 200
 
@@ -25,7 +24,6 @@ class TestAdminIntegration:
         assert "id" in created_admin
         assert "created_at" in created_admin
 
-        # 2. Listar admins e verificar se o admin criado está na lista
         list_response = request(client, "GET", "/admin/")
         assert list_response.status_code == 200
 
@@ -48,20 +46,17 @@ class TestAdminIntegration:
 
         created_ids = []
 
-        # Criar múltiplos admins
         for admin_data in admins_data:
             response = request(client, "POST", "/admin/", json=admin_data)
             assert response.status_code == 200
             created_ids.append(response.json()["id"])
 
-        # Verificar se todos foram criados
         list_response = request(client, "GET", "/admin/")
         assert list_response.status_code == 200
 
         admins_list = list_response.json()
         assert len(admins_list) == 3
 
-        # Verificar se todos os IDs estão presentes
         returned_ids = [admin["id"] for admin in admins_list]
         assert set(created_ids) == set(returned_ids)
 
@@ -73,10 +68,9 @@ class TestAdminIntegration:
 
     def test_admin_data_validation(self, client):
         """Testa validação de dados do admin"""
-        # Teste com email inválido
         invalid_data = {
             "username": "valid_user",
-            "email": "invalid-email",  # email inválido
+            "email": "invalid-email",
         }
 
         response = request(client, "POST", "/admin/", json=invalid_data)
@@ -101,11 +95,9 @@ class TestAdminIntegration:
         """Testa validação de email duplicado"""
         admin_data = {"username": "admin1", "email": "test@example.com"}
 
-        # Criar primeiro admin
         response1 = request(client, "POST", "/admin/", json=admin_data)
         assert response1.status_code == 200
 
-        # Tentar criar segundo admin com mesmo email
         admin_data2 = {"username": "admin2", "email": "test@example.com"}
         response2 = request(client, "POST", "/admin/", json=admin_data2)
 
@@ -117,15 +109,12 @@ class TestAdminIntegration:
         admin_data1 = {"username": "admin_comum", "email": "test1@example.com"}
         admin_data2 = {"username": "admin_comum", "email": "test2@example.com"}
 
-        # Criar primeiro admin
         response1 = request(client, "POST", "/admin/", json=admin_data1)
         assert response1.status_code == 200
 
-        # Criar segundo admin com mesmo username mas email diferente
         response2 = request(client, "POST", "/admin/", json=admin_data2)
         assert response2.status_code == 200
 
-        # Verificar que ambos foram criados
         created_admin1 = response1.json()
         created_admin2 = response2.json()
 

@@ -1,3 +1,10 @@
+import os
+
+os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
+
+if os.getenv("DOCKER_ENV") == "true":
+    os.environ["TESTCONTAINERS_HOST_OVERRIDE"] = "host.docker.internal"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -7,13 +14,17 @@ from testcontainers.postgres import PostgresContainer
 from app.config.database import get_db
 from app.config.integration_settings import get_integration_test_settings
 from app.main import create_app
-from tests.helpers import request
 
 
 @pytest.fixture(scope="session")
 def postgres_container():
     """Container PostgreSQL para testes unitários"""
     with PostgresContainer("postgres:15") as postgres:
+        if os.getenv("DOCKER_ENV") == "true":
+            url = postgres.get_connection_url().replace(
+                "localhost", "host.docker.internal"
+            )
+            postgres.get_connection_url = lambda: url
         yield postgres
 
 
@@ -23,7 +34,6 @@ def test_engine(postgres_container):
     database_url = postgres_container.get_connection_url()
     engine = create_engine(database_url)
 
-    # Executar migrations usando Alembic
     from tests.scripts.setup_test_db import setup_test_database
 
     setup_test_database(database_url)
