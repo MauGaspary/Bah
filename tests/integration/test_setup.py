@@ -16,7 +16,7 @@ def test_transaction_isolation(db_session):
 
     admin = Admin(username="test_isolation", email="test@isolation.com")
     db_session.add(admin)
-    db_session.flush()  # Força o INSERT mas não commita
+    db_session.flush()
 
     found_admin = db_session.query(Admin).filter_by(email="test@isolation.com").first()
     assert found_admin is not None

@@ -1,10 +1,9 @@
 import io
-import sys
 from contextlib import redirect_stdout
 
 from fastapi.testclient import TestClient
 
-from app.config.settings import Settings, get_test_settings
+from app.config.settings import Settings
 from app.main import create_app
 from tests.helpers import request
 

@@ -92,7 +92,7 @@ pipenv run app
 
 ### Banco Local
 
-- Usa SQLite (`bah.db`) no diretório raiz
+- Usa PostgreSQL
 
 ### Comandos Úteis
 
@@ -377,7 +377,7 @@ class AdminRepository:
 - **Alembic**: Migrations de banco de dados
 - **Pydantic**: Validação e serialização de dados
 - **PostgreSQL**: Banco de dados principal (produção)
-- **SQLite**: Banco de dados local (desenvolvimento)
+- **PostgreSQL**: Banco de dados local (desenvolvimento)
 - **Docker**: Containerização
 - **Pytest**: Framework de testes
 - **Black/isort**: Formatação de código
@@ -450,13 +450,13 @@ def test_criar_exemplo(client):
 
 ### Desenvolvimento Local
 
-- SQLite como banco
+- PostgreSQL como banco
 - Servidor de desenvolvimento do uvicorn
 - Hot reload ativado
 
 ### Testes
 
-- Banco em memória (SQLite)
+- Banco em memória
 - Fixtures para dados de teste
 - Isolamento entre testes
 
