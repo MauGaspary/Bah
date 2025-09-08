@@ -1,137 +1,72 @@
-import { useNavigate } from 'react-router-dom'
+import { Search } from 'lucide-react'
+import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Header from '@/components/ui/Header/Header'
+import { Input } from '@/components/ui/Searchbar/Searchbar'
 
 function HomePage() {
-  const navigate = useNavigate()
-
+  const [searchQuery, setSearchQuery] = useState('')
+  const tags = [
+    { name: 'Aceleração', value: 'aceleracao' },
+    { name: 'Projetos', value: 'projetos' },
+    { name: 'Investidores', value: 'investidores' },
+    { name: 'Coworking', value: 'coworking' },
+    { name: 'Mentorias', value: 'mentorias' },
+  ]
   return (
     <>
-      <div className="min-h-screen bg-background-secondary" id="home-section">
-        <div className="max-w-4xl mx-auto space-y-6 p-6">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/')}
-              className="mb-4 cursor-pointer"
-            >
-              ← Voltar
-            </Button>
-          </div>
-
-          <div className="text-center">
-            <h1 className="text-large-title font-kanit text-label-primary">
-              BAH App
+      <Header variant="default" />
+      <main
+        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
+        id="home-section"
+      >
+        <section className="container mx-auto px-4 py-8 md:py-20">
+          <img
+            src="../src/assets/logo.png"
+            alt="logo"
+            className="w-32 md:w-40 h-24 md:h-30 mb-3 mx-auto hidden md:block"
+          />
+          <div className="flex items-center justify-center w-full max-w-[28rem] mx-auto">
+            <h1 className="text-white text-5xl md:text-4xl text-center mb-6 md:mb-4 font-mulish max-w-4xl mx-auto px-4">
+              Conecte-se à{' '}
+              <span className="font-bold italic md:not-italic md:font-normal">
+                inovação
+              </span>{' '}
+              em Caxias do Sul
             </h1>
-            <p className="text-body-regular font-sf-pro text-label-secondary">
-              Aplicação minimalista usando design tokens
-            </p>
           </div>
 
-          <Card className="rounded-card bg-white shadow-md border border-stroke-primary">
-            <CardHeader>
-              <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
-                Exemplo de Card
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-callout-regular font-sf-pro text-label-primary">
-                Este é um exemplo de como usar os design tokens na aplicação.
-              </p>
-
-              <div className="flex gap-3 flex-wrap">
-                <Button variant="primary">Primário</Button>
-                <Button variant="success">Sucesso</Button>
-                <Button variant="secondary">Secundário</Button>
+          <p className="md:hidden text-white text-2xl font-mulish font-normal text-center mb-12 max-w-sm mx-auto px-4">
+            Explore cursos, eventos e desafios de inovação que podem impulsionar
+            sua jornada
+          </p>
+          <div className="flex justify-center max-w-3xl mx-auto mb-8 md:mb-4 px-4">
+            <form className="flex items-center w-full max-w-2xl bg-white rounded-full overflow-hidden h-12 shadow-lg">
+              <Input
+                type="text"
+                placeholder="Conheça as iniciativas"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="flex-1 px-6 py-3 text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-semibold"
+              />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 cursor-pointer bg-bah-purple">
+                <Search className="h-4 w-4 text-white" />
               </div>
-
-              <div className="space-y-3">
-                <h4 className="text-callout-semibold font-sf-pro-text text-black">
-                  Componentes Customizados:
-                </h4>
-
-                <Button
-                  variant="purple"
-                  onClick={() =>
-                    alert('Voce clicou no botão Salvar iniciativas!')
-                  }
-                  className="cursor-pointer"
-                >
-                  Salvar iniciativas
-                </Button>
-
-                <Button
-                  variant="purple"
-                  onClick={() => alert('Voce clicou no botão Exportar dados!')}
-                  className="cursor-pointer"
-                >
-                  Exportar dados
-                </Button>
-
-                <Button
-                  variant="purple"
-                  disabled
-                  onClick={() => alert('Não deveria executar')}
-                  className="cursor-not-allowed"
-                >
-                  Botão Desabilitado
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-success rounded-full"></div>
-                  <span className="text-footnote font-sf-pro text-label-primary">
-                    Online
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-error rounded-full"></div>
-                  <span className="text-footnote font-sf-pro text-label-primary">
-                    Erro
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-bah-blue rounded-full"></div>
-                  <span className="text-footnote font-sf-pro text-label-primary">
-                    BAH
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="text-center pt-4 border-t border-stroke-primary">
-            <p className="text-footnote font-sf-pro text-label-tertiary">
-              Design System BAH © 2025
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Header variant="secondary" />
-        <div className="text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-large-title font-kanit text-label-primary">
-              BAH
-            </h1>
-            <p className="text-body-regular font-sf-pro text-label-secondary max-w-md">
-              Bem-vindo ao sistema BAH.
-            </p>
+            </form>
           </div>
 
-          <Button
-            variant="primary"
-            onClick={() => navigate('/dashboard')}
-            className="px-8 py-3 cursor-pointer"
-          >
-            Acessar Sistema
-          </Button>
-        </div>
-      </div>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
+            {tags.map(tag => (
+              <button
+                key={tag.value}
+                className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200"
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
+        </section>
+      </main>
     </>
   )
 }

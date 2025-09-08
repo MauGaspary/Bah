@@ -175,7 +175,7 @@ function LoginAdminPage() {
         <div className="text-center">
           <div className="mb-6">
             <img
-              src="/src/assets/Bah Projeto Group 4.png"
+              src="/src/assets/logo.png"
               alt="BAH Logo"
               className="w-72 h-auto mx-auto"
             />
