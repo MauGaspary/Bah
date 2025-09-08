@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Text, TIMESTAMP
-from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+from sqlalchemy import Column, String, Text, DateTime
 import uuid
 from app.config.database import Base
 
@@ -7,9 +7,9 @@ from app.config.database import Base
 class Contato(Base):
     __tablename__ = "contatos"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     nome = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, nullable=False, index=True)
     assunto = Column(String, nullable=False)
     mensagem = Column(Text, nullable=False)
-    enviado_em = Column(TIMESTAMP)
+    enviado_em = Column(DateTime, default=datetime.utcnow)

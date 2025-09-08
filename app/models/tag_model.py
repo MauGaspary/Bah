@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Text
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from app.config.database import Base
 
@@ -7,6 +6,6 @@ from app.config.database import Base
 class Tag(Base):
     __tablename__ = "tags"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    nome = Column(String, nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    nome = Column(String, nullable=False, unique=True, index=True)
     descricao = Column(Text)

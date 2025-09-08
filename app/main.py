@@ -10,7 +10,7 @@ app = FastAPI(
 )
 
 app.include_router(admin_router_example, prefix="/admin", tags=["admin"])
-app.include_router(admin_iniciativa_router)
+app.include_router(admin_iniciativa_router, prefix="/admin", tags=["admin"])
 
 
 @app.get("/")

@@ -1,25 +1,46 @@
-from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
-from app.schemas.admin_iniciativa_schemas import IniciativaSchema
+from fastapi import HTTPException
+
+from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
 from app.services.admin_iniciativa_service import AdminIniciativaService
-from app.config.database import get_db
-
-router = APIRouter(prefix="/admin/iniciativas", tags=["Admin Iniciativas"])
 
 
-@router.get("", response_model=dict)
-def listar_iniciativas(
-    q: Optional[str] = Query(None),
-    created_from: Optional[datetime] = Query(None),
-    created_to: Optional[datetime] = Query(None),
-    order_by: str = Query("criado_em"),
-    order_dir: str = Query("desc", regex="^(asc|desc)$"),
-    page: int = Query(1, ge=1),
-    size: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-):
-    return AdminIniciativaService.listar_iniciativas(
-        db, q, created_from, created_to, order_by, order_dir, page, size
-    )
+class AdminIniciativaController:
+    def __init__(self, db: Session):
+        self.service = AdminIniciativaService(db)
+
+    def listar_iniciativas(
+        self,
+        q: Optional[str] = None,
+        created_from: Optional[datetime] = None,
+        created_to: Optional[datetime] = None,
+        order_by: str = "criado_em",
+        order_dir: str = "desc",
+        page: int = 1,
+        size: int = 10,
+    ) -> IniciativaListResponseSchema:
+        try:
+            if created_from and created_to and created_from > created_to:
+                raise HTTPException(
+                    status_code=422, 
+                    detail={"fieldErrors": {"created_from": "Data inicial deve ser menor que data final"}}
+                )
+            
+            return self.service.listar_iniciativas(
+                q, created_from, created_to, order_by, order_dir, page, size
+            )
+        except HTTPException:
+
+            raise
+        except ValueError as e:
+            raise HTTPException(
+                status_code=422,
+                detail={"fieldErrors": {"general": str(e)}}
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail={"message": "Internal server error"}
+            )
