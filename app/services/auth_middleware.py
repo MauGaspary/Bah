@@ -10,9 +10,14 @@ def jwt_required(func):
     async def wrapper(request: Request, *args, **kwargs):
         auth = request.headers.get("Authorization")
         if not auth or not auth.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing token")
+            raise HTTPException(status_code=401, detail="Invalid header")
         
-        token = auth.split(" ")[1]
+        try:
+            token = auth.split(" ")[1]
+            if not token:
+                raise HTTPException(status_code=401, detail="Missing token")
+        except IndexError:
+            raise HTTPException(status_code=401, detail="Missing token")
 
         try:
             claims = verify(token)

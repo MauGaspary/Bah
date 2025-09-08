@@ -14,11 +14,9 @@ class AuthController:
     def login(self, email: str, password: str):
         user = self.user_repo.get_by_email(email)
 
-        if not user:
+        if not user or not self.hasher.verify(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
-        if not self.hasher.verify(password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid credentials password")
         
         token = sign(sub=str(user.id), email=user.email)
 

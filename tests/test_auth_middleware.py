@@ -78,14 +78,14 @@ class TestAuthMiddleware:
         response = client_with_test_route.get("/temp-middleware-test")
         
         assert response.status_code == 401
-        assert response.json()["detail"] == "Missing token"
+        assert response.json()["detail"] == "Invalid header"
 
     def test_protected_endpoint_invalid_authorization_header(self, client_with_test_route):
         headers = {"Authorization": "apenas-token"}
         response = client_with_test_route.get("/temp-middleware-test", headers=headers)
         
         assert response.status_code == 401
-        assert response.json()["detail"] == "Missing token"
+        assert response.json()["detail"] == "Invalid header"
 
     def test_protected_endpoint_malformed_token(self, client_with_test_route):
         headers = {"Authorization": "Bearer token_errado"}
@@ -158,4 +158,4 @@ class TestAuthMiddleware:
         response = client_with_test_route.get("/temp-middleware-test", headers=headers)
         
         assert response.status_code == 401
-        assert response.json()["detail"] == "Missing token"
+        assert response.json()["detail"] == "Invalid header"
