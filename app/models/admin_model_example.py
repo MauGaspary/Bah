@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, String
 
-from app.config.database import Base
+from app.models.base import Base
 
 
 class Admin(Base):

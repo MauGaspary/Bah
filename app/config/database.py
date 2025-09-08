@@ -1,12 +1,7 @@
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
-
-class Base(DeclarativeBase):
-    pass
-
+from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://bah_user:bah_password@localhost:5432/bah_db"

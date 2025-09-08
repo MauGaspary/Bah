@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Index, String
 
-from app.config.database import Base
+from app.models.base import Base
 
 
 class IniciativaTag(Base):

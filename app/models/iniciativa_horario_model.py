@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Index, String, Time
 from sqlalchemy.orm import relationship
 
-from app.config.database import Base
+from app.models.base import Base
 
 
 class HorarioTipo(enum.Enum):

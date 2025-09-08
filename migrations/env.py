@@ -18,11 +18,19 @@ if database_url:
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+
+from app.models.admin_model_example import Admin
+
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from app.config.database import Base
+from app.models.base import Base
+from app.models.contato_model import Contato
+from app.models.iniciativa_horario_model import IniciativaHorario
+from app.models.iniciativa_model import Iniciativa
+from app.models.iniciativa_tag_model import IniciativaTag
+from app.models.organizador_model import Organizador
+from app.models.tag_model import Tag
+from app.models.usuario_model import Usuario
 
 target_metadata = Base.metadata
 

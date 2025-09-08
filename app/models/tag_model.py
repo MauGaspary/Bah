@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy import Column, String, Text
 
-from app.config.database import Base
+from app.models.base import Base
 
 
 class Tag(Base):

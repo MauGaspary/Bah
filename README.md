@@ -26,6 +26,15 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
+**Nota para Windows**: Se encontrar erro relacionado ao `pypiwin32`, execute:
+
+```Shell
+pip install pypiwin32
+
+# Ou se for pywin32
+pip install pywin32
+```
+
 ### Instalar dependências do projeto
 
 ```Bash
@@ -117,7 +126,7 @@ alembic revision --autogenerate -m "create_indexes_for_performance"
 docker compose up --build
 ```
 
-### Serviços Individuais
+### Banco
 
 ```Bash
 # Apenas banco
