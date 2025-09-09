@@ -93,23 +93,92 @@ def app_with_lifespan(postgres_container):
     return app
 
 
-# Fixtures para testes de auth/login
 @pytest.fixture
-def test_user(db_session):
-    """Fixture que cria um usuário de teste no banco"""
+def usuario_fixture(db_session):
+    """Fixture que cria um usuário para usar em testes"""
     import uuid
 
-    from app.models.user_model import User
-    from app.utils.password_hasher import PasswordHasher
+    from app.models.usuario_model import Usuario
 
-    hasher = PasswordHasher()
-    user = User(
-        id=uuid.uuid4(),
-        email="teste@gmail.com",
-        password_hash=hasher.hash("senha123"),
-        name="Usuario Teste",
+    usuario = Usuario(
+        id=str(uuid.uuid4()),
+        nome="Usuário",
+        sobrenome="Teste",
+        email="usuario.teste@example.com",
+        senha_hash="hash_senha_teste",
     )
-
-    db_session.add(user)
+    db_session.add(usuario)
     db_session.flush()
-    return user
+
+    return {
+        "id": usuario.id,
+        "nome": usuario.nome,
+        "sobrenome": usuario.sobrenome,
+        "email": usuario.email,
+    }
+
+
+@pytest.fixture
+def organizador_fixture(db_session):
+    """Fixture que cria um organizador para usar em testes"""
+    import uuid
+
+    from app.models.organizador_model import Organizador
+
+    organizador = Organizador(id=str(uuid.uuid4()), nome="Organizador Teste")
+    db_session.add(organizador)
+    db_session.flush()
+
+    return {"id": organizador.id, "nome": organizador.nome}
+
+
+@pytest.fixture
+def tag_fixture(db_session):
+    """Fixture que cria uma tag para usar em testes"""
+    import uuid
+
+    from app.models.tag_model import Tag
+
+    tag = Tag(id=str(uuid.uuid4()), nome="Tecnologia", descricao="Tag de tecnologia")
+    db_session.add(tag)
+    db_session.flush()
+
+    return {"id": tag.id, "nome": tag.nome, "descricao": tag.descricao}
+
+
+@pytest.fixture
+def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
+    """Fixture que cria uma iniciativa para usar em testes"""
+    from datetime import date, time
+
+    from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
+    from app.models.iniciativa_model import Iniciativa
+
+    iniciativa = Iniciativa(
+        titulo="Iniciativa Teste Existente",
+        descricao="Descrição da iniciativa teste existente",
+        descricao_vetor="Descrição da iniciativa teste existente",
+        organizador_id=organizador_fixture["id"],
+        link="https://example.com/existente",
+        imagem_url="https://example.com/image-existente.jpg",
+        destaque=False,
+        criado_por=usuario_fixture["id"],
+    )
+    db_session.add(iniciativa)
+    db_session.flush()
+
+    horario = IniciativaHorario(
+        iniciativa_id=iniciativa.id,
+        data_evento=date(2025, 12, 15),
+        hora_inicio=time(10, 0),
+        hora_fim=time(16, 0),
+        tipo=HorarioTipo.PRESENCIAL,
+    )
+    db_session.add(horario)
+    db_session.flush()
+
+    return {
+        "id": iniciativa.id,
+        "titulo": iniciativa.titulo,
+        "organizador_id": iniciativa.organizador_id,
+    }
