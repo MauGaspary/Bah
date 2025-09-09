@@ -1,8 +1,14 @@
-from sqlalchemy.orm import Session
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from sqlalchemy.orm import Session
+
 from app.repositories.admin_iniciativa_repository import AdminIniciativaRepository
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema, IniciativaFiltersSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaFiltersSchema,
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+)
 
 
 class AdminIniciativaService:
@@ -19,26 +25,26 @@ class AdminIniciativaService:
         page: int = 1,
         size: int = 10,
     ) -> IniciativaListResponseSchema:
- 
+
         valid_order_fields = ["criado_em", "titulo", "destaque", "editado_em"]
         if order_by not in valid_order_fields:
             order_by = "criado_em"
-        
+
         try:
-       
-            iniciativas = self.repository.list_iniciativas(
+
+            iniciativas_models = self.repository.list_iniciativas(
                 q, created_from, created_to, order_by, order_dir, page, size
             )
-            
-   
-            total = self.repository.count_iniciativas(
-                q, created_from, created_to
-            )
+            iniciativas = [
+                IniciativaSchema.model_validate(iniciativa)
+                for iniciativa in iniciativas_models
+            ]
+
+            total = self.repository.count_iniciativas(q, created_from, created_to)
         except Exception:
-  
+
             iniciativas = []
             total = 0
-
 
         filters = IniciativaFiltersSchema(
             q=q,
@@ -47,11 +53,9 @@ class AdminIniciativaService:
             order_by=order_by,
             order_dir=order_dir,
             page=page,
-            size=size
+            size=size,
         )
 
         return IniciativaListResponseSchema(
-            items=iniciativas,
-            total=total,
-            filters=filters
+            items=iniciativas, total=total, filters=filters
         )

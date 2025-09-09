@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from app.config.settings import Settings
-from app.routes.admin_route_example import router as admin_router_example
 from app.routes.admin_iniciativa_route import router as admin_iniciativa_router
+from app.routes.admin_route_example import router as admin_router_example
 
 
 @asynccontextmanager

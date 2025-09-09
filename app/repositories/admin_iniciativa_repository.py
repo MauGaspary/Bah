@@ -1,11 +1,13 @@
-from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import select, func, or_, and_
-from typing import List, Optional, Tuple
 from datetime import datetime
-from app.models.iniciativa_model import Iniciativa
-from app.models.tag_model import Tag
-from app.models.organizador_model import Organizador
+from typing import List, Optional, Tuple
+
+from sqlalchemy import and_, func, or_, select
+from sqlalchemy.orm import Session, selectinload
+
 from app.models.iniciativa_horario_model import IniciativaHorario
+from app.models.iniciativa_model import Iniciativa
+from app.models.organizador_model import Organizador
+from app.models.tag_model import Tag
 
 
 class AdminIniciativaRepository:
@@ -25,26 +27,27 @@ class AdminIniciativaRepository:
         query = select(Iniciativa).options(
             selectinload(Iniciativa.organizador),
             selectinload(Iniciativa.horarios),
-            selectinload(Iniciativa.tags)
+            selectinload(Iniciativa.tags),
         )
 
         filters = []
-        
 
         filters.append(Iniciativa.deletado_em.is_(None))
-        
+
         if q:
 
             tag_search = select(Tag.id).where(Tag.nome.ilike(f"%{q}%"))
-            iniciativa_with_tag = select(Iniciativa.id).join(
-                Iniciativa.tags
-            ).where(Tag.id.in_(tag_search))
-            
+            iniciativa_with_tag = (
+                select(Iniciativa.id)
+                .join(Iniciativa.tags)
+                .where(Tag.id.in_(tag_search))
+            )
+
             filters.append(
                 or_(
                     Iniciativa.titulo.ilike(f"%{q}%"),
                     Iniciativa.descricao.ilike(f"%{q}%"),
-                    Iniciativa.id.in_(iniciativa_with_tag)
+                    Iniciativa.id.in_(iniciativa_with_tag),
                 )
             )
 
@@ -57,7 +60,6 @@ class AdminIniciativaRepository:
         if filters:
             query = query.where(and_(*filters))
 
- 
         order_column = getattr(Iniciativa, order_by, Iniciativa.criado_em)
         if order_dir == "desc":
             query = query.order_by(order_column.desc())
@@ -77,22 +79,23 @@ class AdminIniciativaRepository:
         query = select(func.count(Iniciativa.id))
 
         filters = []
-        
 
         filters.append(Iniciativa.deletado_em.is_(None))
-        
+
         if q:
 
             tag_search = select(Tag.id).where(Tag.nome.ilike(f"%{q}%"))
-            iniciativa_with_tag = select(Iniciativa.id).join(
-                Iniciativa.tags
-            ).where(Tag.id.in_(tag_search))
-            
+            iniciativa_with_tag = (
+                select(Iniciativa.id)
+                .join(Iniciativa.tags)
+                .where(Tag.id.in_(tag_search))
+            )
+
             filters.append(
                 or_(
                     Iniciativa.titulo.ilike(f"%{q}%"),
                     Iniciativa.descricao.ilike(f"%{q}%"),
-                    Iniciativa.id.in_(iniciativa_with_tag)
+                    Iniciativa.id.in_(iniciativa_with_tag),
                 )
             )
 

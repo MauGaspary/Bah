@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+from datetime import date, datetime, time
 from typing import List, Optional
-from datetime import datetime, date, time
+
+from pydantic import BaseModel
+
 from app.models.iniciativa_horario_model import HorarioTipo
 
 
@@ -37,11 +39,11 @@ class IniciativaSchema(BaseModel):
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: str 
-    link: str  
+    descricao_vetor: str
+    link: str
     destaque: bool
     local: Optional[str]
-    imagem_url: str 
+    imagem_url: str
     organizador_id: str
     criado_por: str
     criado_em: datetime
