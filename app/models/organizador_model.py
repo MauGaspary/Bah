@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String
 import uuid
-from app.config.database import Base
+
+from sqlalchemy import Column, String
+
+from app.models.base import Base
 
 
 class Organizador(Base):

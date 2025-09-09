@@ -1,7 +1,13 @@
-def test_create_admin(client):
-    admin_data = {"username": "testuser", "email": "test@example.com"}
+from tests.helpers import request
 
-    response = client.post("/admin/", json=admin_data)
+
+def test_create_admin(client):
+    response = request(
+        client,
+        "POST",
+        "/admin/",
+        json={"username": "testuser", "email": "test@example.com"},
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -11,7 +17,7 @@ def test_create_admin(client):
 
 
 def test_get_admins(client):
-    response = client.get("/admin/")
+    response = request(client, "GET", "/admin/")
 
     assert response.status_code == 200
     data = response.json()
@@ -19,7 +25,7 @@ def test_get_admins(client):
 
 
 def test_get_admin_by_id(client, admin_global):
-    response = client.get(f"/admin/id/{admin_global['id']}")
+    response = request(client, "GET", f"/admin/id/{admin_global['id']}")
 
     assert response.status_code == 200
     data = response.json()
@@ -28,7 +34,7 @@ def test_get_admin_by_id(client, admin_global):
 
 def test_get_admin_by_id_not_found(client):
     """Busca de admin com ID que nao existe"""
-    response = client.get("/admin/id/9999")
+    response = request(client, "GET", "/admin/id/9999")
 
     assert response.status_code == 404
     data = response.json()
@@ -36,7 +42,7 @@ def test_get_admin_by_id_not_found(client):
 
 
 def test_get_admin_by_email(client, admin_global):
-    response = client.get(f"/admin/email/{admin_global['email']}")
+    response = request(client, "GET", f"/admin/email/{admin_global['email']}")
 
     assert response.status_code == 200
     data = response.json()
@@ -45,7 +51,7 @@ def test_get_admin_by_email(client, admin_global):
 
 def test_get_admin_by_email_not_found(client):
     """Busca de admin com email que nao existe"""
-    response = client.get("/admin/email/nonexistent@example.com")
+    response = request(client, "GET", "/admin/email/nonexistent@example.com")
 
     assert response.status_code == 404
     data = response.json()

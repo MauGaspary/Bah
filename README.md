@@ -26,6 +26,15 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
+**Nota para Windows**: Se encontrar erro relacionado ao `pypiwin32`, execute:
+
+```Shell
+pip install pypiwin32
+
+# Ou se for pywin32
+pip install pywin32
+```
+
 ### Instalar dependências do projeto
 
 ```Bash
@@ -51,6 +60,22 @@ pipenv run test
 pipenv run test:cov
 ```
 
+#### Helpers de Teste
+
+O projeto inclui helpers para padronizar requests nos testes:
+
+```python
+from tests.helpers import request, request_auth
+
+# Request básico
+response = request(client, "POST", "/admin/", json=data)
+
+# Request autenticado
+response = request_auth(client, "GET", "/admin/protected", token="jwt-token")
+```
+
+Veja [TESTING.md](TESTING.md) para documentação completa.
+
 ### Qualidade de código
 
 ```Bash
@@ -60,14 +85,14 @@ pipenv run precommit
 ### Setup do banco
 
 ```Bash
-pipenv run migrate (se necessário)
+pipenv run migrate
 pipenv run seed
 pipenv run app
 ```
 
 ### Banco Local
 
-- Usa SQLite (`bah.db`) no diretório raiz
+- Usa PostgreSQL
 
 ### Comandos Úteis
 
@@ -101,7 +126,7 @@ alembic revision --autogenerate -m "create_indexes_for_performance"
 docker compose up --build
 ```
 
-### Serviços Individuais
+### Banco
 
 ```Bash
 # Apenas banco
@@ -139,11 +164,11 @@ docker compose exec db psql -U bah_user -d bah_db
 # Listar todas as tabelas
 \dt
 
-# Ver dados da tabela admins
-SELECT * FROM admins;
+# Ver dados da tabela
+SELECT * FROM <nome_tabela>;
 
-# Ver estrutura da tabela admins
-\d admins
+# Ver estrutura da tabela
+\d <nome_tabela>
 
 # Ver informações do banco
 \l
@@ -155,7 +180,7 @@ SELECT * FROM admins;
 \q
 ```
 
-#### 4. Verificar se o container está rodando
+#### 3. Verificar se o container está rodando
 
 ```bash
 docker compose ps
@@ -178,7 +203,7 @@ docker compose up db -d
 
 O projeto inclui duas opções de UI para visualizar e gerenciar o banco:
 
-#### 1. Adminer (Simples e rápido)
+#### 1. Adminer
 
 ```bash
 # Iniciar com o banco
@@ -192,7 +217,7 @@ docker compose up db adminer -d
 - **Senha**: bah_password
 - **Base de dados**: bah_db
 
-#### 2. pgAdmin (Interface mais robusta)
+#### 2. pgAdmin
 
 ```bash
 # Iniciar com o banco
@@ -219,22 +244,6 @@ docker compose down
 ## API Endpoints
 
 A API FastAPI já vem configurada e pronta para uso. Com a aplicação rodando:
-
-```bash
-# Listar admins
-curl http://localhost:8000/admin/
-
-# Criar admin
-curl -X POST http://localhost:8000/admin/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "novo.admin", "email": "novo@bah.com.br"}'
-
-# Buscar por ID
-curl http://localhost:8000/admin/id/1
-
-# Buscar por email
-curl http://localhost:8000/admin/email/admin@bah.com.br
-```
 
 ### Documentação Geral
 
@@ -368,7 +377,7 @@ class AdminRepository:
 - **Alembic**: Migrations de banco de dados
 - **Pydantic**: Validação e serialização de dados
 - **PostgreSQL**: Banco de dados principal (produção)
-- **SQLite**: Banco de dados local (desenvolvimento)
+- **PostgreSQL**: Banco de dados local (desenvolvimento)
 - **Docker**: Containerização
 - **Pytest**: Framework de testes
 - **Black/isort**: Formatação de código
@@ -408,7 +417,6 @@ pipenv run migrate
 #### Estrutura de Arquivos
 
 ```python
-# exemplo_model.py
 from sqlalchemy import Column, Integer, String
 from app.models.base import Base
 
@@ -422,7 +430,6 @@ class Exemplo(Base):
 #### Testes
 
 ```python
-# test_exemplo.py
 def test_criar_exemplo(client):
     response = client.post("/exemplo/", json={"nome": "teste"})
     assert response.status_code == 201
@@ -443,13 +450,13 @@ def test_criar_exemplo(client):
 
 ### Desenvolvimento Local
 
-- SQLite como banco
+- PostgreSQL como banco
 - Servidor de desenvolvimento do uvicorn
 - Hot reload ativado
 
 ### Testes
 
-- Banco em memória (SQLite)
+- Banco em memória
 - Fixtures para dados de teste
 - Isolamento entre testes
 
