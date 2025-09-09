@@ -9,13 +9,13 @@ class TestAdminIntegration:
 
     def test_create_and_retrieve_admin_flow(self, client):
         """Testa o fluxo completo de criação e recuperação de admin"""
-        initial_response = request(client, "GET", "/admin/")
+        initial_response = request(client, "GET", "/demo/")
         assert initial_response.status_code == 200
         assert len(initial_response.json()) == 0
 
         admin_data = {"username": "admin_test", "email": "admin@test.com"}
 
-        create_response = request(client, "POST", "/admin/", json=admin_data)
+        create_response = request(client, "POST", "/demo/", json=admin_data)
         assert create_response.status_code == 200
 
         created_admin = create_response.json()
@@ -24,7 +24,7 @@ class TestAdminIntegration:
         assert "id" in created_admin
         assert "created_at" in created_admin
 
-        list_response = request(client, "GET", "/admin/")
+        list_response = request(client, "GET", "/demo/")
         assert list_response.status_code == 200
 
         admins_list = list_response.json()
@@ -34,7 +34,7 @@ class TestAdminIntegration:
 
     def test_multiple_admins_creation(self, client):
         """Testa criação de múltiplos admins"""
-        initial_response = request(client, "GET", "/admin/")
+        initial_response = request(client, "GET", "/demo/")
         assert initial_response.status_code == 200
         assert len(initial_response.json()) == 0
 
@@ -47,11 +47,11 @@ class TestAdminIntegration:
         created_ids = []
 
         for admin_data in admins_data:
-            response = request(client, "POST", "/admin/", json=admin_data)
+            response = request(client, "POST", "/demo/", json=admin_data)
             assert response.status_code == 200
             created_ids.append(response.json()["id"])
 
-        list_response = request(client, "GET", "/admin/")
+        list_response = request(client, "GET", "/demo/")
         assert list_response.status_code == 200
 
         admins_list = list_response.json()
@@ -62,7 +62,7 @@ class TestAdminIntegration:
 
     def test_empty_admin_list(self, client):
         """Testa listagem quando não há admins"""
-        response = request(client, "GET", "/admin/")
+        response = request(client, "GET", "/demo/")
         assert response.status_code == 200
         assert response.json() == []
 
@@ -73,7 +73,7 @@ class TestAdminIntegration:
             "email": "invalid-email",
         }
 
-        response = request(client, "POST", "/admin/", json=invalid_data)
+        response = request(client, "POST", "/demo/", json=invalid_data)
         assert response.status_code == 400
         assert "Formato de email inválido" in response.json()["detail"]
 
@@ -84,7 +84,7 @@ class TestAdminIntegration:
             "email": "admin+test@example.com",
         }
 
-        response = request(client, "POST", "/admin/", json=admin_data)
+        response = request(client, "POST", "/demo/", json=admin_data)
         assert response.status_code == 200
 
         created_admin = response.json()
@@ -95,11 +95,11 @@ class TestAdminIntegration:
         """Testa validação de email duplicado"""
         admin_data = {"username": "admin1", "email": "test@example.com"}
 
-        response1 = request(client, "POST", "/admin/", json=admin_data)
+        response1 = request(client, "POST", "/demo/", json=admin_data)
         assert response1.status_code == 200
 
         admin_data2 = {"username": "admin2", "email": "test@example.com"}
-        response2 = request(client, "POST", "/admin/", json=admin_data2)
+        response2 = request(client, "POST", "/demo/", json=admin_data2)
 
         assert response2.status_code == 400
         assert "Email já está em uso" in response2.json()["detail"]
@@ -109,10 +109,10 @@ class TestAdminIntegration:
         admin_data1 = {"username": "admin_comum", "email": "test1@example.com"}
         admin_data2 = {"username": "admin_comum", "email": "test2@example.com"}
 
-        response1 = request(client, "POST", "/admin/", json=admin_data1)
+        response1 = request(client, "POST", "/demo/", json=admin_data1)
         assert response1.status_code == 200
 
-        response2 = request(client, "POST", "/admin/", json=admin_data2)
+        response2 = request(client, "POST", "/demo/", json=admin_data2)
         assert response2.status_code == 200
 
         created_admin1 = response1.json()
@@ -134,7 +134,7 @@ class TestAdminIntegration:
 
         for invalid_email in invalid_emails:
             admin_data = {"username": "test", "email": invalid_email}
-            response = request(client, "POST", "/admin/", json=admin_data)
+            response = request(client, "POST", "/demo/", json=admin_data)
 
             assert response.status_code == 400
             assert "Formato de email inválido" in response.json()["detail"]

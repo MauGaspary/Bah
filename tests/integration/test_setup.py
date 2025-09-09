@@ -12,12 +12,12 @@ def test_database_connection(db_session):
 @pytest.mark.integration
 def test_transaction_isolation(db_session):
     """Testa se o isolamento de transações está funcionando"""
-    from app.models.admin_model_example import Admin
+    from app.models.demo_model import Demo
 
-    admin = Admin(username="test_isolation", email="test@isolation.com")
-    db_session.add(admin)
+    demo = Demo(username="test_isolation", email="test@isolation.com")
+    db_session.add(demo)
     db_session.flush()
 
-    found_admin = db_session.query(Admin).filter_by(email="test@isolation.com").first()
-    assert found_admin is not None
-    assert found_admin.username == "test_isolation"
+    found_demo = db_session.query(Demo).filter_by(email="test@isolation.com").first()
+    assert found_demo is not None
+    assert found_demo.username == "test_isolation"

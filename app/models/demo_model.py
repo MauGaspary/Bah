@@ -5,8 +5,8 @@ from sqlalchemy import Column, DateTime, Integer, String
 from app.models.base import Base
 
 
-class Admin(Base):
-    __tablename__ = "admins"
+class Demo(Base):
+    __tablename__ = "demos"
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, index=True)

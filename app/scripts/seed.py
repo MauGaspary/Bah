@@ -6,31 +6,31 @@ from sqlalchemy import text
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-import uuid
 
 from app.config.database import SessionLocal
-from app.models.admin_model_example import Admin
+from app.models.demo_model import Demo
 from app.models.usuario_model import Usuario
+from app.utils.password_hasher import PasswordHasher
 
 
-def seed_admins():
+def seed_demos():
     db = SessionLocal()
 
     try:
         result = db.execute(
             text(
-                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'admins')"
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'demos')"
             )
         )
         table_exists = result.scalar()
 
         if not table_exists:
-            print("Tabela 'admins' não existe. Execute as migrations primeiro.")
+            print("Tabela 'demos' não existe. Execute as migrations primeiro.")
             return
 
-        existing_count = db.query(Admin).count()
+        existing_count = db.query(Demo).count()
         if existing_count > 0:
-            print(f"Seed já executado. Encontrados {existing_count} admins.")
+            print(f"Seed já executado. Encontrados {existing_count} demos.")
             return
 
         admins_data = [
@@ -48,12 +48,12 @@ def seed_admins():
             },
         ]
 
-        for admin_data in admins_data:
-            admin = Admin(**admin_data)
-            db.add(admin)
+        for demo_data in admins_data:
+            demo = Demo(**demo_data)
+            db.add(demo)
 
         db.commit()
-        print(f"Seed executado com sucesso. Criados {len(admins_data)} admins.")
+        print(f"Seed executado com sucesso. Criados {len(admins_data)} demos.")
 
     except Exception as e:
         db.rollback()
@@ -63,8 +63,9 @@ def seed_admins():
         db.close()
 
 
-def seed_usuarios():
+def seed_users():
     db = SessionLocal()
+    hasher = PasswordHasher()
 
     try:
         existing_count = db.query(Usuario).count()
@@ -72,41 +73,44 @@ def seed_usuarios():
             print(f"Usuários já existem. Encontrados {existing_count} usuários.")
             return
 
-        usuario_sistema = Usuario(
-            id="sistema",
-            nome="Sistema",
-            sobrenome="Admin",
-            email="sistema@bah.com.br",
-            senha_hash="hash_sistema",
-        )
-
-        usuarios_data = [
+        users_data = [
             {
-                "id": str(uuid.uuid4()),
-                "nome": "João",
-                "sobrenome": "Silva",
-                "email": "joao.silva@example.com",
-                "senha_hash": "hash_joao",
+                "email": "admin@bah.com.br",
+                "password": "admin123",
+                "nome": "Administrador",
+                "sobrenome": "Sistema",
             },
             {
-                "id": str(uuid.uuid4()),
+                "email": "joao.silva@bah.com.br",
+                "password": "senha123",
+                "nome": "João",
+                "sobrenome": "Silva",
+            },
+            {
+                "email": "maria.santos@bah.com.br",
+                "password": "senha123",
                 "nome": "Maria",
                 "sobrenome": "Santos",
-                "email": "maria.santos@example.com",
-                "senha_hash": "hash_maria",
             },
         ]
 
-        db.add(usuario_sistema)
-
-        for usuario_data in usuarios_data:
-            usuario = Usuario(**usuario_data)
+        for user_data in users_data:
+            password_hash = hasher.hash(user_data["password"])
+            usuario = Usuario(
+                email=user_data["email"],
+                senha_hash=password_hash,
+                nome=user_data["nome"],
+                sobrenome=user_data["sobrenome"],
+            )
             db.add(usuario)
 
         db.commit()
         print(
-            f"Seed de usuários executado com sucesso. Criados {len(usuarios_data) + 1} usuários."
+            f"Seed de usuários executado com sucesso. Criados {len(users_data)} usuários."
         )
+        print("\nCredenciais de login:")
+        for user_data in users_data:
+            print(f"Email: {user_data['email']} | Senha: {user_data['password']}")
 
     except Exception as e:
         db.rollback()
@@ -118,6 +122,6 @@ def seed_usuarios():
 
 if __name__ == "__main__":
     print("Executando seed do banco de dados...")
-    seed_usuarios()
-    seed_admins()
+    seed_users()
+    seed_demos()
     print("Seed finalizado")

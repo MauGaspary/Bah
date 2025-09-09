@@ -75,13 +75,13 @@ def client(db_session, postgres_container):
 @pytest.fixture
 def admin_global(db_session):
     """Fixture que cria um admin para usar em testes"""
-    from app.models.admin_model_example import Admin
+    from app.models.demo_model import Demo
 
-    admin = Admin(username="test_admin", email="test_admin@example.com")
-    db_session.add(admin)
+    demo = Demo(username="test_admin", email="test_admin@example.com")
+    db_session.add(demo)
     db_session.flush()
 
-    return {"id": admin.id, "username": admin.username, "email": admin.email}
+    return {"id": demo.id, "username": demo.username, "email": demo.email}
 
 
 @pytest.fixture

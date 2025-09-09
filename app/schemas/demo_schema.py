@@ -3,12 +3,12 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class AdminCreate(BaseModel):
+class DemoCreate(BaseModel):
     username: str
     email: str
 
 
-class AdminResponse(BaseModel):
+class DemoResponse(BaseModel):
     id: int
     username: str
     email: str

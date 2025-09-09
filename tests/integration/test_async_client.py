@@ -18,7 +18,7 @@ async def test_async_client_with_lifespan(async_client):
     """Testa que AsyncClient funciona com lifespan"""
     async with async_client as client:
         response1 = await client.get("/")
-        response2 = await client.get("/admin/")
+        response2 = await client.get("/demo/")
 
         assert response1.status_code == 307
         assert response2.status_code == 200

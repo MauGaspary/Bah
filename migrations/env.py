@@ -19,12 +19,11 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-from app.models.admin_model_example import Admin
-
 # add your model's MetaData object here
 # for 'autogenerate' support
 from app.models.base import Base
 from app.models.contato_model import Contato
+from app.models.demo_model import Demo
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
