@@ -5,6 +5,7 @@ from fastapi.responses import RedirectResponse
 
 from app.config.settings import Settings
 from app.routes.admin_route_example import router as admin_router_example
+from app.routes.iniciativa_route import router as iniciativa_router
 
 
 @asynccontextmanager
@@ -49,6 +50,9 @@ def create_app(settings=None):
     app.state.settings = settings
 
     app.include_router(admin_router_example, prefix="/admin", tags=["admin"])
+    app.include_router(
+        iniciativa_router, prefix="/admin/iniciativas", tags=["admin", "iniciativas"]
+    )
 
     @app.get("/")
     def root():

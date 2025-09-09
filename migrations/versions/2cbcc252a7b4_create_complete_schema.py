@@ -80,7 +80,7 @@ def upgrade() -> None:
         sa.Column("titulo", sa.String(), nullable=False),
         sa.Column("descricao", sa.Text(), nullable=False),
         sa.Column("descricao_vetor", sa.Text(), nullable=False),
-        sa.Column("organizador_id", sa.String(), nullable=False),
+        sa.Column("organizador_id", sa.String(), nullable=True),
         sa.Column("link", sa.Text(), nullable=False),
         sa.Column("destaque", sa.Boolean(), nullable=False),
         sa.Column("local", sa.String(), nullable=True),

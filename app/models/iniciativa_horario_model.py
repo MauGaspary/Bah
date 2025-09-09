@@ -2,7 +2,17 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Index, String, Time
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    String,
+    Time,
+)
 from sqlalchemy.orm import relationship
 
 from app.models.base import Base
@@ -29,6 +39,9 @@ class IniciativaHorario(Base):
 
     __table_args__ = (
         Index("idx_iniciativa_data_evento", "iniciativa_id", "data_evento"),
+        CheckConstraint(
+            "hora_fim > hora_inicio", name="check_hora_fim_maior_que_hora_inicio"
+        ),
     )
 
     iniciativa = relationship("Iniciativa", back_populates="horarios")
