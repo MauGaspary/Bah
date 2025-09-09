@@ -182,3 +182,41 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
         "titulo": iniciativa.titulo,
         "organizador_id": iniciativa.organizador_id,
     }
+
+
+@pytest.fixture
+def auth_token(usuario_fixture):
+    """Fixture que gera um token JWT válido para testes"""
+    from app.services.jwt_service import sign
+
+    return sign(usuario_fixture["id"], usuario_fixture["email"])
+
+
+@pytest.fixture
+def test_user(db_session):
+    """Fixture que cria um usuário de teste para autenticação"""
+    import uuid
+
+    import bcrypt
+
+    from app.models.usuario_model import Usuario
+
+    password_hash = bcrypt.hashpw("senha123".encode("utf-8"), bcrypt.gensalt()).decode(
+        "utf-8"
+    )
+
+    usuario = Usuario(
+        id=str(uuid.uuid4()),
+        nome="Teste",
+        sobrenome="Usuario",
+        email="teste@gmail.com",
+        senha_hash=password_hash,
+    )
+    db_session.add(usuario)
+    db_session.flush()
+
+    return {
+        "id": usuario.id,
+        "nome": usuario.nome,
+        "email": usuario.email,
+    }

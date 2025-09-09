@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.config.database import SessionLocal
 from app.models.demo_model import Demo
+from app.models.organizador_model import Organizador
 from app.models.usuario_model import Usuario
 from app.utils.password_hasher import PasswordHasher
 
@@ -120,8 +121,45 @@ def seed_users():
         db.close()
 
 
+def seed_organizadores():
+    db = SessionLocal()
+
+    try:
+        existing_count = db.query(Organizador).count()
+        if existing_count > 0:
+            print(
+                f"Organizadores já existem. Encontrados {existing_count} organizadores."
+            )
+            return
+
+        organizadores_data = [
+            {"nome": "Prefeitura de Caxias do Sul"},
+            {"nome": "SENAC"},
+            {"nome": "UCS - Universidade de Caxias do Sul"},
+            {"nome": "SEBRAE"},
+            {"nome": "Associação Comercial"},
+        ]
+
+        for org_data in organizadores_data:
+            organizador = Organizador(**org_data)
+            db.add(organizador)
+
+        db.commit()
+        print(
+            f"Seed de organizadores executado com sucesso. Criados {len(organizadores_data)} organizadores."
+        )
+
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao executar seed de organizadores: {e}")
+        sys.exit(1)
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     print("Executando seed do banco de dados...")
     seed_users()
+    seed_organizadores()
     seed_demos()
     print("Seed finalizado")

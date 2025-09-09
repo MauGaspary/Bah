@@ -26,10 +26,14 @@ class IniciativaService:
                     status_code=422, detail="Usuário criador não encontrado"
                 )
 
-        if iniciativa_data.organizador_id and not self.repository.organizador_exists(
-            iniciativa_data.organizador_id
-        ):
-            raise HTTPException(status_code=422, detail="Organizador não encontrado")
+        if iniciativa_data.organizador_id:
+            if not self.repository.organizador_exists(iniciativa_data.organizador_id):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Organizador não encontrado com ID: {iniciativa_data.organizador_id}",
+                )
+        else:
+            raise HTTPException(status_code=422, detail="organizador_id é obrigatório")
 
         if iniciativa_data.tag_ids:
             existing_tags = self.repository.tags_exist(iniciativa_data.tag_ids)

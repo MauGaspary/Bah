@@ -41,7 +41,6 @@ class AdminIniciativaService:
 
             total = self.repository.count_iniciativas(q, created_from, created_to)
         except Exception:
-            # Em caso de erro, retorna lista vazia
             iniciativas = []
             total = 0
 

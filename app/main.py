@@ -6,9 +6,10 @@ from fastapi.responses import RedirectResponse
 
 from app.config.settings import Settings
 from app.middleware.auth_middleware import JWTMiddleware
+from app.routes.admin_iniciativa_route import router as admin_iniciativa_router
 from app.routes.auth_routes import router as auth_router
 from app.routes.demo_route import router as demo_router
-from app.routes.iniciativa_route import router as iniciativa_router
+from app.routes.organizador_route import router as organizador_router
 
 
 @asynccontextmanager
@@ -48,13 +49,17 @@ def create_app(settings=None):
         title="Bah – Plataforma de Inovação de Caxias do Sul API",
         version="1.0.0",
         docs_url="/docs",
+        swagger_ui_parameters={
+            "persistAuthorization": True,
+        },
     )
 
     app.state.settings = settings
 
     app.include_router(demo_router, prefix="/demo", tags=["demo"])
+    app.include_router(admin_iniciativa_router, prefix="/admin", tags=["admin"])
     app.include_router(
-        iniciativa_router, prefix="/admin/iniciativas", tags=["admin", "iniciativas"]
+        organizador_router, prefix="/organizadores", tags=["organizadores"]
     )
     app.include_router(auth_router)
 

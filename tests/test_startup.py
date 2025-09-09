@@ -5,12 +5,12 @@ from fastapi.testclient import TestClient
 
 from app.config.settings import Settings
 from app.main import create_app
-from tests.helpers import request
+from tests.helpers import request, request_auth
 
 
-def test_startup_executes_with_lifespan(client):
+def test_startup_executes_with_lifespan(client, auth_token):
     """Teste do startup do lifespan"""
-    response = request(client, "GET", "/admin/")
+    response = request_auth(client, "GET", "/admin/iniciativas", token=auth_token)
     assert response.status_code == 200
 
 

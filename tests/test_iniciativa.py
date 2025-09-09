@@ -2,11 +2,11 @@ from datetime import date, time
 
 import pytest
 
-from tests.helpers import request
+from tests.helpers import request, request_auth
 
 
 def test_create_iniciativa_success(
-    client, organizador_fixture, tag_fixture, usuario_fixture
+    client, organizador_fixture, tag_fixture, usuario_fixture, auth_token
 ):
     """Teste de criação feliz: criação com payload mínimo válido → 201"""
     payload = {
@@ -25,10 +25,11 @@ def test_create_iniciativa_success(
         ],
     }
 
-    response = request(
+    response = request_auth(
         client,
         "POST",
         f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
+        token=auth_token,
         json=payload,
     )
 
@@ -49,7 +50,7 @@ def test_create_iniciativa_success(
 
 
 def test_create_iniciativa_with_tags(
-    client, organizador_fixture, tag_fixture, usuario_fixture
+    client, organizador_fixture, tag_fixture, usuario_fixture, auth_token
 ):
     """Teste de criação com tags"""
     payload = {
@@ -71,10 +72,11 @@ def test_create_iniciativa_with_tags(
         ],
     }
 
-    response = request(
+    response = request_auth(
         client,
         "POST",
         f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
+        token=auth_token,
         json=payload,
     )
 
@@ -86,7 +88,7 @@ def test_create_iniciativa_with_tags(
 
 
 def test_create_iniciativa_multiple_horarios(
-    client, organizador_fixture, usuario_fixture
+    client, organizador_fixture, usuario_fixture, auth_token
 ):
     """Teste de criação com múltiplos horários"""
     payload = {
@@ -111,10 +113,11 @@ def test_create_iniciativa_multiple_horarios(
         ],
     }
 
-    response = request(
+    response = request_auth(
         client,
         "POST",
         f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
+        token=auth_token,
         json=payload,
     )
 
@@ -123,16 +126,18 @@ def test_create_iniciativa_multiple_horarios(
     assert len(data["horarios"]) == 2
 
 
-def test_create_iniciativa_missing_required_fields(client):
+def test_create_iniciativa_missing_required_fields(client, auth_token):
     """Teste de falha: campos obrigatórios ausentes → 422"""
     payload = {"titulo": "Iniciativa Incompleta"}
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
 
 
-def test_create_iniciativa_empty_title(client, organizador_fixture):
+def test_create_iniciativa_empty_title(client, organizador_fixture, auth_token):
     """Teste de falha: título vazio → 422"""
     payload = {
         "titulo": "",
@@ -150,12 +155,14 @@ def test_create_iniciativa_empty_title(client, organizador_fixture):
         ],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
 
 
-def test_create_iniciativa_empty_horarios(client, organizador_fixture):
+def test_create_iniciativa_empty_horarios(client, organizador_fixture, auth_token):
     """Teste de falha: lista de horários vazia → 422"""
     payload = {
         "titulo": "Iniciativa Sem Horários",
@@ -166,12 +173,16 @@ def test_create_iniciativa_empty_horarios(client, organizador_fixture):
         "horarios": [],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
 
 
-def test_create_iniciativa_hora_fim_menor_que_inicio(client, organizador_fixture):
+def test_create_iniciativa_hora_fim_menor_que_inicio(
+    client, organizador_fixture, auth_token
+):
     """Teste de falha: hora_fim < hora_inicio → 422"""
     payload = {
         "titulo": "Iniciativa Horário Inválido",
@@ -189,7 +200,9 @@ def test_create_iniciativa_hora_fim_menor_que_inicio(client, organizador_fixture
         ],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
     data = response.json()
@@ -204,7 +217,7 @@ def test_create_iniciativa_hora_fim_menor_que_inicio(client, organizador_fixture
         assert "Hora de fim deve ser maior que hora de início" in data["detail"]
 
 
-def test_create_iniciativa_organizador_inexistente(client):
+def test_create_iniciativa_organizador_inexistente(client, auth_token):
     """Teste de falha: organizador inexistente → 422"""
     payload = {
         "titulo": "Iniciativa Organizador Inválido",
@@ -222,14 +235,16 @@ def test_create_iniciativa_organizador_inexistente(client):
         ],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
     data = response.json()
     assert "Organizador não encontrado" in data["detail"]
 
 
-def test_create_iniciativa_tag_inexistente(client, organizador_fixture):
+def test_create_iniciativa_tag_inexistente(client, organizador_fixture, auth_token):
     """Teste de falha: tag inexistente → 422"""
     payload = {
         "titulo": "Iniciativa Tag Inválida",
@@ -248,14 +263,18 @@ def test_create_iniciativa_tag_inexistente(client, organizador_fixture):
         ],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
     data = response.json()
     assert "Tags não encontradas" in data["detail"]
 
 
-def test_create_iniciativa_duplicada(client, organizador_fixture, iniciativa_fixture):
+def test_create_iniciativa_duplicada(
+    client, organizador_fixture, iniciativa_fixture, auth_token
+):
     """Teste de alerta: possível duplicado (mesmo título e organizador)"""
     payload = {
         "titulo": iniciativa_fixture["titulo"],
@@ -273,7 +292,9 @@ def test_create_iniciativa_duplicada(client, organizador_fixture, iniciativa_fix
         ],
     }
 
-    response = request(client, "POST", "/admin/iniciativas/", json=payload)
+    response = request_auth(
+        client, "POST", "/admin/iniciativas/", token=auth_token, json=payload
+    )
 
     assert response.status_code == 422
     data = response.json()
@@ -283,9 +304,14 @@ def test_create_iniciativa_duplicada(client, organizador_fixture, iniciativa_fix
     )
 
 
-def test_get_iniciativa_by_id_success(client, iniciativa_fixture):
+def test_get_iniciativa_by_id_success(client, iniciativa_fixture, auth_token):
     """Teste de busca por ID com sucesso"""
-    response = request(client, "GET", f"/admin/iniciativas/{iniciativa_fixture['id']}")
+    response = request_auth(
+        client,
+        "GET",
+        f"/admin/iniciativas/{iniciativa_fixture['id']}",
+        token=auth_token,
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -293,9 +319,11 @@ def test_get_iniciativa_by_id_success(client, iniciativa_fixture):
     assert data["titulo"] == iniciativa_fixture["titulo"]
 
 
-def test_get_iniciativa_by_id_not_found(client):
+def test_get_iniciativa_by_id_not_found(client, auth_token):
     """Teste de busca por ID inexistente"""
-    response = request(client, "GET", "/admin/iniciativas/id-inexistente")
+    response = request_auth(
+        client, "GET", "/admin/iniciativas/id-inexistente", token=auth_token
+    )
 
     assert response.status_code == 404
     data = response.json()

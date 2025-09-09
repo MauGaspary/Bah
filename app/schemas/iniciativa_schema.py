@@ -24,7 +24,7 @@ class IniciativaCreate(BaseModel):
         min_length=1, max_length=255, description="Título da iniciativa"
     )
     descricao: str = Field(min_length=1, description="Descrição da iniciativa")
-    organizador_id: Optional[str] = Field(None, description="ID do organizador")
+    organizador_id: str = Field(description="ID do organizador")
     link: str = Field(description="Link da iniciativa")
     local: Optional[str] = Field(
         None, max_length=255, description="Local da iniciativa"

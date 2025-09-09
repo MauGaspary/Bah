@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
 
-from tests.helpers import request
+from tests.helpers import request, request_auth
 
 
-def test_lifespan_startup_executes(client):
+def test_lifespan_startup_executes(client, auth_token):
     """
     Teste que verifica se o lifespan startup/shutdown executa corretamente.
 
@@ -13,7 +13,7 @@ def test_lifespan_startup_executes(client):
     - Settings são aplicadas na aplicação
     - Shutdown executa automaticamente
     """
-    response = request(client, "GET", "/admin/")
+    response = request_auth(client, "GET", "/admin/iniciativas", token=auth_token)
 
     assert response.status_code == 200
 

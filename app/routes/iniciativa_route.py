@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
 from app.controllers.iniciativa_controller import IniciativaController
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
+
+security = HTTPBearer()
 
 router = APIRouter()
 
@@ -15,6 +18,7 @@ def create_iniciativa(
     iniciativa: IniciativaCreate,
     criado_por: str = "sistema",  # TODO: Obter do token de autenticação
     db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
     """
     Cria uma nova iniciativa.
@@ -33,7 +37,11 @@ def create_iniciativa(
 
 
 @router.get("/{iniciativa_id}", response_model=IniciativaResponse)
-def get_iniciativa_by_id(iniciativa_id: str, db: Session = Depends(get_db)):
+def get_iniciativa_by_id(
+    iniciativa_id: str,
+    db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """Busca uma iniciativa pelo ID."""
     controller = IniciativaController(db)
     return controller.get_iniciativa_by_id(iniciativa_id)

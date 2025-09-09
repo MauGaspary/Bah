@@ -52,7 +52,6 @@ class IniciativaRepository:
         self.db.commit()
         self.db.refresh(db_iniciativa)
 
-        # Garantir que a iniciativa criada seja retornada (nunca será None aqui)
         iniciativa = self.get_by_id(db_iniciativa.id)
         if iniciativa is None:
             raise ValueError("Erro ao recuperar iniciativa criada")
