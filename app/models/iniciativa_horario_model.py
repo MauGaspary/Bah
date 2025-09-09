@@ -39,7 +39,9 @@ class IniciativaHorario(Base):
 
     __table_args__ = (
         Index("idx_iniciativa_data_evento", "iniciativa_id", "data_evento"),
-        CheckConstraint("hora_fim >= hora_inicio", name="chk_horario_valido"),
+        CheckConstraint(
+            "hora_fim > hora_inicio", name="check_hora_fim_maior_que_hora_inicio"
+        ),
     )
 
     iniciativa = relationship("Iniciativa", back_populates="horarios")

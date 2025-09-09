@@ -15,7 +15,7 @@ class Iniciativa(Base):
     descricao = Column(Text, nullable=False)
     descricao_vetor = Column(Text, nullable=False)
     organizador_id = Column(
-        String, ForeignKey("organizadores.id"), nullable=False, index=True
+        String, ForeignKey("organizadores.id"), nullable=True, index=True
     )
     link = Column(Text, nullable=False)
     destaque = Column(Boolean, nullable=False, default=False, index=True)

@@ -23,10 +23,10 @@ def listar_iniciativas(
     order_by: str = Query(
         "criado_em",
         description="Campo para ordenacao",
-        regex="^(criado_em|titulo|destaque|editado_em)$",
+        pattern="^(criado_em|titulo|destaque|editado_em)$",
     ),
     order_dir: str = Query(
-        "desc", description="Direcao da ordenacao", regex="^(asc|desc)$"
+        "desc", description="Direcao da ordenacao", pattern="^(asc|desc)$"
     ),
     page: int = Query(1, ge=1, description="Numero da pagina"),
     size: int = Query(10, ge=1, le=100, description="Itens por pagina"),

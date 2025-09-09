@@ -31,7 +31,6 @@ class AdminIniciativaService:
             order_by = "criado_em"
 
         try:
-
             iniciativas_models = self.repository.list_iniciativas(
                 q, created_from, created_to, order_by, order_dir, page, size
             )
@@ -42,7 +41,7 @@ class AdminIniciativaService:
 
             total = self.repository.count_iniciativas(q, created_from, created_to)
         except Exception:
-
+            # Em caso de erro, retorna lista vazia
             iniciativas = []
             total = 0
 

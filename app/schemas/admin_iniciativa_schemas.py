@@ -44,7 +44,7 @@ class IniciativaSchema(BaseModel):
     destaque: bool
     local: Optional[str]
     imagem_url: str
-    organizador_id: str
+    organizador_id: Optional[str]
     criado_por: str
     criado_em: datetime
     editado_em: Optional[datetime] = None
@@ -52,7 +52,7 @@ class IniciativaSchema(BaseModel):
     deletado_em: Optional[datetime] = None
     deletado_por: Optional[str] = None
 
-    organizador: OrganizadorSchema
+    organizador: Optional[OrganizadorSchema]
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
 
