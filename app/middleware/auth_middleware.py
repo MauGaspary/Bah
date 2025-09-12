@@ -14,7 +14,9 @@ from app.services.jwt_service import verify
 class JWTMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Protege apenas rotas que começam com /admin/ (exceto /demo/)
-        if request.url.path.startswith("/admin/") and not request.url.path.startswith("/demo/"):
+        if request.url.path.startswith("/admin/") and not request.url.path.startswith(
+            "/demo/"
+        ):
             auth = request.headers.get("Authorization")
 
             if not auth or not auth.startswith("Bearer "):
