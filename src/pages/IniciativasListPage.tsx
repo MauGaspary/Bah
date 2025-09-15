@@ -1,4 +1,8 @@
+
+
+
 import IniciativasSearchbar from '@/components/ui/IniciativasSearchbar'
+
 
 function IniciativasListPage() {
   return ( 
@@ -15,8 +19,12 @@ function IniciativasListPage() {
             <div className="py-6 pr-6">
                 <IniciativasSearchbar />
             </div>
+
+            
         </div>
     </div>
+
+    
   )
 }
 

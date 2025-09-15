@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import LoginAdminPage from './pages/LoginAdminPage'
 import IniciativasListPage from './pages/IniciativasListPage'
 
+
 function App() {
   return (
     <AuthProvider>
@@ -16,6 +17,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<LoginAdminPage />} />
           <Route path="/iniciativas" element={<IniciativasListPage />} />
+
         </Routes>
       </Router>
     </AuthProvider>
