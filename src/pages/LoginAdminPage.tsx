@@ -42,7 +42,7 @@ function LoginAdminPage() {
 
     try {
       await login(values.email, values.password)
-      navigate('/admin/dashboard')
+      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {
