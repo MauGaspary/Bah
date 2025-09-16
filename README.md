@@ -8,22 +8,16 @@
 pip install pipenv
 ```
 
+### Instalar dependências do projeto
+
+```Bash
+pipenv install --dev
+```
+
 ### Ativar virtual environment
 
 ```Bash
-python -m venv .venv
-```
-
-#### Mac e Linux
-
-```Bash
-source .venv/bin/activate
-```
-
-#### Windows
-
-```Shell
-.venv\Scripts\activate
+pipenv shell
 ```
 
 **Nota para Windows**: Se encontrar erro relacionado ao `pypiwin32`, execute:
@@ -33,12 +27,6 @@ pip install pypiwin32
 
 # Ou se for pywin32
 pip install pywin32
-```
-
-### Instalar dependências do projeto
-
-```Bash
-pipenv install --dev
 ```
 
 ### Configurar pre-commit hooks
@@ -53,28 +41,12 @@ pipenv run pre-commit install
 pipenv run app
 ```
 
-### Testes
+### Comandos de Testes
 
 ```Bash
-pipenv run test
-pipenv run test:cov
+pipenv run test     # Sem cobertura
+pipenv run test:cov # Com cobertura
 ```
-
-#### Helpers de Teste
-
-O projeto inclui helpers para padronizar requests nos testes:
-
-```python
-from tests.helpers import request, request_auth
-
-# Request básico
-response = request(client, "POST", "/admin/", json=data)
-
-# Request autenticado
-response = request_auth(client, "GET", "/admin/protected", token="jwt-token")
-```
-
-Veja [TESTING.md](TESTING.md) para documentação completa.
 
 ### Qualidade de código
 
@@ -85,9 +57,9 @@ pipenv run precommit
 ### Setup do banco
 
 ```Bash
-pipenv run migrate
-pipenv run seed
-pipenv run app
+pipenv run migrate  # Aplicar migrations (alembic upgrade head)
+pipenv run seed     # Popular dados iniciais
+pipenv run app      # Rodar aplicação
 ```
 
 ### Banco Local
@@ -105,9 +77,6 @@ alembic history                                             # Ver histórico de 
 alembic revision -m "nome_da_migration"                     # Criar migration manual
 alembic downgrade -1                                        # Reverter para migration anterior
 alembic downgrade <revision_id>                             # Reverter para migration específica
-
-# Seed
-pipenv run seed             # Popular dados iniciais
 ```
 
 **Exemplos de nomes de migration:**
@@ -120,10 +89,12 @@ alembic revision --autogenerate -m "create_indexes_for_performance"
 
 ## Desenvolvimento com Docker
 
-### Rodar App
+### Rodar Docker do Projeto
 
 ```Bash
 docker compose up --build
+
+docker compose down # Parar containers
 ```
 
 ### Banco
@@ -155,7 +126,7 @@ docker compose run --rm quality
 #### 1. Conectar ao container do banco
 
 ```bash
-docker compose exec db psql -U bah_user -d bah_db
+docker compose exec db psql -U admin -d bah_db # Necessário ter o container do banco rodando
 ```
 
 #### 2. Comandos dentro do PostgreSQL
@@ -186,76 +157,28 @@ SELECT * FROM <nome_tabela>;
 docker compose ps
 ```
 
-Se o container não estiver rodando, inicie com:
-
-```bash
-docker compose up db -d
-```
-
-### Configuração do Banco (Docker)
-
-- **Host**: localhost:5432
-- **Database**: bah_db
-- **User**: bah_user
-- **Password**: bah_password
-
 ### Interface Web para Banco de Dados
 
-O projeto inclui duas opções de UI para visualizar e gerenciar o banco:
+#### Adminer
 
-#### 1. Adminer
-
-```bash
-# Iniciar com o banco
-docker compose up db adminer -d
-```
+Para acessar o Adminer é preciso estar com o Docker rodando
 
 - **URL**: http://localhost:8080
 - **Sistema**: PostgreSQL
 - **Servidor**: db
-- **Usuário**: bah_user
-- **Senha**: bah_password
+- **Usuário**: admin
+- **Senha**: admin
 - **Base de dados**: bah_db
-
-#### 2. pgAdmin
-
-```bash
-# Iniciar com o banco
-docker compose up db pgadmin -d
-```
-
-- **URL**: http://localhost:8081
-- **Email**: admin@bah.com.br
-- **Senha**: admin123
-
-Depois adicione o servidor PostgreSQL:
-- **Host**: db
-- **Port**: 5432
-- **Database**: bah_db
-- **Username**: bah_user
-- **Password**: bah_password
-
-## Parar Docker
-
-```Bash
-docker compose down
-```
 
 ## API Endpoints
 
-A API FastAPI já vem configurada e pronta para uso. Com a aplicação rodando:
+A API FastAPI já vem configurada com Swagger e pronta para uso
 
 ### Documentação Geral
 
 Com a aplicação rodando, acesse:
 - **Swagger UI**: http://localhost:8000/
 - **ReDoc**: http://localhost:8000/redoc
-
-### Dados de Seed
-
-- admin@bah.com.br
-- joao.silva@bah.com.br
-- maria.santos@bah.com.br
 
 ## 🏗️ Arquitetura do Projeto
 
@@ -340,36 +263,6 @@ O projeto segue uma arquitetura em camadas inspirada na Clean Architecture:
 6. Database → Repository → Service → Controller → Route → Cliente
 ```
 
-### Exemplo Prático: Criar Admin
-
-```python
-# 1. Route recebe a requisição
-@router.post("/", response_model=AdminResponse)
-def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
-    controller = AdminController(db)
-    return controller.create_admin(admin)
-
-# 2. Controller orquestra
-class AdminController:
-    def create_admin(self, admin_data: AdminCreate) -> AdminResponse:
-        return self.service.create_admin(admin_data)
-
-# 3. Service aplica regras de negócio
-class AdminService:
-    def create_admin(self, admin_data: AdminCreate):
-        if not validate_email(admin_data.email):
-            raise HTTPException(status_code=400, detail="Email inválido")
-        return self.repository.create(admin_data)
-
-# 4. Repository acessa o banco
-class AdminRepository:
-    def create(self, admin_data: AdminCreate):
-        db_admin = Admin(username=admin_data.username, email=admin_data.email)
-        self.db.add(db_admin)
-        self.db.commit()
-        return db_admin
-```
-
 ## 🔧 Tecnologias Utilizadas
 
 - **FastAPI**: Framework web moderno e rápido
@@ -395,17 +288,7 @@ class AdminRepository:
 6. **Route** - Expor endpoints
 7. **Tests** - Criar testes unitários e integração
 
-### Migration (se necessário)
-
-```bash
-# Criar migration
-alembic revision --autogenerate -m "descrição_da_mudança"
-
-# Aplicar migration
-pipenv run migrate
-```
-
-### 3. Padrões de Código
+### Padrões de Código
 
 #### Nomenclatura
 
@@ -413,28 +296,6 @@ pipenv run migrate
 - **Classes**: `PascalCase`
 - **Funções/Variáveis**: `snake_case`
 - **Constantes**: `UPPER_CASE`
-
-#### Estrutura de Arquivos
-
-```python
-from sqlalchemy import Column, Integer, String
-from app.models.base import Base
-
-class Exemplo(Base):
-    __tablename__ = "exemplos"
-
-    id = Column(Integer, primary_key=True)
-    nome = Column(String, nullable=False)
-```
-
-#### Testes
-
-```python
-def test_criar_exemplo(client):
-    response = client.post("/exemplo/", json={"nome": "teste"})
-    assert response.status_code == 201
-    assert response.json()["nome"] == "teste"
-```
 
 ### 4. Checklist de Contribuição
 

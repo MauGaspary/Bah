@@ -3,14 +3,14 @@ services:
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: bah_db
-      POSTGRES_USER: bah_user
-      POSTGRES_PASSWORD: bah_password
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bah_user -d bah_db"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d bah_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,7 +18,7 @@ services:
   migrate:
     build: .
     environment:
-      DATABASE_URL: postgresql://bah_user:bah_password@db:5432/bah_db
+      DATABASE_URL: postgresql://admin:admin@db:5432/bah_db
     volumes:
       - .:/app
     command: alembic upgrade head
@@ -29,7 +29,7 @@ services:
   seed:
     build: .
     environment:
-      DATABASE_URL: postgresql://bah_user:bah_password@db:5432/bah_db
+      DATABASE_URL: postgresql://admin:admin@db:5432/bah_db
     volumes:
       - .:/app
     command: python -m app.scripts.seed
@@ -42,7 +42,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://bah_user:bah_password@db:5432/bah_db
+      DATABASE_URL: postgresql://admin:admin@db:5432/bah_db
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -78,7 +78,7 @@ services:
   stack:
     build: .
     environment:
-      DATABASE_URL: postgresql://bah_user:bah_password@db:5432/bah_db
+      DATABASE_URL: postgresql://admin:admin@db:5432/bah_db
     volumes:
       - .:/app
     command: sh -c "echo 'App iniciada' && tail -f /dev/null"
@@ -90,17 +90,6 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@bah.com.br
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    ports:
-      - "8081:80"
     depends_on:
       db:
         condition: service_healthy

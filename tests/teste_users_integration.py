@@ -4,9 +4,7 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql://bah_user:bah_password@db:5432/bah_db"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://admin:admin@db:5432/bah_db")
 
 
 @pytest.fixture()
