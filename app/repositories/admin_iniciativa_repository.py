@@ -69,6 +69,24 @@ class AdminIniciativaRepository:
         query = query.offset((page - 1) * size).limit(size)
 
         return self.db.execute(query).scalars().all()
+    
+
+    def get_by_id(self, iniciativa_id: str, allow_deleted: bool = False) -> Optional[Iniciativa]:
+        query = self.db.query(Iniciativa)
+        if not allow_deleted:
+            query = query.filter(Iniciativa.deletado_em.is_(None))
+        return query.filter(Iniciativa.id == iniciativa_id).first()
+    
+    def soft_delete(self, iniciativa_id: str, deletado_por: str = None) -> Optional[Iniciativa]:
+        iniciativa = self.get_by_id(iniciativa_id, allow_deleted=True)
+        if iniciativa:
+            if iniciativa.deletado_em is None:  # Só atualiza se não estiver deletado
+                iniciativa.deletado_em = func.now()
+                iniciativa.deletado_por = deletado_por
+                self.db.commit()
+                self.db.refresh(iniciativa)
+            return iniciativa
+        return None
 
     def count_iniciativas(
         self,
