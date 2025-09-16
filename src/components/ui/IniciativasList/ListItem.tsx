@@ -18,18 +18,20 @@ function ListItem({title, description, imageUrl}: ListItemProps) {
                 <img src={imageUrl} alt={title} className="w-12 h-12 rounded-full object-cover"/>
             </div>
 
-            <div className="flex flex-col ">
-                <h1 className="text-title3-semibold font-mulish  ">{title}</h1>
-                <p className="text-body-regular font-mulish text-label-secondary ">{description}</p>
+            <div className="flex flex-col flex-1 min-w-0">
+                <h1 className="text-title3-semibold font-mulish truncate  ">{title}</h1>
+                <p className="text-body-regular font-mulish text-label-secondary line-clamp-2">{description}</p>
             </div>
 
             <div className="ml-auto flex gap-2 p-2 ">
-                <Button variant="outline" className="cursor-pointer border-bah-blue h-8 min-w-0 px-2 py-1 text-sm flex ">
+                <Button variant="outline" className="cursor-pointer border-bah-blue h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 "
+                onClick={() => console.log('Editar')}>
                     <SquarePenIcon className="w-4 h-4 text-bah-blue" />
                    <p className="text-body-regular font-mulish text-bah-blue ">Editar</p>
                 </Button>
 
-                <Button variant="outline" className="cursor-pointer border-error h-8 min-w-0 px-2 py-1 text-sm flex ">
+                <Button variant="outline" className="cursor-pointer border-error h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 active:bg-error"
+                onClick={() => console.log('Excluir')}>
                     <Trash2Icon className="w-4 h-4 text-error" />
                 <p className="text-body-regular font-mulish text-error">Excluir</p>
                 </Button>

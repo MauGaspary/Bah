@@ -11,7 +11,8 @@ function IniciativasSearchbar() {
         <Input className="w-full bg-background-secondary" 
         placeholder="Buscar iniciativa por categoria, palavras-chave, data..." />
 
-          <Button className="cursor-pointer bg-success">
+          <Button className="cursor-pointer bg-success active:scale-95"
+          onClick={() => console.log('Nova iniciativa')}>
             Nova iniciativa
             </Button>
            

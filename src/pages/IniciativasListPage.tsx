@@ -1,12 +1,3 @@
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "@/components/ui/pagination"
-
 
 import IniciativasSearchbar from '@/components/ui/IniciativasSearchbar'
 import IniciativasList from '@/components/ui/IniciativasList/IniciativasList'
@@ -30,33 +21,6 @@ function IniciativasListPage() {
                 <IniciativasList />
                 </div>
 
-
-                <div className="mt-3">
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                        <PaginationPrevious href="#" />
-                        </PaginationItem>
-
-                        <PaginationItem>
-                        <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                        <PaginationLink href="#">2</PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                        <PaginationLink href="#">3</PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                        <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
-  
-                </div>
             </div>
 
         
