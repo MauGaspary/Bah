@@ -24,6 +24,7 @@ const buttonVariants = cva(
         ghost:
           'hover:bg-background-secondary text-label-primary focus-visible:ring-gray/50 rounded-button',
         link: 'text-bah-blue underline-offset-4 hover:underline focus-visible:ring-bah-blue/50',
+        list: 'border border-stroke-primary bg-background-primary hover:bg-background-secondary text-label-primary focus-visible:ring-gray/50 rounded-[5px]',
       },
       size: {
         sm: 'h-8 px-3 py-1.5 text-footnote min-w-[120px] has-[>svg]:px-2.5',

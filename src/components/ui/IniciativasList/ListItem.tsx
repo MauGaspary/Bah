@@ -24,13 +24,13 @@ function ListItem({title, description, imageUrl}: ListItemProps) {
             </div>
 
             <div className="ml-auto flex gap-2 p-2 ">
-                <Button variant="outline" className="cursor-pointer border-editar/25 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 "
+                <Button variant="list" className="cursor-pointer border-editar/25 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 "
                 onClick={() => console.log('Editar')}>
                     <SquarePenIcon className="w-4 h-4 text-editar" />
                    <p className="text-body-regular font-mulish text-editar ">Editar</p>
                 </Button>
 
-                <Button variant="outline" className="cursor-pointer border-error/25 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 active:bg-error"
+                <Button variant="list" className="cursor-pointer border-error/25 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 active:bg-error"
                 onClick={() => console.log('Excluir')}>
                     <Trash2Icon className="w-4 h-4 text-error" />
                 <p className="text-body-regular font-mulish text-error">Excluir</p>
