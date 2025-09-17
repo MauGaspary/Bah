@@ -45,8 +45,6 @@ test:
   artifacts:
     reports:
       cobertura: coverage.xml
-    paths:
-      - htmlcov/
     expire_in: 1 week
   only:
     - merge_requests

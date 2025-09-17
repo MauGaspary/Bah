@@ -5,7 +5,7 @@ from app.config.database import get_db
 from app.controllers.auth_controller import AuthController
 from app.schemas.auth_schema import LoginRequest, LoginResponse
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
 
 @router.post("/login", response_model=LoginResponse)

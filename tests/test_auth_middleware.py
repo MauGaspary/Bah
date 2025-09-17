@@ -163,7 +163,6 @@ class TestAuthMiddleware:
         assert response.json()["detail"] == "Invalid header"
 
     def test_empty_token_after_bearer(self, client_with_test_route):
-        """Testa token vazio após 'Bearer '"""
         headers = {"Authorization": "Bearer "}
         response = client_with_test_route.get("/temp-middleware-test", headers=headers)
 
@@ -171,7 +170,6 @@ class TestAuthMiddleware:
         assert response.json()["detail"] == "Missing token"
 
     def test_bearer_with_only_spaces(self, client_with_test_route):
-        """Testa 'Bearer' seguido apenas de espaços"""
         headers = {"Authorization": "Bearer    "}
         response = client_with_test_route.get("/temp-middleware-test", headers=headers)
 
@@ -179,7 +177,6 @@ class TestAuthMiddleware:
         assert response.json()["detail"] == "Missing token"
 
     def test_bearer_without_space(self, client_with_test_route):
-        """Testa 'Bearer' sem espaço após - não passa no startswith"""
         headers = {"Authorization": "Bearer"}
         response = client_with_test_route.get("/temp-middleware-test", headers=headers)
 
