@@ -23,7 +23,9 @@ class JWTMiddleware(BaseHTTPMiddleware):
                     status_code=401, content={"detail": "Authorization header required"}
                 )
 
-            token = auth.split(" ", 1)[1] if len(auth.split(" ", 1)) > 1 else ""
+            parts = auth.split(" ", 1)
+            token = parts[1] if len(parts) == 2 else ""
+
             if not token.strip():
                 return JSONResponse(
                     status_code=401, content={"detail": "Token required"}

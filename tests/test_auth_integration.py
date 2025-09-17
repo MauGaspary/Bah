@@ -1,6 +1,3 @@
-import bcrypt
-import pytest
-
 from app.config.settings import JWT_TTL
 from app.services.jwt_service import verify
 

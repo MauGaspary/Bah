@@ -16,26 +16,12 @@ from app.routes.organizador_route import router as organizador_router
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
 
-    print(
-        f"Iniciando aplicação - Ambiente: {'TEST' if settings.testing else 'DEV' if settings.debug else 'PROD'}"
-    )
-
-    if settings.enable_database:
-        print("Inicializando conexão com banco de dados...")
-
-    if settings.enable_logging_setup:
-        print(f"Configurando logging - Level: {settings.log_level}")
-
-    print("Aplicação iniciada com sucesso!")
-
     yield
 
-    print("Finalizando aplicação...")
-
     if settings.enable_database:
-        print("Fechando conexões com banco de dados...")
+        from app.config.database import engine
 
-    print("Aplicação finalizada!")
+        engine.dispose()
 
 
 def create_app(settings=None):
@@ -61,8 +47,7 @@ def create_app(settings=None):
     app.include_router(
         organizador_router, prefix="/organizadores", tags=["organizadores"]
     )
-    app.include_router(auth_router)
-
+    app.include_router(auth_router, prefix="/auth", tags=["auth"])
     app.add_middleware(JWTMiddleware)
     app.add_middleware(
         CORSMiddleware,
