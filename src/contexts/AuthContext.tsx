@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
+
 import { login as authLogin } from '@/lib/auth'
 
 interface AuthContextType {
@@ -11,7 +12,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-interface AuthProviderProps { children: ReactNode }
+interface AuthProviderProps {
+  children: ReactNode
+}
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [token, setToken] = useState<string | null>(null)
@@ -37,7 +40,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )
@@ -45,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth deve ser usado dentro de um AuthProvider')
+  if (!context)
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider')
   return context
 }
