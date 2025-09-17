@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_iniciativa_repository import AdminIniciativaRepository
@@ -57,3 +57,11 @@ class AdminIniciativaService:
         return IniciativaListResponseSchema(
             items=iniciativas, total=total, filters=filters
         )
+    
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
+        iniciativa = self.repository.soft_delete(iniciativa_id, deletado_por)
+        if not iniciativa:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Iniciativa não encontrada"
+            )
