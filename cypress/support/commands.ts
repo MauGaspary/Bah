@@ -1,37 +1,47 @@
 /// <reference types="cypress" />
+
 // ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
+// Custom commands for BAH Frontend tests
 // ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+// Custom command to login with credentials
+Cypress.Commands.add('login', (email: string, password: string) => {
+  cy.visit('/admin')
+  cy.get('input[type="email"]').type(email)
+  cy.get('input[type="password"]').type(password)
+  cy.get('button[type="submit"]').click()
+})
+
+// Custom command to clear localStorage
+Cypress.Commands.add('clearAuth', () => {
+  cy.window().then((win) => {
+    win.localStorage.removeItem('access_token')
+  })
+})
+
+// Custom command to set auth token in localStorage
+Cypress.Commands.add('setAuthToken', (token: string) => {
+  cy.window().then((win) => {
+    win.localStorage.setItem('access_token', token)
+  })
+})
+
+// Custom command to check if user is authenticated
+Cypress.Commands.add('isAuthenticated', () => {
+  cy.window().then((win) => {
+    const token = win.localStorage.getItem('access_token')
+    return cy.wrap(!!token)
+  })
+})
+
+// Extend Cypress chainable interface
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      login(email: string, password: string): Chainable<void>
+      clearAuth(): Chainable<void>
+      setAuthToken(token: string): Chainable<void>
+      isAuthenticated(): Chainable<boolean>
+    }
+  }
+}
