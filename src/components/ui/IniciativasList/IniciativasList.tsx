@@ -43,7 +43,7 @@ function IniciativasList() {
 
       <div className="flex px-6 py-2 bg-background-secondary">
         <h1 className="text-body-regular font-mulish">Iniciativa</h1>
-        <h1 className="text-body-regular font-mulish ml-auto px-16">Ações</h1>
+        <h1 className="text-body-regular font-mulish ml-auto px-38">Ações</h1>
       </div>
  
       <div className="py-4 space-y-2">
