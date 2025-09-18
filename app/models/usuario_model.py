@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, String, Text
 
@@ -14,4 +14,4 @@ class Usuario(Base):
     sobrenome = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True, index=True)
     senha_hash = Column(Text, nullable=False)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))

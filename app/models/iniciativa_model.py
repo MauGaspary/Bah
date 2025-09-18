@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
@@ -23,7 +23,7 @@ class Iniciativa(Base):
     imagem_url = Column(String, nullable=False)
 
     criado_por = Column(String, ForeignKey("usuarios.id"), nullable=False, index=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     editado_em = Column(DateTime)
     editado_por = Column(String, ForeignKey("usuarios.id"))
     deletado_em = Column(DateTime)
