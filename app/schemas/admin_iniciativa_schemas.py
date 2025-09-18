@@ -11,7 +11,7 @@ class TagSchema(BaseModel):
     nome: str
     descricao: Optional[str]
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -19,7 +19,7 @@ class OrganizadorSchema(BaseModel):
     id: str
     nome: str
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -31,7 +31,7 @@ class IniciativaHorarioSchema(BaseModel):
     tipo: HorarioTipo
     criado_em: datetime
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -56,7 +56,7 @@ class IniciativaSchema(BaseModel):
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -75,5 +75,5 @@ class IniciativaListResponseSchema(BaseModel):
     total: int
     filters: IniciativaFiltersSchema
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
