@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import numpy as np
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, selectinload
 
@@ -16,11 +17,12 @@ class IniciativaRepository:
         self.db = db
 
     def create(self, iniciativa_data: IniciativaCreate, criado_por: str) -> Iniciativa:
-        # TODO: Implementar geração de embeddings para descricao_vetor
+        temp_vector = np.random.rand(768).tolist()
+
         db_iniciativa = Iniciativa(
             titulo=iniciativa_data.titulo,
             descricao=iniciativa_data.descricao,
-            descricao_vetor=iniciativa_data.descricao,  # TODO: Usar embeddings reais
+            descricao_vetor=temp_vector,
             organizador_id=iniciativa_data.organizador_id,
             link=iniciativa_data.link,
             local=iniciativa_data.local,

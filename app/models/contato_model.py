@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, String, Text
 
@@ -14,4 +14,4 @@ class Contato(Base):
     email = Column(String, nullable=False, index=True)
     assunto = Column(String, nullable=False)
     mensagem = Column(Text, nullable=False)
-    enviado_em = Column(DateTime, default=datetime.utcnow)
+    enviado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))

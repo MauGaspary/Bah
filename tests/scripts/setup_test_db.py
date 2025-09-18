@@ -9,6 +9,17 @@ def setup_test_database(database_url: str):
     """Executa migrations no banco de teste"""
     import os
 
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(database_url)
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+            conn.commit()
+        except Exception:
+            pass
+    engine.dispose()
+
     current_dir = os.path.dirname(__file__)
     project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
 

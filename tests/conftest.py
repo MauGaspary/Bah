@@ -151,13 +151,17 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
     """Fixture que cria uma iniciativa para usar em testes"""
     from datetime import date, time
 
+    import numpy as np
+
     from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
     from app.models.iniciativa_model import Iniciativa
+
+    test_vector = np.random.rand(768).tolist()
 
     iniciativa = Iniciativa(
         titulo="Iniciativa Teste Existente",
         descricao="Descrição da iniciativa teste existente",
-        descricao_vetor="Descrição da iniciativa teste existente",
+        descricao_vetor=test_vector,
         organizador_id=organizador_fixture["id"],
         link="https://example.com/existente",
         imagem_url="https://example.com/image-existente.jpg",

@@ -1,29 +1,29 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
 
 class TagSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     nome: str
     descricao: Optional[str]
 
-    class Config:
-        from_attributes = True
-
 
 class OrganizadorSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     nome: str
 
-    class Config:
-        from_attributes = True
-
 
 class IniciativaHorarioSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     data_evento: date
     hora_inicio: time
@@ -31,11 +31,10 @@ class IniciativaHorarioSchema(BaseModel):
     tipo: HorarioTipo
     criado_em: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class IniciativaSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     titulo: str
     descricao: str
@@ -56,9 +55,6 @@ class IniciativaSchema(BaseModel):
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
 
-    class Config:
-        from_attributes = True
-
 
 class IniciativaFiltersSchema(BaseModel):
     q: Optional[str] = None
@@ -71,9 +67,8 @@ class IniciativaFiltersSchema(BaseModel):
 
 
 class IniciativaListResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     items: List[IniciativaSchema]
     total: int
     filters: IniciativaFiltersSchema
-
-    class Config:
-        from_attributes = True
