@@ -33,7 +33,6 @@ def test_get_demo_by_id(client, admin_global):
 
 
 def test_get_demo_by_id_not_found(client):
-    """Busca de demo com ID que nao existe"""
     response = request(client, "GET", "/demo/id/9999")
 
     assert response.status_code == 404
@@ -50,9 +49,34 @@ def test_get_demo_by_email(client, admin_global):
 
 
 def test_get_demo_by_email_not_found(client):
-    """Busca de demo com email que nao existe"""
     response = request(client, "GET", "/demo/email/nonexistent@example.com")
 
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Demo não encontrado"
+
+
+def test_create_demo_invalid_email(client):
+    response = request(
+        client,
+        "POST",
+        "/demo/",
+        json={"username": "testuser", "email": "invalid-email"},
+    )
+
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Formato de email inválido"
+
+
+def test_create_demo_duplicate_email(client, admin_global):
+    response = request(
+        client,
+        "POST",
+        "/demo/",
+        json={"username": "newuser", "email": admin_global["email"]},
+    )
+
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Email já está em uso"

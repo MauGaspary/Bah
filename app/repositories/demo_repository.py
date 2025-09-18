@@ -1,8 +1,8 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.demo_model import Demo
 from app.schemas.demo_schema import DemoCreate
+from app.utils.exceptions import EmailAlreadyExistsException
 
 
 class DemoRepository:
@@ -11,7 +11,7 @@ class DemoRepository:
 
     def create(self, demo_data: DemoCreate):
         if self.get_demo_by_email(demo_data.email):
-            raise HTTPException(status_code=400, detail="Email já está em uso")
+            raise EmailAlreadyExistsException("Email já está em uso")
 
         db_demo = Demo(username=demo_data.username, email=demo_data.email)
         self.db.add(db_demo)
