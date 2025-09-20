@@ -58,9 +58,9 @@ function SidebarAdm() {
                   <span className="flex-1 ms-3 whitespace-nowrap">Menu</span>
                 </li>
                   <li
-                    className="w-full px-3  font-medium text-white hover:text-bah-green cursor-pointer"
+                    className="w-full px-3 font-medium text-white hover:text-bah-green cursor-pointer"
                   >
-                    <a href="/admin/iniciativas" className="flex items-center p-4 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group hover:bg-purple-700">
+                    <a href="/admin/iniciativas" className="flex items-center p-4 transition duration-75 rounded-lg group hover:bg-purple-700">
                       <NotebookText />
                       <span className="flex-1 ms-3 whitespace-nowrap">
                         Iniciativas
@@ -68,9 +68,9 @@ function SidebarAdm() {
                     </a>
                   </li>
                   <li
-                    className="w-full px-3  font-medium text-white hover:text-bah-green cursor-pointe"
+                    className="w-full px-3  font-medium text-white hover:text-bah-green cursor-pointer"
                   >
-                    <a href="/admin/iniciativas" className="flex items-center p-4 transition duration-75 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group hover:bg-purple-700">
+                    <a href="/admin/usuarios" className="flex items-center p-4 transition duration-75 rounded-lg group hover:bg-purple-700">
                       <UsersRound />
                       <span className="flex-1 ms-3 whitespace-nowrap">
                         Usuários
@@ -79,7 +79,11 @@ function SidebarAdm() {
                   </li>
               </div>
 
-              <li className="fixed bottom-2 z-40 font-medium text-white hover:text-bah-green dark:hover:text-bah-green cursor-pointer">
+              <li className="fixed bottom-2 z-40 font-medium text-white hover:text-bah-green dark:hover:text-bah-green cursor-pointer" 
+                onClick={() => {
+                localStorage.removeItem('token');
+                window.location.href = '/admin';
+              }}>
                 <div className="flex items-center gap-8 p-4 transition duration-75 rounded-lg group">
                   {/* stacked labels: name and email */}
                   <div className="flex flex-col">
@@ -87,7 +91,7 @@ function SidebarAdm() {
                     <span className="ms-3 text-sm text-gray-400 dark:text-gray-400 opacity-90 group-hover:text-bah-green dark:group-hover:text-bah-green">admin@gmail.com</span>
                   </div>
 
-                  <LogOut className='text-error group-hover:text-error dark:group-hover:text-crimson'/>
+                  <LogOut className='text-error'/>
                 </div>
               </li>
             </ul>
