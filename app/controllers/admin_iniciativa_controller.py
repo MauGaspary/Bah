@@ -47,7 +47,7 @@ class AdminIniciativaController:
             raise HTTPException(
                 status_code=500, detail={"message": "Internal server error"}
             ) from e
-        
+
     def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
         """Soft delete de uma iniciativa"""
         try:
@@ -56,6 +56,5 @@ class AdminIniciativaController:
             raise
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail={"message": "Erro ao deletar iniciativa"}
+                status_code=500, detail={"message": "Erro ao deletar iniciativa"}
             ) from e

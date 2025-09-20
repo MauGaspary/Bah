@@ -67,15 +67,13 @@ def listar_iniciativas(
         q, created_from, created_to, order_by, order_dir, page, size
     )
 
-@router.delete(
-    "/iniciativas/{iniciativa_id}",
-    status_code=status.HTTP_204_NO_CONTENT
-    )
+
+@router.delete("/iniciativas/{iniciativa_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_iniciativa(
     iniciativa_id: str,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-    ):
+    current_user: str = Depends(get_current_user),
+):
     """
     Soft delete de uma iniciativa (marca deletado_em e deletado_por)
     - Idempotente: múltiplas chamadas retornam 204

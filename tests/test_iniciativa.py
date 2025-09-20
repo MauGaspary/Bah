@@ -328,3 +328,84 @@ def test_get_iniciativa_by_id_not_found(client, auth_token):
     assert response.status_code == 404
     data = response.json()
     assert "Iniciativa não encontrada" in data["detail"]
+
+
+def test_delete_iniciativa_success(client, iniciativa_fixture, auth_token, db_session):
+    """Teste feliz: DELETE → 204 → iniciativa não aparece mais na listagem"""
+
+    # Verifica se a iniciativa existe na listagem
+    response_list_before = request_auth(
+        client, "GET", "/admin/iniciativas", token=auth_token
+    )
+    assert response_list_before.status_code == 200
+    iniciativa_ids_before = [item["id"] for item in response_list_before.json()["items"]]
+    assert iniciativa_fixture["id"] in iniciativa_ids_before
+
+    # DELETE
+    response_delete = request_auth(
+        client,
+        "DELETE",
+        f"/admin/iniciativas/{iniciativa_fixture['id']}",
+        token=auth_token
+    )
+    assert response_delete.status_code == 204
+
+    # Verifica se não aparece mais na listagem
+    response_list_after = request_auth(
+        client, "GET", "/admin/iniciativas", token=auth_token
+    )
+    assert response_list_after.status_code == 200
+    iniciativas_ids_after = [item["id"] for item in response_list_after.json()["items"]]
+    assert iniciativa_fixture["id"] not in iniciativas_ids_after
+
+    # Verifica se deletado_em foi atualizado no banco de dados
+    from app.models.iniciativa_model import Iniciativa
+    deleted_iniciativa = db_session.query(Iniciativa).filter(
+        Iniciativa.id == iniciativa_fixture["id"]
+    ).first()
+    assert deleted_iniciativa.deletado_em is not None
+    assert deleted_iniciativa.deletado_por is not None
+
+
+def test_delete_iniciativa_idempotente(client, iniciativa_fixture, auth_token):
+    """Teste de idempotência: DELETE duas vezes → 204 nas duas"""
+
+    # Primeiro DELETE
+    response1 = request_auth(
+        client, 
+        "DELETE",
+        f"/admin/iniciativas/{iniciativa_fixture['id']}",  
+        token=auth_token
+    )
+    assert response1.status_code == 204
+
+    # Segundo DELETE
+    response2 = request_auth(
+        client, 
+        "DELETE",
+        f"/admin/iniciativas/{iniciativa_fixture['id']}",  
+        token=auth_token
+    )
+    assert response2.status_code == 204
+
+
+def test_delete_iniciativa_inexistente(client, auth_token):
+    """Teste de iniciativa inexistente → 404"""
+    response = request_auth(
+        client,
+        "DELETE",
+        "/admin/iniciativas/99999999-9999-9999-9999-999999999999",  
+        token=auth_token
+    )
+    assert response.status_code == 404
+    assert "não encontrada" in response.json()["detail"].lower()
+
+
+def test_delete_iniciativa_nao_autorizada(client, iniciativa_fixture):
+    """Teste de DELETE sem autenticação → 401"""
+    response = request(
+        client,
+        "DELETE",
+        f"/admin/iniciativas/{iniciativa_fixture['id']}"
+    )
+    assert response.status_code == 401
