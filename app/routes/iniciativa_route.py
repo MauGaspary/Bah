@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,7 @@ def create_iniciativa(
     criado_por: str = "sistema",  # TODO: Obter do token de autenticação
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request = None,
 ):
     """
     Cria uma nova iniciativa.
@@ -32,7 +33,8 @@ def create_iniciativa(
 
     Retorna 201 com o recurso criado ou 422 quando validações falham.
     """
-    controller = IniciativaController(db)
+    model = request.app.state.embedding_model
+    controller = IniciativaController(db, model)
     return controller.create_iniciativa(iniciativa, criado_por)
 
 

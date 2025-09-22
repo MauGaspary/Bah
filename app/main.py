@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from sentence_transformers import SentenceTransformer
 
 from app.config.settings import Settings
 from app.middleware.auth_middleware import JWTMiddleware
@@ -17,6 +18,8 @@ from app.utils.exceptions import DomainException
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
+    model = SentenceTransformer("intfloat/multilingual-e5-base")
+    app.state.embedding_model = model
 
     yield
 

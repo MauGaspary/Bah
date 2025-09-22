@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import HTTPException
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
@@ -9,8 +10,9 @@ from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, model: SentenceTransformer):
         self.repository = IniciativaRepository(db)
+        self.model = model
 
     def create_iniciativa(
         self, iniciativa_data: IniciativaCreate, criado_por: str
@@ -61,6 +63,24 @@ class IniciativaService:
             if conflicting_horarios:
 
                 pass
+
+        try:
+            embedding = self.model.encode(
+                iniciativa_data.descricao,
+                convert_to_numpy=True,
+                normalize_embeddings=True,
+            )
+
+            # iniciativa_data.descricao_vetor = embedding
+            iniciativa = self.repository.create(
+                iniciativa_data, criado_por, descricao_vetor=embedding
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Erro ao gerar embedding da descrição: {str(e)}",
+            ) from e
 
         try:
             iniciativa = self.repository.create(iniciativa_data, criado_por)

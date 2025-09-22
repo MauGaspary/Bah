@@ -16,13 +16,17 @@ class IniciativaRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, iniciativa_data: IniciativaCreate, criado_por: str) -> Iniciativa:
-        temp_vector = np.random.rand(768).tolist()
+    def create(
+        self,
+        iniciativa_data: IniciativaCreate,
+        criado_por: str,
+        descricao_vetor: List[float],
+    ) -> Iniciativa:
 
         db_iniciativa = Iniciativa(
             titulo=iniciativa_data.titulo,
             descricao=iniciativa_data.descricao,
-            descricao_vetor=temp_vector,
+            descricao_vetor=descricao_vetor,
             organizador_id=iniciativa_data.organizador_id,
             link=iniciativa_data.link,
             local=iniciativa_data.local,
