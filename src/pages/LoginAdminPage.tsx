@@ -41,7 +41,7 @@ function LoginAdminPage() {
 
     try {
       await login(values.email, values.password)
-      navigate('/dashboard')
+      navigate('/admin/iniciativas')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {
