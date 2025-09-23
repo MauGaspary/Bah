@@ -1,29 +1,49 @@
 import { NotebookText, UsersRound, LogOut } from 'lucide-react'
-import {useState} from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-
-import LogoImg from "../../assets/logo.png"
+import { useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import LogoImg from '../../assets/logo.png'
 import '../../index.css'
 
-function MenuItem({ to, label, Icon}: { to: string; label: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }) {
-  const location = useLocation()
-  const isActive = location.pathname === to
+interface MenuItemProps {
+  to: string
+  label: string
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+}
 
+function MenuItem({ to, label, Icon }: MenuItemProps) {
   return (
     <li className="w-full">
-      <NavLink to={to} className={({ isActive: navIsActive }) => `block -mx-3 transition duration-75 ${navIsActive || isActive ? 'bg-purple-400' : ''}`}>
-        <div className={`group flex w-full items-center px-6 py-4 ${isActive ? '' : 'hover:bg-purple-400'}`}>
-          <Icon className={`${isActive ? 'text-bah-green' : 'text-white group-hover:text-bah-green'}`} />
-          <span className="flex-1 ms-3 whitespace-nowrap">{label}</span>
-        </div>
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          `block -mx-3 transition duration-75 ${isActive ? 'bg-purple-400' : ''}`
+        }
+      >
+        {({ isActive }) => (
+          <div className="group flex w-full items-center px-6 py-4">
+            <Icon
+              className={`${
+                isActive
+                  ? 'text-bah-green'
+                  : 'text-white group-hover:text-bah-green'
+              }`}
+            />
+            <span className="flex-1 ms-3 whitespace-nowrap">{label}</span>
+          </div>
+        )}
       </NavLink>
     </li>
   )
 }
 
 function SidebarAdm() {
-
   const [logoutPopup, setLogoutPopup] = useState(false)
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
 
   return (
     <>
@@ -33,11 +53,9 @@ function SidebarAdm() {
           className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
           aria-label="Sidebar"
         >
-          <div
-            className="h-full px-3 py-4 overflow-y-auto bg-bah-purple text-white font-mulish rounded-tr-[var(--radius-card)] rounded-br-[var(--radius-card)]"
-          >
-            <ul className="h-full flex-col justify-around space-y-2 font-medium ">
-              <div>
+          <div className="h-full px-3 py-4 overflow-y-auto bg-bah-purple text-white font-mulish rounded-tr-[var(--radius-card)] rounded-br-[var(--radius-card)] flex flex-col">
+            <div className="flex-1">
+              <ul className="space-y-2 font-medium">
                 <li>
                   <NavLink to="/dashboard" className="block -mx-3">
                     <div className="group flex w-full items-center px-6 py-4">
@@ -45,51 +63,60 @@ function SidebarAdm() {
                     </div>
                   </NavLink>
                 </li>
-                <li className='pb-4 pt-4'>
+                <li className="pb-4 pt-4">
                   <span className="flex-1 ms-3 whitespace-nowrap">Menu</span>
                 </li>
-                <MenuItem to="/admin/iniciativas" label="Iniciativas" Icon={NotebookText} />
-                <MenuItem to="/admin/usuarios" label="Usuários" Icon={UsersRound} />
+                <MenuItem
+                  to="/admin/iniciativas"
+                  label="Iniciativas"
+                  Icon={NotebookText}
+                />
+                <MenuItem
+                  to="/admin/usuarios"
+                  label="Usuários"
+                  Icon={UsersRound}
+                />
+              </ul>
+            </div>
+
+            <div className="font-medium text-white">
+              <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex flex-col">
+                  <span className="whitespace-nowrap">Admin</span>
+                  <span className="text-sm text-gray-400 opacity-90">
+                    admin@gmail.com
+                  </span>
+                </div>
+                <button
+                  onClick={() => setLogoutPopup(true)}
+                  className="p-2 text-red-400 hover:text-bah-green rounded transition duration-75 cursor-pointer"
+                >
+                  <LogOut size={24} />
+                </button>
               </div>
-                <li onClick={() => setLogoutPopup(true)} className="fixed bottom-0 left-0 w-64 font-medium text-white cursor-pointer">
-                  <div className="w-full transition duration-75">
-                    <div className="group flex justify-center items-center py-5 gap-8 rounded-br-[var(--radius-card)] hover:bg-purple-400">
-                      <div className="flex flex-col">
-                        <span className="ms-3 whitespace-nowrap">Admin</span>
-                        <span className="ms-3 text-sm text-gray-400 dark:text-gray-400 opacity-90 group-hover:text-bah-green">admin@gmail.com</span>
-                      </div>
-                      <LogOut className='text-error group-hover:text-bah-green'/>
-                    </div>
-                  </div>
-                </li>
-            </ul>
+            </div>
           </div>
         </aside>
       </div>
-      {
-        logoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-100 backdrop-brightness-50 font-mulish font-medium">
-          
-          <div className=" flex items-center justify-center w-full h-full m-100">
-            <div className="bg-white rounded-[var(--radius-card)] justify-center text-center shadow-lg w-105 overflow-auto p-10">
-              <h2 className="text-xl font-bold mb-4">Logout</h2>
-              <p className="mb-4">Tem certeza que deseja fazer logout?</p>
-              <div className="flex justify-around">
-                <button
-                  onClick={() => {
-                    localStorage.removeItem('token');
-                    window.location.href = '/admin';
-                  }}
-                  className="w-35 py-3 bg-bah-purple text-white rounded-[var(--radius-button)] cursor-pointer"
-                >
-                  Sim
-                </button>
-                <button 
-                  onClick={() => setLogoutPopup(false)}
-                  className="w-35 bg-white text-black rounded-[var(--radius-button)] cursor-pointer border border-gray-300 shadow hover:shadow-md transition-shadow">
-                    Cancelar
-                </button>
-              </div>
+
+      {logoutPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-brightness-50 font-mulish font-medium">
+          <div className="bg-white rounded-[var(--radius-card)] text-center shadow-lg w-96 p-10">
+            <h2 className="text-xl font-bold mb-4">Logout</h2>
+            <p className="mb-4">Tem certeza que deseja fazer logout?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-6 py-3 bg-bah-purple text-white rounded-[var(--radius-button)] hover:bg-purple-700 transition-colors cursor-pointer"
+              >
+                Sim
+              </button>
+              <button
+                onClick={() => setLogoutPopup(false)}
+                className="flex-1 px-6 py-3 bg-white text-black rounded-[var(--radius-button)] border border-gray-300 hover:shadow-md transition-shadow cursor-pointer"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
@@ -97,4 +124,5 @@ function SidebarAdm() {
     </>
   )
 }
+
 export default SidebarAdm
