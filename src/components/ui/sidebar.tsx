@@ -1,9 +1,9 @@
 import { NotebookText, UsersRound, LogOut } from 'lucide-react'
-import React from 'react'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import {useState} from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 
-import LogoImg from '../../../assets/logo.png'
-import '../../../index.css'
+import LogoImg from "../../assets/logo.png"
+import '../../index.css'
 
 function MenuItem({ to, label, Icon}: { to: string; label: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }) {
   const location = useLocation()
@@ -22,7 +22,8 @@ function MenuItem({ to, label, Icon}: { to: string; label: string; Icon: React.C
 }
 
 function SidebarAdm() {
-  const navigate = useNavigate()
+
+  const [logoutPopup, setLogoutPopup] = useState(false)
 
   return (
     <>
@@ -50,26 +51,49 @@ function SidebarAdm() {
                 <MenuItem to="/admin/iniciativas" label="Iniciativas" Icon={NotebookText} />
                 <MenuItem to="/admin/usuarios" label="Usuários" Icon={UsersRound} />
               </div>
-
-              <li className="fixed bottom-0 left-0 w-64 font-medium text-white cursor-pointer"
-                onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/admin')
-              }}>
-                <div className="w-full transition duration-75">
-                  <div className="group flex justify-center items-center py-5 gap-8 rounded-br-[var(--radius-card)] hover:bg-purple-400">
-                    <div className="flex flex-col">
-                      <span className="ms-3 whitespace-nowrap">Admin</span>
-                      <span className="ms-3 text-sm text-gray-400 dark:text-gray-400 opacity-90 group-hover:text-bah-green">admin@gmail.com</span>
+                <li onClick={() => setLogoutPopup(true)} className="fixed bottom-0 left-0 w-64 font-medium text-white cursor-pointer">
+                  <div className="w-full transition duration-75">
+                    <div className="group flex justify-center items-center py-5 gap-8 rounded-br-[var(--radius-card)] hover:bg-purple-400">
+                      <div className="flex flex-col">
+                        <span className="ms-3 whitespace-nowrap">Admin</span>
+                        <span className="ms-3 text-sm text-gray-400 dark:text-gray-400 opacity-90 group-hover:text-bah-green">admin@gmail.com</span>
+                      </div>
+                      <LogOut className='text-error group-hover:text-bah-green'/>
                     </div>
-                    <LogOut className='text-error group-hover:text-bah-green'/>
                   </div>
-                </div>
-              </li>
+                </li>
             </ul>
           </div>
         </aside>
       </div>
+      {
+        logoutPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-100 backdrop-brightness-50 font-mulish font-medium">
+          
+          <div className=" flex items-center justify-center w-full h-full m-100">
+            <div className="bg-white rounded-[var(--radius-card)] justify-center text-center shadow-lg w-105 overflow-auto p-10">
+              <h2 className="text-xl font-bold mb-4">Logout</h2>
+              <p className="mb-4">Tem certeza que deseja fazer logout?</p>
+              <div className="flex justify-around">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    window.location.href = '/admin';
+                  }}
+                  className="w-35 py-3 bg-bah-purple text-white rounded-[var(--radius-button)] cursor-pointer"
+                >
+                  Sim
+                </button>
+                <button 
+                  onClick={() => setLogoutPopup(false)}
+                  className="w-35 bg-white text-black rounded-[var(--radius-button)] cursor-pointer border border-gray-300 shadow hover:shadow-md transition-shadow">
+                    Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
