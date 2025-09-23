@@ -50,9 +50,9 @@ export function verify_token(token: string): Record<string, unknown> {
       const decoded = atob(parts[1])
       try {
         const payload = JSON.parse(decoded)
-        if (payload && typeof payload === 'object') return payload as Record<string, unknown>
-      } catch {
-      }
+        if (payload && typeof payload === 'object')
+          return payload as Record<string, unknown>
+      } catch {}
     }
   }
   throw new Error('Invalid token')
