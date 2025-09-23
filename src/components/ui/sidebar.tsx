@@ -20,7 +20,7 @@ function MenuItem({ to, label, Icon }: MenuItemProps) {
         }
       >
         {({ isActive }) => (
-          <div className="group flex w-full items-center px-6 py-4">
+          <div className="group flex w-full items-center px-8 py-4">
             <Icon
               className={`${
                 isActive
@@ -50,7 +50,7 @@ function SidebarAdm() {
       <div className="sidebar">
         <aside
           id="separator-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+          className="top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
           aria-label="Sidebar"
         >
           <div className="h-full px-3 py-4 overflow-y-auto bg-bah-purple text-white font-mulish rounded-tr-[var(--radius-card)] rounded-br-[var(--radius-card)] flex flex-col">
