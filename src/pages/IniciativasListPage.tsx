@@ -1,5 +1,5 @@
 
-import IniciativasSearchbar from '@/components/ui/IniciativasSearchbar'
+import IniciativasSearchbar from '@/components/ui/AdminSearchbar/IniciativasSearchbar'
 import IniciativasList from '@/components/ui/IniciativasList/IniciativasList'
 
 function IniciativasListPage() {
