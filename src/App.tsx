@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-//import Header from './components/ui/Header/Header'
 import { AuthProvider } from './contexts/AuthContext'
 import DashboardPage from './pages/DashboardPage'
 import HomePage from './pages/HomePage'
 import LoginAdminPage from './pages/LoginAdminPage'
+import FormIniciativa from './pages/formIniciativa'
 
 function App() {
   return (
@@ -14,6 +14,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<LoginAdminPage />} />
+          <Route path="/CriarIniciativa" element={<FormIniciativa />} />
         </Routes>
       </Router>
     </AuthProvider>
