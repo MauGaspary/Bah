@@ -23,22 +23,9 @@ class AdminIniciativaController:
         size: int = 10,
     ) -> IniciativaListResponseSchema:
         try:
-            if created_from and created_to and created_from > created_to:
-                raise HTTPException(
-                    status_code=422,
-                    detail={
-                        "fieldErrors": {
-                            "created_from": "Data inicial deve ser menor que data final"
-                        }
-                    },
-                )
-
             return self.service.listar_iniciativas(
                 q, created_from, created_to, order_by, order_dir, page, size
             )
-        except HTTPException:
-
-            raise
         except ValueError as e:
             raise HTTPException(
                 status_code=422, detail={"fieldErrors": {"general": str(e)}}

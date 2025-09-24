@@ -25,24 +25,22 @@ class AdminIniciativaService:
         page: int = 1,
         size: int = 10,
     ) -> IniciativaListResponseSchema:
+        if created_from and created_to and created_from > created_to:
+            raise ValueError("Data inicial deve ser menor que data final")
 
         valid_order_fields = ["criado_em", "titulo", "destaque", "editado_em"]
         if order_by not in valid_order_fields:
             order_by = "criado_em"
 
-        try:
-            iniciativas_models = self.repository.list_iniciativas(
-                q, created_from, created_to, order_by, order_dir, page, size
-            )
-            iniciativas = [
-                IniciativaSchema.model_validate(iniciativa)
-                for iniciativa in iniciativas_models
-            ]
+        iniciativas_models = self.repository.list_iniciativas(
+            q, created_from, created_to, order_by, order_dir, page, size
+        )
+        iniciativas = [
+            IniciativaSchema.model_validate(iniciativa)
+            for iniciativa in iniciativas_models
+        ]
 
-            total = self.repository.count_iniciativas(q, created_from, created_to)
-        except Exception:
-            iniciativas = []
-            total = 0
+        total = self.repository.count_iniciativas(q, created_from, created_to)
 
         filters = IniciativaFiltersSchema(
             q=q,
