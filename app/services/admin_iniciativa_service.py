@@ -62,7 +62,4 @@ class AdminIniciativaService:
     def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
         iniciativa = self.repository.soft_delete(iniciativa_id, deletado_por)
         if not iniciativa:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Iniciativa não encontrada",
-            )
+            raise ValueError("Iniciativa não encontrada.")

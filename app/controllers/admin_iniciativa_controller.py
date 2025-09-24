@@ -52,8 +52,8 @@ class AdminIniciativaController:
         """Soft delete de uma iniciativa"""
         try:
             return self.service.delete_iniciativa(iniciativa_id, deletado_por)
-        except HTTPException:
-            raise
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail={"message": str(e)})
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail={"message": "Erro ao deletar iniciativa"}
