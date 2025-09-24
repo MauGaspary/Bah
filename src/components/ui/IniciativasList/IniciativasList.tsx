@@ -71,7 +71,7 @@ function IniciativasList() {
               />
             </PaginationItem>
 
-            {Array.from({ length: totalPages }).map((_, i) => (
+            {[...Array(totalPages).keys()].map((i) => (
               <PaginationItem key={i}>
                 <PaginationLink
                   href="#"
@@ -82,6 +82,7 @@ function IniciativasList() {
                 </PaginationLink>
               </PaginationItem>
             ))}
+
 
             <PaginationItem>
               <PaginationNext
