@@ -24,11 +24,13 @@ const buttonVariants = cva(
         ghost:
           'hover:bg-background-secondary text-label-primary focus-visible:ring-gray/50 rounded-button',
         link: 'text-bah-blue underline-offset-4 hover:underline focus-visible:ring-bah-blue/50',
+        list: 'border border-stroke-primary bg-background-primary hover:bg-background-secondary text-label-primary focus-visible:ring-gray/50 rounded-[5px]',
       },
       size: {
         sm: 'h-8 px-3 py-1.5 text-footnote min-w-[120px] has-[>svg]:px-2.5',
         default: 'h-[52px] px-4 py-2 min-w-[197px] has-[>svg]:px-3',
         lg: 'h-12 px-6 py-3 text-body-semibold min-w-[220px] has-[>svg]:px-4',
+        icon: 'h-10 w-10 p-0',
       },
     },
     defaultVariants: {
