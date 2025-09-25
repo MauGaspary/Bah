@@ -65,26 +65,19 @@ class IniciativaService:
                 pass
 
         try:
+            print("model", self.model)
             embedding = self.model.encode(
                 iniciativa_data.descricao,
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
 
-            # iniciativa_data.descricao_vetor = embedding
             iniciativa = self.repository.create(
                 iniciativa_data, criado_por, descricao_vetor=embedding
             )
 
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Erro ao gerar embedding da descrição: {str(e)}",
-            ) from e
-
-        try:
-            iniciativa = self.repository.create(iniciativa_data, criado_por)
             return IniciativaResponse.model_validate(iniciativa)
+
         except Exception as e:
             print(f"Erro na criação: {type(e).__name__}: {str(e)}")
 

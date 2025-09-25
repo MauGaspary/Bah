@@ -18,8 +18,6 @@ from app.utils.exceptions import DomainException
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
-    model = SentenceTransformer("intfloat/multilingual-e5-base")
-    app.state.embedding_model = model
 
     yield
 
@@ -46,6 +44,9 @@ def create_app(settings=None):
     )
 
     app.state.settings = settings
+
+    model = SentenceTransformer("intfloat/multilingual-e5-base")
+    app.state.embedding_model = model
 
     app.include_router(demo_router, prefix="/demo", tags=["demo"])
     app.include_router(admin_iniciativa_router, prefix="/admin", tags=["admin"])

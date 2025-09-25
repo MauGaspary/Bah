@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
+from app.config.model import get_embedding_model  
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
@@ -23,9 +25,10 @@ def create_iniciativa(
     iniciativa: IniciativaCreate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
+    model: SentenceTransformer = Depends(get_embedding_model),
 ):
     """Cria uma nova iniciativa."""
-    controller = IniciativaController(db)
+    controller = IniciativaController(db, model)
     return controller.create_iniciativa(iniciativa, current_user)
 
 
