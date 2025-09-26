@@ -47,7 +47,7 @@ function PaginationLink({ className, isActive, ...props }: PaginationLinkProps) 
       data-slot="pagination-link"
       data-active={isActive}
       className={cn(
-        "inline-flex items-center justify-center px-2 py-1 text-sm rounded-[5px] border border-black text-black transition-colors transform active:scale-95 active:bg-bah-purple focus:outline-none",
+        "inline-flex items-center justify-center px-2 py-1 text-sm rounded-[5px] border border-stroke-secondary/60 text-black transition-colors transform active:scale-95 active:bg-bah-purple focus:outline-none",
         isActive
           ? "bg-bah-purple text-white"
           : "bg-white text-black",

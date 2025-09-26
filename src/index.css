@@ -29,6 +29,7 @@
   --color-label-secondary: rgba(60, 60, 67, 0.6);
   --color-label-tertiary: rgba(60, 60, 67, 0.3);
   --color-stroke-primary: #c6c6c8;
+  --color-stroke-secondary: #3c3c43;
   --color-black: #000000;
   --color-white: #ffffff;
   --color-gray: #8e8e93;
@@ -42,14 +43,19 @@
   --color-bah-green: #c7d871;
   --color-bah-purple: #542e82;
   --color-editar: #155dfc;
-
+  --color-editar-secondary: #c6dfff;
+  --color-excluir: #e60f1a;
+  --color-excluir-secondary: #ffc9c9;
+  
   --radius-button: 16px;
   --radius-card: 32px;
 
   --font-size-large-title: 34px;
+  --font-size-medium-title: 32px;
   --font-size-title1: 28px;
   --font-size-title3-regular: 20px;
   --font-size-title3-semibold: 20px;
+  
   --font-size-body-regular: 17px;
   --font-size-body-semibold: 17px;
   --font-size-callout-regular: 16px;
@@ -92,6 +98,13 @@ body {
   line-height: 1.2;
   font-weight: 700;
 }
+
+.text-medium-title {
+  font-size: var(--font-size-medium-title);
+  line-height: 1.2;
+  font-weight: 400;
+}
+
 .text-title1 {
   font-size: var(--font-size-title1);
   line-height: 1.3;
