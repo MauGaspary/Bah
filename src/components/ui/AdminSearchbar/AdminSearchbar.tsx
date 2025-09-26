@@ -1,26 +1,29 @@
 import { AdminInput } from '../AdminSearchbar/AdminInput'
 import { Card, CardHeader } from '../card'
 import { Button } from '../button'
-
 import { SearchIcon } from 'lucide-react'
 
-function IniciativasSearchbar() {
+type SearchbarProps = {
+  placeholder: string
+  buttonLabel: string
+  onButtonClick?: () => void
+}
+
+function AdminSearchbar({ placeholder, buttonLabel, onButtonClick }: SearchbarProps) {
   const handleSearch = () => {
-    console.log('Buscar')
+    console.log('Buscar') // keep existing function
   }
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-card bg-white shadow-md border-none ">
-        <CardHeader className="flex items-center gap-10 px-10 ">
+      <Card className="rounded-card bg-white shadow-md border-none">
+        <CardHeader className="flex items-center gap-10 px-10">
           <div className="relative w-full rounded-2xl border border-gray-300 focus-within:ring-2 focus-within:ring-bah-purple focus-within:border-transparent">
             <AdminInput
               className="w-full bg-background-secondary rounded-2xl"
-              placeholder="Buscar iniciativa por categoria, palavras-chave, data..."
+              placeholder={placeholder}
               onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  handleSearch()
-                }
+                if (e.key === 'Enter') handleSearch()
               }}
             />
 
@@ -33,11 +36,12 @@ function IniciativasSearchbar() {
               <SearchIcon className="w-3 h-3 text-label-secondary" />
             </Button>
           </div>
+
           <Button
             className="cursor-pointer bg-success active:scale-95"
-            onClick={() => console.log('Nova iniciativa')}
+            onClick={onButtonClick}
           >
-            Nova iniciativa
+            {buttonLabel}
           </Button>
         </CardHeader>
       </Card>
@@ -45,4 +49,4 @@ function IniciativasSearchbar() {
   )
 }
 
-export default IniciativasSearchbar
+export default AdminSearchbar

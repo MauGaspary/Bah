@@ -1,5 +1,5 @@
-import IniciativasList from '@/components/ui/IniciativasList/IniciativasList'
-import IniciativasSearchbar from '@/components/ui/AdminSearchbar/IniciativasSearchbar'
+import IniciativasList from '@/components/ui/List/IniciativasList'
+import AdminSearchbar from '@/components/ui/AdminSearchbar/AdminSearchbar'
 import SidebarAdm from '@/components/ui/sidebar'
 
 function AdminIniciativas() {
@@ -21,7 +21,11 @@ function AdminIniciativas() {
           </div>
 
           <div className="py-6 pr-6">
-            <IniciativasSearchbar />
+            <AdminSearchbar
+              placeholder="Buscar iniciativa por categoria, palavras-chave, data..."
+              buttonLabel="Nova iniciativa"
+              onButtonClick={() => console.log('Nova iniciativa')}
+            />
 
             <div className="mt-16">
               <IniciativasList />
