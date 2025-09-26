@@ -11,7 +11,7 @@ type SearchbarProps = {
 
 function AdminSearchbar({ placeholder, buttonLabel, onButtonClick }: SearchbarProps) {
   const handleSearch = () => {
-    console.log('Buscar') // keep existing function
+    console.log('Buscar')
   }
 
   return (
