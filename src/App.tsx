@@ -14,7 +14,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<LoginAdminPage />} />
-          <Route path="/CriarIniciativa" element={<FormIniciativa />} />
+          <Route path="/criarIniciativa" element={<FormIniciativa />} />
         </Routes>
       </Router>
     </AuthProvider>

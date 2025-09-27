@@ -1,655 +1,689 @@
-import React, { useState, useEffect } from 'react'
-import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
-import { LayoutGrid, Users, LogOut } from 'lucide-react'
+import React, { useEffect, useState, type KeyboardEvent } from 'react'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import type { Control } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import toast, { Toaster } from 'react-hot-toast'
+import { Camera, Star } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 
-interface FormData {
-  titulo: string
-  local: string
-  link1: string
-  link2: string
-  organizador: string
-  descricao: string
+const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className = '', ...props }, ref) => (
+  <input
+    className={`w-full ${className} focus:outline-none focus:ring-0 focus:border-gray-300`}
+    ref={ref}
+    {...props}
+  />
+))
+
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+>(({ className = '', ...props }, ref) => (
+  <textarea
+    className={`w-full ${className} focus:outline-none focus:ring-0 focus:border-gray-300`}
+    ref={ref}
+    {...props}
+  />
+))
+
+const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({
+  children,
+  className = '',
+  ...props
+}) => (
+  <label className={className} {...props}>
+    {children}
+  </label>
+)
+
+type Option = { value: string; label: string }
+
+const HOUR_OPTIONS: Option[] = [
+  { value: '', label: 'Selecione o horário' },
+  { value: '08:00', label: '08:00' },
+  { value: '09:00', label: '09:00' },
+  { value: '10:00', label: '10:00' },
+  { value: '11:00', label: '11:00' },
+  { value: '12:00', label: '12:00' },
+  { value: '13:00', label: '13:00' },
+  { value: '14:00', label: '14:00' },
+  { value: '15:00', label: '15:00' },
+  { value: '16:00', label: '16:00' },
+  { value: '17:00', label: '17:00' },
+]
+
+const DAY_OPTIONS: Option[] = [
+  { value: '', label: 'Selecione o dia' },
+  { value: 'segunda', label: 'Segunda-feira' },
+  { value: 'terca', label: 'Terça-feira' },
+  { value: 'quarta', label: 'Quarta-feira' },
+  { value: 'quinta', label: 'Quinta-feira' },
+  { value: 'sexta', label: 'Sexta-feira' },
+  { value: 'sabado', label: 'Sábado' },
+  { value: 'domingo', label: 'Domingo' },
+]
+
+interface TimeSelectProps {
+  dayValue: string
+  startValue: string
+  endValue: string
+  onDayChange: (v: string) => void
+  onStartChange: (v: string) => void
+  onEndChange: (v: string) => void
 }
 
-const iniciativaParaEditar = {
-  id: 123,
-  titulo: 'Iniciativa de Exemplo',
-  local: 'Online',
-  link1: 'https://siteprincipal.com',
-  link2: 'https://sitelinkedin.com',
-  organizador: 'Equipe BAH',
-  descricao: 'Descrição.',
-  isAtivo: false,
-  tags: ['Tag1', 'Tag2'],
-}
-
-function Sidebar() {
+const TimeSelect: React.FC<TimeSelectProps> = ({
+  dayValue,
+  startValue,
+  endValue,
+  onDayChange,
+  onStartChange,
+  onEndChange,
+}) => {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-48 bg-[#5a2d86] text-white p-4 rounded-r-2xl z-20">
-      <a href="/" className="flex items-center">
-        <div className="w-28">
-          <img
-            src="../src/assets/logo.png"
-            alt="Logo BAH"
-            className="w-full h-auto"
-          />
-        </div>
-      </a>
-      <div className="mt-8 flex flex-col">
-        <span className="px-3 py-2 text-sm text-white/70 font-bold">MENU</span>
-        <nav className="mt-2 flex flex-col gap-1">
-          <a
-            href="/iniciativas"
-            className="pl-3 pr-3 py-2 rounded hover:bg-white/10 flex items-center gap-3"
-          >
-            <LayoutGrid size={20} />
-            Iniciativas
-          </a>
-          <a
-            href="/usuarios"
-            className="pl-3 pr-3 py-2 rounded hover:bg-white/10 flex items-center gap-3"
-          >
-            <Users size={20} />
-            Usuários
-          </a>
-        </nav>
-      </div>
-      <div className="absolute bottom-0 left-0 w-full p-4 flex justify-between items-center">
-        <div className="text-sm">
-          <div className="font-semibold">Admin</div>
-          <div className="text-xs opacity-80">admin@exemplo.com</div>
-        </div>
-        <button
-          onClick={() => {
-            console.log('Logout clicado!')
-            alert('Logout!')
-          }}
-          className="p-2 rounded-md hover:bg-red-500/20 text-white/80 hover:text-red-400 transition-colors"
-          title="Sair"
-          aria-label="Logout"
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div>
+        <label className="block text-xs font-bold text-black mb-2">Dia</label>
+        <select
+          value={dayValue ?? ''}
+          onChange={e => onDayChange(e.target.value)}
+          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
         >
-          <LogOut size={20} />
-        </button>
+          {DAY_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
-    </aside>
+
+      <div>
+        <label className="block text-xs font-bold text-black mb-2">
+          Horário Início
+        </label>
+        <select
+          value={startValue ?? ''}
+          onChange={e => onStartChange(e.target.value)}
+          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+        >
+          {HOUR_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-black mb-2">
+          Horário Fim
+        </label>
+        <select
+          value={endValue ?? ''}
+          onChange={e => onEndChange(e.target.value)}
+          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+        >
+          {HOUR_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   )
 }
 
-interface InitiativeCardProps {
-  formData: FormData
-  isAtivo: boolean
-  tags: string[]
-  newTag: string
-  onFormChange: (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => void
-  onToggleAtivo: () => void
-  onNewTagChange: (e: ChangeEvent<HTMLInputElement>) => void
-  onNewTagKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
-  onRemoveTag: (tag: string) => void
-}
+const scheduleSchema = z.object({
+  id: z.string().optional(),
+  dia: z.string().min(1, 'O dia é obrigatório.'),
+  inicio: z.string().min(1, 'O horário de início é obrigatório.'),
+  fim: z.string().min(1, 'O horário de fim é obrigatório.'),
+  tipo: z.string().min(1, 'O tipo de horário é obrigatório.'),
+})
 
-function InitiativeCard({
-  formData,
-  isAtivo,
-  tags,
-  newTag,
-  onFormChange,
-  onToggleAtivo,
-  onNewTagChange,
-  onNewTagKeyDown,
-  onRemoveTag,
-}: InitiativeCardProps) {
+const initiativeSchema = z.object({
+  titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
+  local: z.string().min(3, 'O local deve ter pelo menos 3 caracteres.'),
+  link1: z
+    .string()
+    .url('O link 1 deve ser uma URL válida.')
+    .optional()
+    .or(z.literal('')),
+  link2: z
+    .string()
+    .url('O link 2 deve ser uma URL válida.')
+    .optional()
+    .or(z.literal('')),
+  organizador: z.string().min(1, 'O organizador é obrigatório.'),
+  descricao: z
+    .string()
+    .min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
+  isAtivo: z.boolean(),
+  tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
+  schedules: z.array(scheduleSchema),
+  newTag: z.string().optional(),
+  foto: z.any().optional(),
+})
+
+type InitiativeFormData = z.infer<typeof initiativeSchema>
+
+const ScheduleItem: React.FC<{
+  index: number
+  control: Control<InitiativeFormData>
+  onRemove: (index: number) => void
+  errors?: any
+}> = ({ index, control, onRemove, errors }) => {
   return (
-    <section className="w-full">
-      <div className="relative bg-white rounded-[1.5rem] p-6 border border-gray-200 shadow-sm w-full">
-        <div className="absolute top-6 right-6 flex items-center gap-4">
-          <button
-            type="button"
-            onClick={onToggleAtivo}
-            aria-label={
-              isAtivo ? 'Desmarcar como favorito' : 'Marcar como favorito'
-            }
-            className="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className={isAtivo ? 'text-black' : 'text-gray-400'}
-            >
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z" />
-            </svg>
-          </button>
-          <label
-            htmlFor="toggle-ativo"
-            className="relative inline-flex items-center cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              id="toggle-ativo"
-              className="sr-only peer"
-              checked={isAtivo}
-              onChange={onToggleAtivo}
-            />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-          </label>
-        </div>
-        <h2 className="font-mulish text-lg font-bold text-black mb-6">
-          Detalhes da Iniciativa
-        </h2>
-        <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-black mb-2">
-                Título
-              </label>
-              <input
-                type="text"
-                name="titulo"
-                value={formData.titulo}
-                onChange={onFormChange}
-                placeholder="Placeholder"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-[0.8rem] text-sm placeholder-gray-400 focus:outline-none ]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-black mb-2">
-                Local
-              </label>
-              <input
-                type="text"
-                name="local"
-                value={formData.local}
-                onChange={onFormChange}
-                placeholder="Placeholder"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-[0.8rem] text-sm placeholder-gray-400 "
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-black mb-2">
-                Link
-              </label>
-              <input
-                type="text"
-                name="link1"
-                value={formData.link1}
-                onChange={onFormChange}
-                placeholder="Placeholder"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-[0.8rem] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 "
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-black mb-2">
-                Link
-              </label>
-              <input
-                type="text"
-                name="link2"
-                value={formData.link2}
-                onChange={onFormChange}
-                placeholder="Placeholder"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-[0.8rem] text-sm placeholder-gray-400 focus:outline-none focus:ring-2"
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-black mb-2">
-                Organizador
-              </label>
-              <select
-                name="organizador"
-                value={formData.organizador}
-                onChange={onFormChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2"
-              >
-                <option value="">Placeholder</option>
-                <option value="Equipe BAH">Equipe BAH</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-black mb-2">
-                Descrição
-              </label>
-              <textarea
-                name="descricao"
-                value={formData.descricao}
-                onChange={onFormChange}
-                placeholder="Entry Requirements"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-[0.8rem] text-sm placeholder-gray-400 h-28 resize-y focus:outline-none focus:ring-2"
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-black mb-2">
-                Tags
-              </label>
-              <div className="w-full border-2 border-gray-300 rounded-[1rem] min-h-[7rem] p-3 flex flex-col">
-                <div className="flex flex-wrap gap-2">
-                  {tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-2 py-1 rounded-full"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => onRemoveTag(tag)}
-                        className="text-lime-700 hover:text-lime-900"
-                        aria-label={`Remover tag ${tag}`}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="15" y1="9" x2="9" y2="15"></line>
-                          <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={onNewTagChange}
-                  onKeyDown={onNewTagKeyDown}
-                  placeholder="Adicionar tag..."
-                  className="w-full mt-auto pt-2 border-t border-gray-200 text-sm placeholder-gray-400 focus:outline-none bg-transparent"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="bg-gray-50 rounded-[1rem] p-4 border border-gray-100 flex flex-col gap-3 mb-6">
+      <div className="flex justify-between items-start">
+        <div className="text-sm font-semibold">Horário {index + 1}</div>
+
+        <Button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="text-red-500 hover:text-red-700 px-3 py-1 hover:bg-red-50 transition"
+          aria-label={`Remover horário ${index + 1}`}
+          variant="ghost"
+          size="sm"
+          style={{ borderRadius: '10px' }}
+        >
+          Remover
+        </Button>
       </div>
-    </section>
+
+      <div>
+        <Controller
+          name={`schedules.${index}.dia` as const}
+          control={control}
+          render={({ field: dayField }) => (
+            <Controller
+              name={`schedules.${index}.inicio` as const}
+              control={control}
+              render={({ field: inicioField }) => (
+                <Controller
+                  name={`schedules.${index}.fim` as const}
+                  control={control}
+                  render={({ field: fimField }) => (
+                    <>
+                      <TimeSelect
+                        dayValue={dayField.value}
+                        startValue={inicioField.value}
+                        endValue={fimField.value}
+                        onDayChange={dayField.onChange}
+                        onStartChange={inicioField.onChange}
+                        onEndChange={fimField.onChange}
+                      />
+
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {errors?.[index]?.dia && (
+                          <p className="text-red-500 text-xs">
+                            {errors[index].dia.message}
+                          </p>
+                        )}
+                        {errors?.[index]?.inicio && (
+                          <p className="text-red-500 text-xs">
+                            {errors[index].inicio.message}
+                          </p>
+                        )}
+                        {errors?.[index]?.fim && (
+                          <p className="text-red-500 text-xs">
+                            {errors[index].fim.message}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                />
+              )}
+            />
+          )}
+        />
+      </div>
+
+      <div className="mt-2">
+        <label className="block text-xs font-bold text-black mb-2">Tipo</label>
+        <Controller
+          name={`schedules.${index}.tipo` as const}
+          control={control}
+          render={({ field }) => (
+            <select
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+            >
+              <option value="">Selecione o tipo</option>
+              <option value="presencial">Presencial</option>
+              <option value="online">Online</option>
+              <option value="hibrido">Híbrido</option>
+            </select>
+          )}
+        />
+        {errors?.[index]?.tipo && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors[index].tipo.message}
+          </p>
+        )}
+      </div>
+    </div>
   )
 }
 
 export default function FormIniciativa() {
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState<FormData>({
-    titulo: '',
-    local: '',
-    link1: '',
-    link2: '',
-    organizador: '',
-    descricao: '',
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    getValues,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<InitiativeFormData>({
+    resolver: zodResolver(initiativeSchema),
+    defaultValues: {
+      titulo: '',
+      local: '',
+      link1: '',
+      link2: '',
+      organizador: '',
+      descricao: '',
+      isAtivo: false,
+      tags: [],
+      schedules: [],
+      newTag: '',
+      foto: undefined,
+    },
   })
-  const [isAtivo, setIsAtivo] = useState(true)
-  const [tags, setTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState('')
 
-  interface Schedule {
-    id: string
-    dia: string
-    inicio: string
-    fim: string
-    tipo: string
-  }
-  const [schedules, setSchedules] = useState<Schedule[]>([])
+  const organizadorValue = watch('organizador')
+  const {
+    fields: tagFields,
+    append: appendTag,
+    remove: removeTag,
+  } = useFieldArray({ control, name: 'tags' })
+  const {
+    fields: scheduleFields,
+    append: appendSchedule,
+    remove: removeSchedule,
+  } = useFieldArray({ control, name: 'schedules' })
 
-  const makeId = () => String(Date.now()) + Math.floor(Math.random() * 1000)
-
-  const handleAddSchedule = () => {
-    setSchedules(prev => [
-      ...prev,
-      { id: makeId(), dia: '', inicio: '', fim: '', tipo: '' },
-    ])
-  }
-
-  const handleRemoveSchedule = (id: string) => {
-    setSchedules(prev => prev.filter(s => s.id !== id))
+  const handleNewTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const newTagValue = getValues('newTag')?.trim()
+      if (newTagValue && !getValues('tags').includes(newTagValue)) {
+        appendTag(newTagValue)
+        setValue('newTag', '')
+      }
+    }
   }
 
-  const handleScheduleChange = (
-    id: string,
-    field: keyof Omit<Schedule, 'id'>,
-    value: string
-  ) => {
-    setSchedules(prev =>
-      prev.map(s => (s.id === id ? { ...s, [field]: value } : s))
+  const onSubmit = (data: InitiativeFormData) => {
+    const fotoFileList = data.foto as unknown as FileList | undefined | null
+    const foto =
+      fotoFileList && fotoFileList.length > 0 ? fotoFileList[0] : undefined
+    const { newTag, ...payload } = data
+    console.log('Payload submetido:', { ...payload, foto })
+    toast.success(
+      isEditing
+        ? 'Iniciativa atualizada com sucesso!'
+        : 'Iniciativa criada com sucesso!'
     )
   }
 
   useEffect(() => {
     if (isEditing) {
-      setFormData({
-        titulo: iniciativaParaEditar.titulo,
-        local: iniciativaParaEditar.local,
-        link1: iniciativaParaEditar.link1,
-        link2: iniciativaParaEditar.link2,
-        organizador: iniciativaParaEditar.organizador,
-        descricao: iniciativaParaEditar.descricao,
-      })
-      setIsAtivo(iniciativaParaEditar.isAtivo)
-      setTags(iniciativaParaEditar.tags)
-      // exemplo: popular schedules se viesse do backend
-      setSchedules([
-        {
-          id: makeId(),
-          dia: 'segunda',
-          inicio: '09:00',
-          fim: '11:00',
-          tipo: 'online',
-        },
-      ])
+      const dadosDoBackend: InitiativeFormData = {
+        titulo: 'Iniciativa de Exemplo',
+        local: 'Online',
+        link1: 'https://site.com',
+        link2: '',
+        organizador: 'Equipe BAH',
+        descricao: 'Descrição de exemplo para o modo de edição.',
+        isAtivo: false,
+        tags: ['React', 'TypeScript'],
+        schedules: [
+          {
+            id: '1',
+            dia: 'segunda',
+            inicio: '09:00',
+            fim: '11:00',
+            tipo: 'online',
+          },
+        ],
+        newTag: '',
+        foto: undefined,
+      }
+      reset(dadosDoBackend)
     } else {
-      setFormData({
+      reset({
         titulo: '',
         local: '',
         link1: '',
         link2: '',
         organizador: '',
         descricao: '',
+        isAtivo: false,
+        tags: [],
+        schedules: [],
+        newTag: '',
+        foto: undefined,
       })
-      setTags([])
-      setSchedules([])
     }
-  }, [isEditing])
-
-  const handleFormChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  const handleToggleAtivo = () => {
-    setIsAtivo(current => !current)
-  }
-
-  const handleNewTagChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewTag(e.target.value)
-  }
-
-  const handleAddTag = () => {
-    const trimmedTag = newTag.trim()
-    if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags(prev => [...prev, trimmedTag])
-    }
-    setNewTag('')
-  }
-
-  const handleNewTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddTag()
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(prev => prev.filter(tag => tag !== tagToRemove))
-  }
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    const payload = { ...formData, isAtivo, tags, schedules }
-    if (isEditing) {
-      alert('Lógica para ATUALIZAR a iniciativa. Veja o console.')
-      console.log('Atualizando com:', payload)
-    } else {
-      alert('Lógica para CRIAR uma nova iniciativa. Veja o console.')
-      console.log('Criando com:', payload)
-    }
-  }
+  }, [isEditing, reset])
 
   return (
-    <>
-      <Sidebar />
-      <main className="ml-64 p-6 min-h-screen bg-gray-50">
-        <header className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-mulish text-[#5a2d86]">
-              {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
-            </h1>
-            <p className="text-sm text-gray-600">
-              {isEditing ? `Editar a iniciativa` : 'Criar iniciativa'}
-            </p>
-          </div>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-sm bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
-          >
-            {isEditing ? 'Cancelar Edição' : 'Editar'}
-          </button>
-        </header>
+    <main className="p-6 min-h-screen bg-gray-50">
+      <Toaster position="top-right" reverseOrder={false} />
 
-        <form onSubmit={handleSubmit}>
-          <div className="w-full">
-            <InitiativeCard
-              formData={formData}
-              isAtivo={isAtivo}
-              tags={tags}
-              newTag={newTag}
-              onFormChange={handleFormChange}
-              onToggleAtivo={handleToggleAtivo}
-              onNewTagChange={handleNewTagChange}
-              onNewTagKeyDown={handleNewTagKeyDown}
-              onRemoveTag={handleRemoveTag}
-            />
-          </div>
+      <header className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-mulish text-[#5a2d86]">
+            {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
+          </h1>
+          <p className="text-sm text-gray-600">
+            {isEditing ? 'Editar a iniciativa' : 'Criar nova iniciativa'}
+          </p>
+        </div>
+        <Button
+          type="button"
+          onClick={() => setIsEditing(!isEditing)}
+          className="bg-gray-200 text-black px-4 py-1 hover:bg-gray-300"
+          style={{
+            borderRadius: '10px',
+            minWidth: 'fit-content',
+            height: '2.5rem',
+          }}
+        >
+          {isEditing ? 'Cancelar Edição' : 'Editar'}
+        </Button>
+      </header>
 
-          <section className="w-full mt-8">
-            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-200 shadow-sm w-full">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-mulish text-lg font-bold text-black">
-                  Horários
-                </h2>
-
-                <div className="flex flex-col items-center">
-                  <span className="text-sm text-black font-bold mb-2">
-                    Clique para adicionar
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={handleAddSchedule}
-                    className="px-4 py-2 w-30 h-10 rounded-[0.8rem] bg-[#f2f2f7] text-[#85858b] text-sm hover:opacity-90"
-                    aria-label="Adicionar horário"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {schedules.length === 0 && (
-                  <div className="col-span-full text-sm text-gray-500">
-                    Nenhum horário adicionado — clique em + para adicionar.
-                  </div>
-                )}
-
-                {schedules.map(schedule => (
-                  <div
-                    key={schedule.id}
-                    className="bg-gray-50 rounded-[1rem] p-4 border border-gray-100 flex flex-col gap-3"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="text-sm font-semibold">Horário</div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSchedule(schedule.id)}
-                        className="text-red-500 text-sm px-2 py-1 rounded hover:bg-red-50"
-                        aria-label="Remover horário"
-                      >
-                        Remover
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-bold text-black mb-2">
-                          Dia
-                        </label>
-                        <select
-                          value={schedule.dia}
-                          onChange={e =>
-                            handleScheduleChange(
-                              schedule.id,
-                              'dia',
-                              e.target.value
-                            )
-                          }
-                          className={`w-full px-4 py-2 border border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5a2d86] ${
-                            schedule.dia === '' ? 'text-gray-400' : 'text-black'
-                          }`}
-                        >
-                          <option value="" disabled hidden>
-                            Selecione o dia
-                          </option>
-                          <option value="segunda">Segunda-feira</option>
-                          <option value="terca">Terça-feira</option>
-                          <option value="quarta">Quarta-feira</option>
-                          <option value="quinta">Quinta-feira</option>
-                          <option value="sexta">Sexta-feira</option>
-                          <option value="sabado">Sábado</option>
-                          <option value="domingo">Domingo</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-black mb-2">
-                          Tipo
-                        </label>
-                        <select
-                          value={schedule.tipo}
-                          onChange={e =>
-                            handleScheduleChange(
-                              schedule.id,
-                              'tipo',
-                              e.target.value
-                            )
-                          }
-                          className={`w-full px-4 py-2 border border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5a2d86] ${
-                            schedule.tipo === ''
-                              ? 'text-gray-400'
-                              : 'text-black'
-                          }`}
-                        >
-                          <option value="" disabled hidden>
-                            Selecione o tipo
-                          </option>
-                          <option value="presencial">Presencial</option>
-                          <option value="online">Online</option>
-                          <option value="hibrido">Híbrido</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-bold text-black mb-2">
-                          Horário Início
-                        </label>
-                        <select
-                          value={schedule.inicio}
-                          onChange={e =>
-                            handleScheduleChange(
-                              schedule.id,
-                              'inicio',
-                              e.target.value
-                            )
-                          }
-                          className={`w-full px-4 py-2 border border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5a2d86] ${
-                            schedule.inicio === ''
-                              ? 'text-gray-400'
-                              : 'text-black'
-                          }`}
-                        >
-                          <option value="" disabled hidden>
-                            Selecione o horário
-                          </option>
-                          <option value="08:00">08:00</option>
-                          <option value="09:00">09:00</option>
-                          <option value="10:00">10:00</option>
-                          <option value="11:00">11:00</option>
-                          <option value="12:00">12:00</option>
-                          <option value="13:00">13:00</option>
-                          <option value="14:00">14:00</option>
-                          <option value="15:00">15:00</option>
-                          <option value="16:00">16:00</option>
-                          <option value="17:00">17:00</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-black mb-2">
-                          Horário Fim
-                        </label>
-                        <select
-                          value={schedule.fim}
-                          onChange={e =>
-                            handleScheduleChange(
-                              schedule.id,
-                              'fim',
-                              e.target.value
-                            )
-                          }
-                          className={`w-full px-4 py-2 border border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5a2d86] ${
-                            schedule.fim === '' ? 'text-gray-400' : 'text-black'
-                          }`}
-                        >
-                          <option value="" disabled hidden>
-                            Selecione o horário
-                          </option>
-                          <option value="09:00">09:00</option>
-                          <option value="10:00">10:00</option>
-                          <option value="11:00">11:00</option>
-                          <option value="12:00">12:00</option>
-                          <option value="13:00">13:00</option>
-                          <option value="14:00">14:00</option>
-                          <option value="15:00">15:00</option>
-                          <option value="16:00">16:00</option>
-                          <option value="17:00">17:00</option>
-                          <option value="18:00">18:00</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="w-full mt-8">
-            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-200 shadow-sm w-full">
-              <h2 className="font-mulish text-lg font-bold text-black mb-6">
-                Foto
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <section className="w-full">
+          <div className="relative bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-mulish text-lg font-bold text-black">
+                Detalhes da Iniciativa
               </h2>
-              <label className="flex items-center justify-center w-full h-64 bg-gray-100 border border-gray-300 rounded-[1.5rem] cursor-pointer hover:bg-gray-200 transition">
-                <div className="text-center text-gray-500 text-sm flex items-center gap-2">
-                  <img
-                    src="../src/assets/camera.png"
-                    alt="Logo"
-                    className="w-5 h-5"
-                  />
-                  <span>Clique para adicionar uma foto</span>
-                  <input type="file" className="hidden" />
-                </div>
-              </label>
+              <div className="flex items-center gap-2">
+                <Star
+                  className={`w-5 h-5 ${watch('isAtivo') ? 'text-black' : 'text-gray-400'}`}
+                />
+                <Controller
+                  name="isAtivo"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className={`
+    relative inline-flex h-6 w-11 items-center rounded-full 
+    ${field.value ? 'bg-green-500' : 'bg-gray-300'}
+    transition-colors
+  `}
+                    >
+                      <span
+                        className={`
+      pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white
+      transition-transform duration-200 ease-in-out
+      ${field.value ? 'translate-x-6' : 'translate-x-1'}
+    `}
+                      />
+                    </Switch>
+                  )}
+                />
+              </div>
             </div>
-          </section>
 
-          <div className="mt-6 flex justify">
-            <button
-              type="submit"
-              className="px-7 py-2 rounded-lg bg-[#5a2d86] font-mulish text-white text-sm hover:opacity-90 mt-5"
-            >
-              {isEditing ? 'Atualizar Iniciativa' : 'Salvar Iniciativa'}
-            </button>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Título
+                  </label>
+                  <Input
+                    {...register('titulo')}
+                    placeholder="Digite o título"
+                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                  />
+                  {errors.titulo && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.titulo.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Local
+                  </label>
+                  <Input
+                    {...register('local')}
+                    placeholder="Digite o local"
+                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                  />
+                  {errors.local && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.local.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Link 1
+                  </label>
+                  <Input
+                    {...register('link1')}
+                    placeholder="https://exemplo.com"
+                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                  />
+                  {errors.link1 && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.link1.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Link 2
+                  </label>
+                  <Input
+                    {...register('link2')}
+                    placeholder="https://linkedin.com/exemplo"
+                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                  />
+                  {errors.link2 && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.link2.message}
+                    </p>
+                  )}
+                </div>
+                <div className="md:col-span-1">
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Organizador
+                  </label>
+                  <select
+                    {...register('organizador')}
+                    className={`w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300 ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
+                  >
+                    <option value="" disabled>
+                      Selecione
+                    </option>
+                    <option value="Equipe BAH">Equipe BAH</option>
+                  </select>
+                  {errors.organizador && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.organizador.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Descrição
+                  </label>
+                  <Textarea
+                    {...register('descricao')}
+                    placeholder="Digite a descrição"
+                    className="px-4 py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm h-28 resize-y placeholder:text-gray-400"
+                  />
+                  {errors.descricao && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.descricao.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-1">
+                  <label className="block text-xs font-bold text-black mb-2">
+                    Tags
+                  </label>
+                  <div className="w-full border-2 border-gray-200 rounded-[1rem] min-h-[7rem] p-3 flex flex-col">
+                    <div className="flex flex-wrap gap-2">
+                      {tagFields.map((field, index) => (
+                        <span
+                          key={field.id}
+                          className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
+                        >
+                          {getValues(`tags.${index}`)}
+                          <Button
+                            type="button"
+                            onClick={() => removeTag(index)}
+                            className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none"
+                            aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            ✕
+                          </Button>
+                        </span>
+                      ))}
+                    </div>
+                    <Input
+                      {...register('newTag')}
+                      onKeyDown={handleNewTagKeyDown}
+                      placeholder="Adicionar tag..."
+                      className="w-full mt-auto pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400"
+                    />
+                  </div>
+                  {errors.tags && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.tags.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
-      </main>
-    </>
+        </section>
+
+        <section className="w-full mt-8">
+          <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-mulish text-lg font-bold text-black">
+                Horários
+              </h2>
+
+              <div className="flex flex-col items-center">
+                <p className="text-xs font-bold mb-1">Clique para adicionar</p>
+                <Button
+                  type="button"
+                  onClick={() =>
+                    appendSchedule({ dia: '', inicio: '', fim: '', tipo: '' })
+                  }
+                  className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
+                  style={{
+                    width: '35px',
+                    minWidth: '50px',
+                    maxWidth: '50px',
+                    height: '20px',
+                    borderRadius: '10px',
+                    padding: 0,
+                    boxSizing: 'border-box',
+                  }}
+                  aria-label="Adicionar horário"
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+              {scheduleFields.length === 0 && (
+                <div className="col-span-full text-sm text-gray-500">
+                  Nenhum horário adicionado — clique em + para adicionar.
+                </div>
+              )}
+
+              {scheduleFields.map((field, index) => (
+                <ScheduleItem
+                  key={field.id}
+                  index={index}
+                  control={control}
+                  onRemove={removeSchedule}
+                  errors={errors.schedules}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full mt-6">
+          <h2 className="font-mulish text-lg font-bold text-black mb-6">
+            Foto
+          </h2>
+
+          <Label
+            htmlFor="foto-upload"
+            className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
+          >
+            <div className="flex flex-col items-center justify-center text-gray-500">
+              <Camera className="w-5 h-5 mb-2" />
+              <p className="mb-1 text-sm">Clique para adicionar uma foto</p>
+            </div>
+            <Input
+              id="foto-upload"
+              type="file"
+              className="hidden"
+              {...register('foto')}
+            />
+          </Label>
+
+          {errors.foto && (
+            <p className="text-red-500 text-xs mt-2">
+              {(errors.foto as any).message}
+            </p>
+          )}
+        </section>
+
+        <div className="mt-6 flex justify-start">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className={`bg-[#5a2d86] text-white hover:bg-[#4a246d] mt-6 rounded-lg h-12 px-6 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+          >
+            {isSubmitting
+              ? 'Salvando...'
+              : isEditing
+                ? 'Atualizar Iniciativa'
+                : 'Salvar Iniciativa'}
+          </Button>
+        </div>
+      </form>
+    </main>
   )
 }
