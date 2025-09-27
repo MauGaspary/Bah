@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
-from app.config.model import get_embedding_model  
+from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user

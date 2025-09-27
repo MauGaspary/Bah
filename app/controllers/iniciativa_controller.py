@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
@@ -18,3 +19,9 @@ class IniciativaController:
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
         return self.service.get_iniciativa_by_id(iniciativa_id)
+
+    def search_iniciativas(self, query: str, page: int, size: int):
+        try:
+            return self.service.search_iniciativas(query, page, size)
+        except HTTPException as e:
+            raise e

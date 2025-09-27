@@ -6,6 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaFiltersSchema,
+    IniciativaListResponseSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
@@ -95,3 +99,22 @@ class IniciativaService:
         if not iniciativa:
             raise HTTPException(status_code=404, detail="Iniciativa não encontrada")
         return IniciativaResponse.model_validate(iniciativa)
+
+    def search_iniciativas(
+        self, query: str, page: int, size: int
+    ) -> IniciativaListResponseSchema:
+        embedding = self.model.encode(
+            query, convert_to_numpy=True, normalize_embeddings=True
+        )
+        try:
+            iniciativas, total = self.repository.search_by_embedding(embedding, page, size)
+
+            filters = IniciativaFiltersSchema(q=query, page=page, size=size)
+            return IniciativaListResponseSchema(
+                items=iniciativas, total=total, filters=filters
+            )
+        except Exception as e:
+            print(f"Erro na busca: {type(e).__name__}: {str(e)}")
+            raise ValueError(
+                status_code=500, detail=f"Erro interno do servidor na service: {str(e)}"
+            ) from e
