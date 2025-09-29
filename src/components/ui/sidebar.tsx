@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import LogoImg from '../../assets/logo.png'
 import '../../index.css'
+import Modal from '../logoutModal'
 
 interface MenuItemProps {
   to: string
@@ -42,7 +43,7 @@ function SidebarAdm() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
-    navigate('/login')
+    navigate('/admin')
   }
 
   return (
@@ -100,7 +101,7 @@ function SidebarAdm() {
       </div>
 
       {logoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-brightness-50 font-mulish font-medium">
+        <Modal onClose={() => setLogoutPopup(false)} onLogout={handleLogout}>
           <div className="bg-white rounded-[var(--radius-card)] text-center shadow-lg w-96 p-10">
             <h2 className="text-xl font-bold mb-4">Logout</h2>
             <p className="mb-4">Tem certeza que deseja fazer logout?</p>
@@ -119,7 +120,7 @@ function SidebarAdm() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   )
