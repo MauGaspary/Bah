@@ -1,45 +1,24 @@
 import React, { useEffect, useState, type KeyboardEvent } from 'react'
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
-import type { Control } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast, { Toaster } from 'react-hot-toast'
 import { Camera, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form'
 import SidebarAdm from '@/components/ui/sidebar'
-
-const Input = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className = '', ...props }, ref) => (
-  <input
-    className={`w-full ${className} focus:outline-none focus:ring-0 focus:border-gray-300`}
-    ref={ref}
-    {...props}
-  />
-))
-
-const Textarea = React.forwardRef<
-  HTMLTextAreaElement,
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>
->(({ className = '', ...props }, ref) => (
-  <textarea
-    className={`w-full ${className} focus:outline-none focus:ring-0 focus:border-gray-300`}
-    ref={ref}
-    {...props}
-  />
-))
-
-const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({
-  children,
-  className = '',
-  ...props
-}) => (
-  <label className={className} {...props}>
-    {children}
-  </label>
-)
 
 type Option = { value: string; label: string }
 
@@ -88,11 +67,11 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <div>
-        <label className="block text-xs font-bold text-black mb-2">Dia</label>
+        <Label className="text-xs font-bold text-black mb-2">Dia</Label>
         <select
           value={dayValue ?? ''}
           onChange={e => onDayChange(e.target.value)}
-          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
         >
           {DAY_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -103,13 +82,13 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-black mb-2">
+        <Label className="text-xs font-bold text-black mb-2">
           Horário Início
-        </label>
+        </Label>
         <select
           value={startValue ?? ''}
           onChange={e => onStartChange(e.target.value)}
-          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
         >
           {HOUR_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -120,13 +99,11 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-black mb-2">
-          Horário Fim
-        </label>
+        <Label className="text-xs font-bold text-black mb-2">Horário Fim</Label>
         <select
           value={endValue ?? ''}
           onChange={e => onEndChange(e.target.value)}
-          className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
         >
           {HOUR_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -175,41 +152,34 @@ type InitiativeFormData = z.infer<typeof initiativeSchema>
 
 const ScheduleItem: React.FC<{
   index: number
-  control: Control<InitiativeFormData>
   onRemove: (index: number) => void
   errors?: any
-}> = ({ index, control, onRemove, errors }) => {
+}> = ({ index, onRemove, errors }) => {
   return (
-    <div className="bg-gray-50 rounded-[1rem] p-4 border border-gray-100 flex flex-col gap-3 mb-6">
-      <div className="flex justify-between items-start">
-        <div className="text-sm font-semibold">Horário {index + 1}</div>
+    <Card className="bg-gray-50 border-gray-100 mb-6">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="text-sm font-semibold">Horário {index + 1}</div>
 
-        <Button
-          type="button"
-          onClick={() => onRemove(index)}
-          className="text-red-500 hover:text-red-700 px-3 py-1 hover:bg-red-50 transition"
-          aria-label={`Remover horário ${index + 1}`}
-          variant="ghost"
-          size="sm"
-          style={{ borderRadius: '10px' }}
-        >
-          Remover
-        </Button>
-      </div>
+          <Button
+            type="button"
+            onClick={() => onRemove(index)}
+            className="text-white px-3 py-1 transition"
+            aria-label={`Remover horário ${index + 1}`}
+            variant="destructive"
+            size="sm"
+            style={{ borderRadius: '10px' }}
+          >
+            Remover
+          </Button>
+        </div>
 
-      <div>
-        <Controller
-          name={`schedules.${index}.dia` as const}
-          control={control}
-          render={({ field: dayField }) => (
-            <Controller
-              name={`schedules.${index}.inicio` as const}
-              control={control}
-              render={({ field: inicioField }) => (
-                <Controller
-                  name={`schedules.${index}.fim` as const}
-                  control={control}
-                  render={({ field: fimField }) => (
+        <FormField name={`schedules.${index}.dia`}>
+          {({ field: dayField }) => (
+            <FormField name={`schedules.${index}.inicio`}>
+              {({ field: inicioField }) => (
+                <FormField name={`schedules.${index}.fim`}>
+                  {({ field: fimField }) => (
                     <>
                       <TimeSelect
                         dayValue={dayField.value}
@@ -239,54 +209,45 @@ const ScheduleItem: React.FC<{
                       </div>
                     </>
                   )}
-                />
+                </FormField>
               )}
-            />
+            </FormField>
           )}
-        />
-      </div>
+        </FormField>
 
-      <div className="mt-2">
-        <label className="block text-xs font-bold text-black mb-2">Tipo</label>
-        <Controller
-          name={`schedules.${index}.tipo` as const}
-          control={control}
-          render={({ field }) => (
-            <select
-              value={field.value ?? ''}
-              onChange={field.onChange}
-              className="w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300"
-            >
-              <option value="">Selecione o tipo</option>
-              <option value="presencial">Presencial</option>
-              <option value="online">Online</option>
-              <option value="hibrido">Híbrido</option>
-            </select>
-          )}
-        />
-        {errors?.[index]?.tipo && (
-          <p className="text-red-500 text-xs mt-1">
-            {errors[index].tipo.message}
-          </p>
-        )}
-      </div>
-    </div>
+        <div className="mt-2">
+          <FormField name={`schedules.${index}.tipo`}>
+            {({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-xs font-bold text-black mb-2">
+                  Tipo
+                </FormLabel>
+                <FormControl>
+                  <select
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
+                  >
+                    <option value="">Selecione o tipo</option>
+                    <option value="presencial">Presencial</option>
+                    <option value="online">Online</option>
+                    <option value="hibrido">Híbrido</option>
+                  </select>
+                </FormControl>
+                <FormMessage name={`schedules.${index}.tipo`} />
+              </FormItem>
+            )}
+          </FormField>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
 export default function FormIniciativa() {
   const [isEditing, setIsEditing] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    getValues,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<InitiativeFormData>({
+  const form = useForm<InitiativeFormData>({
     resolver: zodResolver(initiativeSchema),
     defaultValues: {
       titulo: '',
@@ -302,6 +263,16 @@ export default function FormIniciativa() {
       foto: undefined,
     },
   })
+
+  const {
+    register,
+    control,
+    reset,
+    getValues,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = form
 
   const organizadorValue = watch('organizador')
   const {
@@ -381,9 +352,9 @@ export default function FormIniciativa() {
   }, [isEditing, reset])
 
   return (
-    <div className="flex">
+    <div className="flex h-screen w-full">
       <SidebarAdm />
-      <main className="p-6 min-h-screen bg-gray-50">
+      <main className="flex-1 p-6 bg-gray-50 overflow-y-auto w-full">
         <Toaster position="top-right" reverseOrder={false} />
 
         <header className="mb-6 flex justify-between items-center">
@@ -398,288 +369,309 @@ export default function FormIniciativa() {
           <Button
             type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className="bg-gray-200 text-black px-4 py-1 hover:bg-gray-300"
-            style={{
-              borderRadius: '10px',
-              minWidth: 'fit-content',
-              height: '2.5rem',
-            }}
+            variant="secondary"
+            size="sm"
+            className="min-w-fit"
           >
             {isEditing ? 'Cancelar Edição' : 'Editar'}
           </Button>
         </header>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <section className="w-full">
-            <div className="relative bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-mulish text-lg font-bold text-black">
-                  Detalhes da Iniciativa
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Star
-                    className={`w-5 h-5 ${watch('isAtivo') ? 'text-black' : 'text-gray-400'}`}
-                  />
-                  <Controller
-                    name="isAtivo"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className={`
-    relative inline-flex h-6 w-11 items-center rounded-full 
-    ${field.value ? 'bg-green-500' : 'bg-gray-300'}
-    transition-colors
-  `}
-                      >
-                        <span
-                          className={`
-      pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white
-      transition-transform duration-200 ease-in-out
-      ${field.value ? 'translate-x-6' : 'translate-x-1'}
-    `}
+        <Form form={form} onSubmit={onSubmit} className="w-full">
+          <section className="w-full max-w-none">
+            <Card className="bg-white border-gray-100 shadow-sm w-full">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="font-mulish text-lg font-bold text-black">
+                    Detalhes da Iniciativa
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Star
+                      className={`w-5 h-5 ${watch('isAtivo') ? 'text-black fill-black' : 'text-gray-400 fill-gray-400'}`}
+                    />
+                    <FormField name="isAtivo">
+                      {({ field }) => (
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg"
                         />
-                      </Switch>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Título
-                    </label>
-                    <Input
-                      {...register('titulo')}
-                      placeholder="Digite o título"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                    />
-                    {errors.titulo && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.titulo.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Local
-                    </label>
-                    <Input
-                      {...register('local')}
-                      placeholder="Digite o local"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                    />
-                    {errors.local && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.local.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Link 1
-                    </label>
-                    <Input
-                      {...register('link1')}
-                      placeholder="https://exemplo.com"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                    />
-                    {errors.link1 && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.link1.message}
-                      </p>
-                    )}
+                      )}
+                    </FormField>
                   </div>
                 </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField name="titulo">
+                      {({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Título
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Digite o título"
+                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage name="titulo" />
+                        </FormItem>
+                      )}
+                    </FormField>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Link 2
-                    </label>
-                    <Input
-                      {...register('link2')}
-                      placeholder="https://linkedin.com/exemplo"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                    />
-                    {errors.link2 && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.link2.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="md:col-span-1">
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Organizador
-                    </label>
-                    <select
-                      {...register('organizador')}
-                      className={`w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300 ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
-                    >
-                      <option value="" disabled>
-                        Selecione
-                      </option>
-                      <option value="Equipe BAH">Equipe BAH</option>
-                    </select>
-                    {errors.organizador && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.organizador.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                    <FormField name="local">
+                      {({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Local
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Digite o local"
+                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage name="local" />
+                        </FormItem>
+                      )}
+                    </FormField>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Descrição
-                    </label>
-                    <Textarea
-                      {...register('descricao')}
-                      placeholder="Digite a descrição"
-                      className="px-4 py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm h-28 resize-y placeholder:text-gray-400"
-                    />
-                    {errors.descricao && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.descricao.message}
-                      </p>
-                    )}
+                    <FormField name="link1">
+                      {({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Link 1
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="https://exemplo.com"
+                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage name="link1" />
+                        </FormItem>
+                      )}
+                    </FormField>
                   </div>
 
-                  <div className="md:col-span-1">
-                    <label className="block text-xs font-bold text-black mb-2">
-                      Tags
-                    </label>
-                    <div className="w-full border-2 border-gray-200 rounded-[1rem] min-h-[7rem] p-3 flex flex-col">
-                      <div className="flex flex-wrap gap-2">
-                        {tagFields.map((field, index) => (
-                          <span
-                            key={field.id}
-                            className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
-                          >
-                            {getValues(`tags.${index}`)}
-                            <Button
-                              type="button"
-                              onClick={() => removeTag(index)}
-                              className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none"
-                              aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
-                              variant="ghost"
-                              size="sm"
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField name="link2">
+                      {({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Link 2
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="https://linkedin.com/exemplo"
+                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage name="link2" />
+                        </FormItem>
+                      )}
+                    </FormField>
+                    <FormField name="organizador">
+                      {({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-5">
+                            Organizador
+                          </FormLabel>
+                          <FormControl>
+                            <select
+                              {...field}
+                              className={`w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
                             >
-                              ✕
-                            </Button>
-                          </span>
-                        ))}
-                      </div>
-                      <Input
-                        {...register('newTag')}
-                        onKeyDown={handleNewTagKeyDown}
-                        placeholder="Adicionar tag..."
-                        className="w-full mt-auto pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400"
-                      />
+                              <option value="" disabled>
+                                Selecione
+                              </option>
+                              <option value="Equipe BAH">Equipe BAH</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage name="organizador" />
+                        </FormItem>
+                      )}
+                    </FormField>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField name="descricao">
+                      {({ field }) => (
+                        <FormItem className="md:col-span-2 flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Descrição
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Digite a descrição"
+                              className="py-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage name="descricao" />
+                        </FormItem>
+                      )}
+                    </FormField>
+
+                    <FormField name="tags">
+                      {() => (
+                        <FormItem className="md:col-span-1 flex flex-col">
+                          <FormLabel className="text-xs font-bold text-black mb-2">
+                            Tags
+                          </FormLabel>
+                          <FormControl>
+                            <div className="w-full border-2 border-gray-200 rounded-[1rem] h-[10rem] p-3 flex flex-col">
+                              <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                                <div className="flex flex-wrap gap-2">
+                                  {tagFields.map((field, index) => (
+                                    <span
+                                      key={field.id}
+                                      className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
+                                    >
+                                      {getValues(`tags.${index}`)}
+                                      <Button
+                                        type="button"
+                                        onClick={() => removeTag(index)}
+                                        className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none w-5 h-5 p-0 min-w-5 flex items-center justify-center"
+                                        aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
+                                        variant="ghost"
+                                        size="sm"
+                                      >
+                                        ✕
+                                      </Button>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                              <Input
+                                {...register('newTag')}
+                                onKeyDown={handleNewTagKeyDown}
+                                placeholder="Adicionar tag..."
+                                className="w-full pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400 flex-shrink-0"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage name="tags" />
+                        </FormItem>
+                      )}
+                    </FormField>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="w-full max-w-none mt-8">
+            <Card className="bg-white border-gray-100 shadow-sm w-full">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="font-mulish text-lg font-bold text-black">
+                    Horários
+                  </CardTitle>
+
+                  <div className="flex flex-col items-center">
+                    <p className="text-xs font-bold mb-1">
+                      Clique para adicionar
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        appendSchedule({
+                          dia: '',
+                          inicio: '',
+                          fim: '',
+                          tipo: '',
+                        })
+                      }
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
+                      style={{
+                        width: '35px',
+                        minWidth: '50px',
+                        maxWidth: '50px',
+                        height: '20px',
+                        borderRadius: '10px',
+                        padding: 0,
+                        boxSizing: 'border-box',
+                      }}
+                      aria-label="Adicionar horário"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+                  {scheduleFields.length === 0 && (
+                    <div className="col-span-full text-sm text-gray-500">
+                      Nenhum horário adicionado — clique em + para adicionar.
                     </div>
-                    {errors.tags && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.tags.message}
-                      </p>
-                    )}
-                  </div>
+                  )}
+
+                  {scheduleFields.map((field, index) => (
+                    <ScheduleItem
+                      key={field.id}
+                      index={index}
+                      onRemove={removeSchedule}
+                      errors={errors.schedules}
+                    />
+                  ))}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </section>
 
-          <section className="w-full mt-8">
-            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-mulish text-lg font-bold text-black">
-                  Horários
-                </h2>
-
-                <div className="flex flex-col items-center">
-                  <p className="text-xs font-bold mb-1">
-                    Clique para adicionar
-                  </p>
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      appendSchedule({ dia: '', inicio: '', fim: '', tipo: '' })
-                    }
-                    className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
-                    style={{
-                      width: '35px',
-                      minWidth: '50px',
-                      maxWidth: '50px',
-                      height: '20px',
-                      borderRadius: '10px',
-                      padding: 0,
-                      boxSizing: 'border-box',
-                    }}
-                    aria-label="Adicionar horário"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
-                {scheduleFields.length === 0 && (
-                  <div className="col-span-full text-sm text-gray-500">
-                    Nenhum horário adicionado — clique em + para adicionar.
-                  </div>
-                )}
-
-                {scheduleFields.map((field, index) => (
-                  <ScheduleItem
-                    key={field.id}
-                    index={index}
-                    control={control}
-                    onRemove={removeSchedule}
-                    errors={errors.schedules}
-                  />
-                ))}
-              </div>
-            </div>
+          <section className="w-full max-w-none mt-6">
+            <Card className="bg-white border-gray-100 shadow-sm w-full">
+              <CardHeader>
+                <CardTitle className="font-mulish text-lg font-bold text-black">
+                  Foto
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FormField name="foto">
+                  {({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormControl>
+                        <Label
+                          htmlFor="foto-upload"
+                          className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
+                        >
+                          <div className="flex flex-col items-center justify-center text-gray-500">
+                            <Camera className="w-5 h-5 mb-2" />
+                            <p className="mb-1 text-sm">
+                              Clique para adicionar uma foto
+                            </p>
+                          </div>
+                          <Input
+                            id="foto-upload"
+                            type="file"
+                            className="hidden"
+                            {...field}
+                          />
+                        </Label>
+                      </FormControl>
+                      <FormMessage name="foto" />
+                    </FormItem>
+                  )}
+                </FormField>
+              </CardContent>
+            </Card>
           </section>
 
-          <section className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full mt-6">
-            <h2 className="font-mulish text-lg font-bold text-black mb-6">
-              Foto
-            </h2>
-
-            <Label
-              htmlFor="foto-upload"
-              className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
-            >
-              <div className="flex flex-col items-center justify-center text-gray-500">
-                <Camera className="w-5 h-5 mb-2" />
-                <p className="mb-1 text-sm">Clique para adicionar uma foto</p>
-              </div>
-              <Input
-                id="foto-upload"
-                type="file"
-                className="hidden"
-                {...register('foto')}
-              />
-            </Label>
-
-            {errors.foto && (
-              <p className="text-red-500 text-xs mt-2">
-                {(errors.foto as any).message}
-              </p>
-            )}
-          </section>
-
-          <div className="mt-6 flex justify-start">
+          <div className="w-full mt-6 flex justify-start">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-[#5a2d86] text-white hover:bg-[#4a246d] mt-6 rounded-lg h-12 px-6 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              variant="purple"
+              size="lg"
+              className="mt-6 text-white"
             >
               {isSubmitting
                 ? 'Salvando...'
@@ -688,7 +680,7 @@ export default function FormIniciativa() {
                   : 'Salvar Iniciativa'}
             </Button>
           </div>
-        </form>
+        </Form>
       </main>
     </div>
   )
