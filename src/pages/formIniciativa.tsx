@@ -7,6 +7,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { Camera, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import SidebarAdm from '@/components/ui/sidebar'
 
 const Input = React.forwardRef<
   HTMLInputElement,
@@ -380,310 +381,315 @@ export default function FormIniciativa() {
   }, [isEditing, reset])
 
   return (
-    <main className="p-6 min-h-screen bg-gray-50">
-      <Toaster position="top-right" reverseOrder={false} />
+    <div className="flex">
+      <SidebarAdm />
+      <main className="p-6 min-h-screen bg-gray-50">
+        <Toaster position="top-right" reverseOrder={false} />
 
-      <header className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-mulish text-[#5a2d86]">
-            {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
-          </h1>
-          <p className="text-sm text-gray-600">
-            {isEditing ? 'Editar a iniciativa' : 'Criar nova iniciativa'}
-          </p>
-        </div>
-        <Button
-          type="button"
-          onClick={() => setIsEditing(!isEditing)}
-          className="bg-gray-200 text-black px-4 py-1 hover:bg-gray-300"
-          style={{
-            borderRadius: '10px',
-            minWidth: 'fit-content',
-            height: '2.5rem',
-          }}
-        >
-          {isEditing ? 'Cancelar Edição' : 'Editar'}
-        </Button>
-      </header>
+        <header className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-mulish text-[#5a2d86]">
+              {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {isEditing ? 'Editar a iniciativa' : 'Criar nova iniciativa'}
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => setIsEditing(!isEditing)}
+            className="bg-gray-200 text-black px-4 py-1 hover:bg-gray-300"
+            style={{
+              borderRadius: '10px',
+              minWidth: 'fit-content',
+              height: '2.5rem',
+            }}
+          >
+            {isEditing ? 'Cancelar Edição' : 'Editar'}
+          </Button>
+        </header>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <section className="w-full">
-          <div className="relative bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-mulish text-lg font-bold text-black">
-                Detalhes da Iniciativa
-              </h2>
-              <div className="flex items-center gap-2">
-                <Star
-                  className={`w-5 h-5 ${watch('isAtivo') ? 'text-black' : 'text-gray-400'}`}
-                />
-                <Controller
-                  name="isAtivo"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className={`
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <section className="w-full">
+            <div className="relative bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-mulish text-lg font-bold text-black">
+                  Detalhes da Iniciativa
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Star
+                    className={`w-5 h-5 ${watch('isAtivo') ? 'text-black' : 'text-gray-400'}`}
+                  />
+                  <Controller
+                    name="isAtivo"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className={`
     relative inline-flex h-6 w-11 items-center rounded-full 
     ${field.value ? 'bg-green-500' : 'bg-gray-300'}
     transition-colors
   `}
-                    >
-                      <span
-                        className={`
+                      >
+                        <span
+                          className={`
       pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white
       transition-transform duration-200 ease-in-out
       ${field.value ? 'translate-x-6' : 'translate-x-1'}
     `}
-                      />
-                    </Switch>
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Título
-                  </label>
-                  <Input
-                    {...register('titulo')}
-                    placeholder="Digite o título"
-                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                        />
+                      </Switch>
+                    )}
                   />
-                  {errors.titulo && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.titulo.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Local
-                  </label>
-                  <Input
-                    {...register('local')}
-                    placeholder="Digite o local"
-                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                  />
-                  {errors.local && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.local.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Link 1
-                  </label>
-                  <Input
-                    {...register('link1')}
-                    placeholder="https://exemplo.com"
-                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                  />
-                  {errors.link1 && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.link1.message}
-                    </p>
-                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Link 2
-                  </label>
-                  <Input
-                    {...register('link2')}
-                    placeholder="https://linkedin.com/exemplo"
-                    className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                  />
-                  {errors.link2 && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.link2.message}
-                    </p>
-                  )}
-                </div>
-                <div className="md:col-span-1">
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Organizador
-                  </label>
-                  <select
-                    {...register('organizador')}
-                    className={`w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300 ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
-                  >
-                    <option value="" disabled>
-                      Selecione
-                    </option>
-                    <option value="Equipe BAH">Equipe BAH</option>
-                  </select>
-                  {errors.organizador && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.organizador.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Descrição
-                  </label>
-                  <Textarea
-                    {...register('descricao')}
-                    placeholder="Digite a descrição"
-                    className="px-4 py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm h-28 resize-y placeholder:text-gray-400"
-                  />
-                  {errors.descricao && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.descricao.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="md:col-span-1">
-                  <label className="block text-xs font-bold text-black mb-2">
-                    Tags
-                  </label>
-                  <div className="w-full border-2 border-gray-200 rounded-[1rem] min-h-[7rem] p-3 flex flex-col">
-                    <div className="flex flex-wrap gap-2">
-                      {tagFields.map((field, index) => (
-                        <span
-                          key={field.id}
-                          className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
-                        >
-                          {getValues(`tags.${index}`)}
-                          <Button
-                            type="button"
-                            onClick={() => removeTag(index)}
-                            className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none"
-                            aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
-                            variant="ghost"
-                            size="sm"
-                          >
-                            ✕
-                          </Button>
-                        </span>
-                      ))}
-                    </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Título
+                    </label>
                     <Input
-                      {...register('newTag')}
-                      onKeyDown={handleNewTagKeyDown}
-                      placeholder="Adicionar tag..."
-                      className="w-full mt-auto pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400"
+                      {...register('titulo')}
+                      placeholder="Digite o título"
+                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
                     />
+                    {errors.titulo && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.titulo.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.tags && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.tags.message}
-                    </p>
-                  )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Local
+                    </label>
+                    <Input
+                      {...register('local')}
+                      placeholder="Digite o local"
+                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                    />
+                    {errors.local && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.local.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Link 1
+                    </label>
+                    <Input
+                      {...register('link1')}
+                      placeholder="https://exemplo.com"
+                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                    />
+                    {errors.link1 && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.link1.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Link 2
+                    </label>
+                    <Input
+                      {...register('link2')}
+                      placeholder="https://linkedin.com/exemplo"
+                      className="px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                    />
+                    {errors.link2 && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.link2.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="md:col-span-1">
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Organizador
+                    </label>
+                    <select
+                      {...register('organizador')}
+                      className={`w-full px-4 py-2 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-0 focus:border-gray-300 ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
+                    >
+                      <option value="" disabled>
+                        Selecione
+                      </option>
+                      <option value="Equipe BAH">Equipe BAH</option>
+                    </select>
+                    {errors.organizador && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.organizador.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Descrição
+                    </label>
+                    <Textarea
+                      {...register('descricao')}
+                      placeholder="Digite a descrição"
+                      className="px-4 py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm h-28 resize-y placeholder:text-gray-400"
+                    />
+                    {errors.descricao && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.descricao.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-1">
+                    <label className="block text-xs font-bold text-black mb-2">
+                      Tags
+                    </label>
+                    <div className="w-full border-2 border-gray-200 rounded-[1rem] min-h-[7rem] p-3 flex flex-col">
+                      <div className="flex flex-wrap gap-2">
+                        {tagFields.map((field, index) => (
+                          <span
+                            key={field.id}
+                            className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
+                          >
+                            {getValues(`tags.${index}`)}
+                            <Button
+                              type="button"
+                              onClick={() => removeTag(index)}
+                              className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none"
+                              aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
+                              variant="ghost"
+                              size="sm"
+                            >
+                              ✕
+                            </Button>
+                          </span>
+                        ))}
+                      </div>
+                      <Input
+                        {...register('newTag')}
+                        onKeyDown={handleNewTagKeyDown}
+                        placeholder="Adicionar tag..."
+                        className="w-full mt-auto pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400"
+                      />
+                    </div>
+                    {errors.tags && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.tags.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="w-full mt-8">
-          <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-mulish text-lg font-bold text-black">
-                Horários
-              </h2>
+          <section className="w-full mt-8">
+            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-mulish text-lg font-bold text-black">
+                  Horários
+                </h2>
 
-              <div className="flex flex-col items-center">
-                <p className="text-xs font-bold mb-1">Clique para adicionar</p>
-                <Button
-                  type="button"
-                  onClick={() =>
-                    appendSchedule({ dia: '', inicio: '', fim: '', tipo: '' })
-                  }
-                  className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
-                  style={{
-                    width: '35px',
-                    minWidth: '50px',
-                    maxWidth: '50px',
-                    height: '20px',
-                    borderRadius: '10px',
-                    padding: 0,
-                    boxSizing: 'border-box',
-                  }}
-                  aria-label="Adicionar horário"
-                >
-                  +
-                </Button>
+                <div className="flex flex-col items-center">
+                  <p className="text-xs font-bold mb-1">
+                    Clique para adicionar
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      appendSchedule({ dia: '', inicio: '', fim: '', tipo: '' })
+                    }
+                    className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
+                    style={{
+                      width: '35px',
+                      minWidth: '50px',
+                      maxWidth: '50px',
+                      height: '20px',
+                      borderRadius: '10px',
+                      padding: 0,
+                      boxSizing: 'border-box',
+                    }}
+                    aria-label="Adicionar horário"
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+                {scheduleFields.length === 0 && (
+                  <div className="col-span-full text-sm text-gray-500">
+                    Nenhum horário adicionado — clique em + para adicionar.
+                  </div>
+                )}
+
+                {scheduleFields.map((field, index) => (
+                  <ScheduleItem
+                    key={field.id}
+                    index={index}
+                    control={control}
+                    onRemove={removeSchedule}
+                    errors={errors.schedules}
+                  />
+                ))}
               </div>
             </div>
+          </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
-              {scheduleFields.length === 0 && (
-                <div className="col-span-full text-sm text-gray-500">
-                  Nenhum horário adicionado — clique em + para adicionar.
-                </div>
-              )}
+          <section className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full mt-6">
+            <h2 className="font-mulish text-lg font-bold text-black mb-6">
+              Foto
+            </h2>
 
-              {scheduleFields.map((field, index) => (
-                <ScheduleItem
-                  key={field.id}
-                  index={index}
-                  control={control}
-                  onRemove={removeSchedule}
-                  errors={errors.schedules}
-                />
-              ))}
-            </div>
+            <Label
+              htmlFor="foto-upload"
+              className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
+            >
+              <div className="flex flex-col items-center justify-center text-gray-500">
+                <Camera className="w-5 h-5 mb-2" />
+                <p className="mb-1 text-sm">Clique para adicionar uma foto</p>
+              </div>
+              <Input
+                id="foto-upload"
+                type="file"
+                className="hidden"
+                {...register('foto')}
+              />
+            </Label>
+
+            {errors.foto && (
+              <p className="text-red-500 text-xs mt-2">
+                {(errors.foto as any).message}
+              </p>
+            )}
+          </section>
+
+          <div className="mt-6 flex justify-start">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className={`bg-[#5a2d86] text-white hover:bg-[#4a246d] mt-6 rounded-lg h-12 px-6 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+              {isSubmitting
+                ? 'Salvando...'
+                : isEditing
+                  ? 'Atualizar Iniciativa'
+                  : 'Salvar Iniciativa'}
+            </Button>
           </div>
-        </section>
-
-        <section className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm w-full mt-6">
-          <h2 className="font-mulish text-lg font-bold text-black mb-6">
-            Foto
-          </h2>
-
-          <Label
-            htmlFor="foto-upload"
-            className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
-          >
-            <div className="flex flex-col items-center justify-center text-gray-500">
-              <Camera className="w-5 h-5 mb-2" />
-              <p className="mb-1 text-sm">Clique para adicionar uma foto</p>
-            </div>
-            <Input
-              id="foto-upload"
-              type="file"
-              className="hidden"
-              {...register('foto')}
-            />
-          </Label>
-
-          {errors.foto && (
-            <p className="text-red-500 text-xs mt-2">
-              {(errors.foto as any).message}
-            </p>
-          )}
-        </section>
-
-        <div className="mt-6 flex justify-start">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className={`bg-[#5a2d86] text-white hover:bg-[#4a246d] mt-6 rounded-lg h-12 px-6 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {isSubmitting
-              ? 'Salvando...'
-              : isEditing
-                ? 'Atualizar Iniciativa'
-                : 'Salvar Iniciativa'}
-          </Button>
-        </div>
-      </form>
-    </main>
+        </form>
+      </main>
+    </div>
   )
 }
