@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
@@ -13,18 +13,12 @@ class TagSchema(BaseModel):
     nome: str
     descricao: Optional[str]
 
-    class ConfigDict:
-        from_attributes = True
-
 
 class OrganizadorSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
     nome: str
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaHorarioSchema(BaseModel):
@@ -37,17 +31,14 @@ class IniciativaHorarioSchema(BaseModel):
     tipo: HorarioTipo
     criado_em: datetime
 
-    class ConfigDict:
-        from_attributes = True
-
 
 class IniciativaSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: str
+    descricao_vetor: Any = None
     link: str
     destaque: bool
     local: Optional[str]
@@ -64,8 +55,13 @@ class IniciativaSchema(BaseModel):
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
 
-    class ConfigDict:
-        from_attributes = True
+    @field_serializer("descricao_vetor")
+    def serialize_vector(self, value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        if hasattr(value, "tolist"):
+            return str(value.tolist())
+        return str(value)
 
 
 class IniciativaFiltersSchema(BaseModel):
@@ -78,12 +74,19 @@ class IniciativaFiltersSchema(BaseModel):
     size: int = 10
 
 
+class IniciativaUpdateSchema(BaseModel):
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    organizador_id: Optional[str] = None
+    link: Optional[str] = None
+    local: Optional[str] = None
+    imagem_url: Optional[str] = None
+    destaque: Optional[bool] = None
+
+
 class IniciativaListResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     items: List[IniciativaSchema]
     total: int
     filters: IniciativaFiltersSchema
-
-    class ConfigDict:
-        from_attributes = True

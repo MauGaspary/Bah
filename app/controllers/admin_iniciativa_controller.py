@@ -4,7 +4,11 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+    IniciativaUpdateSchema,
+)
 from app.services.admin_iniciativa_service import AdminIniciativaService
 
 
@@ -30,6 +34,18 @@ class AdminIniciativaController:
             raise HTTPException(
                 status_code=422, detail={"fieldErrors": {"general": str(e)}}
             ) from e
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail={"message": "Internal server error"}
+            ) from e
+
+    def editar_iniciativa(
+        self, iniciativa_id: str, dados: IniciativaUpdateSchema, editado_por: str
+    ) -> IniciativaSchema:
+        try:
+            return self.service.editar_iniciativa(iniciativa_id, dados, editado_por)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail={"message": "Internal server error"}

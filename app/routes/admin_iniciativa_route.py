@@ -8,7 +8,11 @@ from app.config.database import get_db
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+    IniciativaUpdateSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 router = APIRouter()
@@ -66,3 +70,14 @@ def listar_iniciativas(
     return controller.listar_iniciativas(
         q, created_from, created_to, order_by, order_dir, page, size
     )
+
+
+@router.patch("/iniciativas/{iniciativa_id}", response_model=IniciativaSchema)
+def editar_iniciativa(
+    iniciativa_id: str,
+    dados: IniciativaUpdateSchema,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    controller = AdminIniciativaController(db)
+    return controller.editar_iniciativa(iniciativa_id, dados, current_user)

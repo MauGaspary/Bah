@@ -109,3 +109,23 @@ class AdminIniciativaRepository:
             query = query.where(and_(*filters))
 
         return self.db.execute(query).scalar() or 0
+
+    def get_by_id(self, iniciativa_id: str) -> Optional[Iniciativa]:
+        query = (
+            select(Iniciativa)
+            .options(
+                selectinload(Iniciativa.organizador),
+                selectinload(Iniciativa.horarios),
+                selectinload(Iniciativa.tags),
+            )
+            .where(Iniciativa.id == iniciativa_id, Iniciativa.deletado_em.is_(None))
+        )
+        return self.db.execute(query).scalar_one_or_none()
+
+    def update_iniciativa(self, iniciativa: Iniciativa, **kwargs) -> Iniciativa:
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(iniciativa, key, value)
+        self.db.commit()
+        self.db.refresh(iniciativa)
+        return iniciativa

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -8,6 +8,7 @@ from app.schemas.admin_iniciativa_schemas import (
     IniciativaFiltersSchema,
     IniciativaListResponseSchema,
     IniciativaSchema,
+    IniciativaUpdateSchema,
 )
 
 
@@ -55,3 +56,20 @@ class AdminIniciativaService:
         return IniciativaListResponseSchema(
             items=iniciativas, total=total, filters=filters
         )
+
+    def editar_iniciativa(
+        self, iniciativa_id: str, dados: IniciativaUpdateSchema, editado_por: str
+    ) -> IniciativaSchema:
+        iniciativa = self.repository.get_by_id(iniciativa_id)
+        if not iniciativa:
+            raise ValueError("Iniciativa não encontrada")
+
+        update_data = dados.model_dump(exclude_unset=True)
+        if update_data:
+            update_data["editado_por"] = editado_por
+            update_data["editado_em"] = datetime.now(timezone.utc)
+
+        iniciativa_atualizada = self.repository.update_iniciativa(
+            iniciativa, **update_data
+        )
+        return IniciativaSchema.model_validate(iniciativa_atualizada)
