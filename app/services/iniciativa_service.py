@@ -28,36 +28,29 @@ class IniciativaService:
                 .first()
             )
             if not usuario_existe:
-                raise HTTPException(
-                    status_code=422, detail="Usuário criador não encontrado"
-                )
+                raise ValueError("Usuário criador não encontrado")
 
         if iniciativa_data.organizador_id:
             if not self.repository.organizador_exists(iniciativa_data.organizador_id):
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Organizador não encontrado com ID: {iniciativa_data.organizador_id}",
+                raise ValueError(
+                    f"Organizador não encontrado com ID: {iniciativa_data.organizador_id}"
                 )
         else:
-            raise HTTPException(status_code=422, detail="organizador_id é obrigatório")
+            raise ValueError("organizador_id é obrigatório")
 
         if iniciativa_data.tag_ids:
             existing_tags = self.repository.tags_exist(iniciativa_data.tag_ids)
             missing_tags = set(iniciativa_data.tag_ids) - set(existing_tags)
             if missing_tags:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Tags não encontradas: {', '.join(missing_tags)}",
-                )
+                raise ValueError(f"Tags não encontradas: {', '.join(missing_tags)}")
 
         if iniciativa_data.organizador_id:
             duplicate = self.repository.check_duplicate_iniciativa(
                 iniciativa_data.titulo, iniciativa_data.organizador_id
             )
             if duplicate:
-                raise HTTPException(
-                    status_code=422,
-                    detail="Já existe uma iniciativa com este título para este organizador",
+                raise ValueError(
+                    "Já existe uma iniciativa com este título para este organizador"
                 )
 
         if iniciativa_data.organizador_id:
@@ -86,18 +79,15 @@ class IniciativaService:
             print(f"Erro na criação: {type(e).__name__}: {str(e)}")
 
             if "check constraint" in str(e).lower() or "constraint" in str(e).lower():
-                raise HTTPException(
-                    status_code=422,
-                    detail="Dados inválidos: verifique se a hora de fim é maior que a hora de início",
+                raise ValueError(
+                    "Dados inválidos: verifique se a hora de fim é maior que a hora de início"
                 ) from e
-            raise HTTPException(
-                status_code=500, detail=f"Erro interno do servidor: {str(e)}"
-            ) from e
+            raise RuntimeError(f"Erro interno do servidor: {str(e)}") from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
         iniciativa = self.repository.get_by_id(iniciativa_id)
         if not iniciativa:
-            raise HTTPException(status_code=404, detail="Iniciativa não encontrada")
+            raise ValueError("Iniciativa não encontrada")
         return IniciativaResponse.model_validate(iniciativa)
 
     def search_iniciativas(

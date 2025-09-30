@@ -9,34 +9,83 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from testcontainers.postgres import PostgresContainer
 
 from app.config.database import get_db
 from app.config.integration_settings import get_integration_test_settings
 from app.main import create_app
 
 
+def is_docker_available():
+    """Verifica se Docker está disponível"""
+    try:
+        import docker
+
+        client = docker.from_env()
+        client.ping()
+        return True
+    except Exception:
+        return False
+
+
+use_containers_env = os.getenv("USE_CONTAINERS", "auto").lower()
+if use_containers_env == "auto":
+    USE_CONTAINERS = is_docker_available()
+    MODE_MSG = (
+        "Docker detectado: Usando PostgreSQL containers"
+        if USE_CONTAINERS
+        else "Usando SQLite local"
+    )
+else:
+    USE_CONTAINERS = use_containers_env == "true"
+    MODE_MSG = (
+        "Forçando uso de Docker PostgreSQL containers"
+        if USE_CONTAINERS
+        else "Usando SQLite local"
+    )
+
+print(f"\n{MODE_MSG}\n", flush=True)
+
+if USE_CONTAINERS:
+    from testcontainers.postgres import PostgresContainer
+
+
 @pytest.fixture(scope="session")
 def postgres_container():
     """Container PostgreSQL para testes unitários"""
-    with PostgresContainer("postgres:15") as postgres:
-        if os.getenv("DOCKER_ENV") == "true":
-            url = postgres.get_connection_url().replace(
-                "localhost", "host.docker.internal"
-            )
-            postgres.get_connection_url = lambda: url
-        yield postgres
+    if not USE_CONTAINERS:
+
+        class MockContainer:
+            def get_connection_url(self):
+                return "sqlite:///:memory:"
+
+        yield MockContainer()
+    else:
+        with PostgresContainer("postgres:15") as postgres:
+            if os.getenv("DOCKER_ENV") == "true":
+                url = postgres.get_connection_url().replace(
+                    "localhost", "host.docker.internal"
+                )
+                postgres.get_connection_url = lambda: url
+            yield postgres
 
 
 @pytest.fixture(scope="session")
 def test_engine(postgres_container):
-    """Engine de teste com PostgreSQL"""
+    """Engine de teste com PostgreSQL ou SQLite"""
     database_url = postgres_container.get_connection_url()
-    engine = create_engine(database_url)
 
-    from tests.scripts.setup_test_db import setup_test_database
+    if USE_CONTAINERS:
+        engine = create_engine(database_url)
+        from tests.scripts.setup_test_db import setup_test_database
 
-    setup_test_database(database_url)
+        setup_test_database(database_url)
+    else:
+        engine = create_engine(
+            "sqlite:///:memory:", connect_args={"check_same_thread": False}
+        )
+        from app.models.base import Base
+
+        Base.metadata.create_all(bind=engine)
 
     yield engine
     engine.dispose()
@@ -60,7 +109,7 @@ def db_session(test_engine):
 
 @pytest.fixture
 def client(db_session, postgres_container):
-    """Cliente de teste FastAPI usando PostgreSQL"""
+    """Cliente de teste FastAPI usando PostgreSQL ou SQLite"""
 
     def override_get_db():
         yield db_session
