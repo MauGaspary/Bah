@@ -4,6 +4,8 @@ import sys
 
 from sqlalchemy import text
 
+from app.models.tag_model import Tag
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
@@ -157,9 +159,45 @@ def seed_organizadores():
         db.close()
 
 
+def seed_tags():
+    db = SessionLocal()
+
+    try:
+        existing_count = db.query(Tag).count()
+        if existing_count > 0:
+            print(f"Tags já existem. Encontrados {existing_count} tags.")
+            return
+
+        tags_data = [
+            {"nome": "Meio Ambiente"},
+            {"nome": "Educação"},
+            {"nome": "Saúde"},
+            {"nome": "Tecnologia"},
+            {"nome": "Cultura"},
+            {"nome": "Esporte"},
+            {"nome": "Inclusão Social"},
+            {"nome": "Desenvolvimento Sustentável"},
+        ]
+
+        for tag_data in tags_data:
+            tag = Tag(**tag_data)
+            db.add(tag)
+
+        db.commit()
+        print(f"Seed de tags executado com sucesso. Criados {len(tags_data)} tags.")
+
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao executar seed de tags: {e}")
+        sys.exit(1)
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     print("Executando seed do banco de dados...")
     seed_users()
     seed_organizadores()
+    seed_tags()
     seed_demos()
     print("Seed finalizado")
