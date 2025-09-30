@@ -73,3 +73,8 @@ class AdminIniciativaService:
             iniciativa, **update_data
         )
         return IniciativaSchema.model_validate(iniciativa_atualizada)
+
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
+        iniciativa = self.repository.soft_delete(iniciativa_id, deletado_por)
+        if not iniciativa:
+            raise ValueError("Iniciativa não encontrada.")
