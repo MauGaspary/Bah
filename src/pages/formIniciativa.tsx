@@ -67,11 +67,13 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <div>
-        <Label className="text-xs font-bold text-black mb-2">Dia</Label>
+        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
+          Dia
+        </Label>
         <select
           value={dayValue ?? ''}
           onChange={e => onDayChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
         >
           {DAY_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -82,13 +84,13 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
       </div>
 
       <div>
-        <Label className="text-xs font-bold text-black mb-2">
+        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
           Horário Início
         </Label>
         <select
           value={startValue ?? ''}
           onChange={e => onStartChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
         >
           {HOUR_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -99,11 +101,13 @@ const TimeSelect: React.FC<TimeSelectProps> = ({
       </div>
 
       <div>
-        <Label className="text-xs font-bold text-black mb-2">Horário Fim</Label>
+        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
+          Horário Fim
+        </Label>
         <select
           value={endValue ?? ''}
           onChange={e => onEndChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
+          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
         >
           {HOUR_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
@@ -159,12 +163,14 @@ const ScheduleItem: React.FC<{
     <Card className="bg-gray-50 border-gray-100 mb-6">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
-          <div className="text-sm font-semibold">Horário {index + 1}</div>
+          <div className="text-callout-semibold font-sf-pro-text text-label-primary">
+            Horário {index + 1}
+          </div>
 
           <Button
             type="button"
             onClick={() => onRemove(index)}
-            className="text-white px-3 py-1 transition"
+            className="text-white px-3 py-1 transition cursor-pointer"
             aria-label={`Remover horário ${index + 1}`}
             variant="destructive"
             size="sm"
@@ -219,14 +225,14 @@ const ScheduleItem: React.FC<{
           <FormField name={`schedules.${index}.tipo`}>
             {({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="text-xs font-bold text-black mb-2">
+                <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                   Tipo
                 </FormLabel>
                 <FormControl>
                   <select
                     value={field.value ?? ''}
                     onChange={field.onChange}
-                    className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent"
+                    className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
                   >
                     <option value="">Selecione o tipo</option>
                     <option value="presencial">Presencial</option>
@@ -359,10 +365,10 @@ export default function FormIniciativa() {
 
         <header className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-mulish text-[#5a2d86]">
+            <h1 className="text-large-title font-kanit text-[#5a2d86]">
               {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-body-regular font-sf-pro text-label-secondary">
               {isEditing ? 'Editar a iniciativa' : 'Criar nova iniciativa'}
             </p>
           </div>
@@ -371,7 +377,7 @@ export default function FormIniciativa() {
             onClick={() => setIsEditing(!isEditing)}
             variant="secondary"
             size="sm"
-            className="min-w-fit"
+            className="min-w-fit cursor-pointer"
           >
             {isEditing ? 'Cancelar Edição' : 'Editar'}
           </Button>
@@ -382,7 +388,7 @@ export default function FormIniciativa() {
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="font-mulish text-lg font-bold text-black">
+                  <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
                     Detalhes da Iniciativa
                   </CardTitle>
                   <div className="flex items-center gap-2">
@@ -394,7 +400,7 @@ export default function FormIniciativa() {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg"
+                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg cursor-pointer"
                         />
                       )}
                     </FormField>
@@ -407,7 +413,7 @@ export default function FormIniciativa() {
                     <FormField name="titulo">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Título
                           </FormLabel>
                           <FormControl>
@@ -425,7 +431,7 @@ export default function FormIniciativa() {
                     <FormField name="local">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Local
                           </FormLabel>
                           <FormControl>
@@ -443,7 +449,7 @@ export default function FormIniciativa() {
                     <FormField name="link1">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Link 1
                           </FormLabel>
                           <FormControl>
@@ -463,7 +469,7 @@ export default function FormIniciativa() {
                     <FormField name="link2">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Link 2
                           </FormLabel>
                           <FormControl>
@@ -480,19 +486,36 @@ export default function FormIniciativa() {
                     <FormField name="organizador">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-5">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-5">
                             Organizador
                           </FormLabel>
                           <FormControl>
-                            <select
-                              {...field}
-                              className={`w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
-                            >
-                              <option value="" disabled>
-                                Selecione
-                              </option>
-                              <option value="Equipe BAH">Equipe BAH</option>
-                            </select>
+                            <div className="relative">
+                              <select
+                                {...field}
+                                className={`w-full py-3 pl-3 pr-10 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer appearance-none ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
+                              >
+                                <option value="" disabled>
+                                  Selecione
+                                </option>
+                                <option value="Equipe BAH">Equipe BAH</option>
+                              </select>
+                              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                <svg
+                                  className="w-4 h-4 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
                           </FormControl>
                           <FormMessage name="organizador" />
                         </FormItem>
@@ -504,14 +527,14 @@ export default function FormIniciativa() {
                     <FormField name="descricao">
                       {({ field }) => (
                         <FormItem className="md:col-span-2 flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Descrição
                           </FormLabel>
                           <FormControl>
                             <Textarea
                               {...field}
                               placeholder="Digite a descrição"
-                              className="py-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400"
+                              className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
                             />
                           </FormControl>
                           <FormMessage name="descricao" />
@@ -522,7 +545,7 @@ export default function FormIniciativa() {
                     <FormField name="tags">
                       {() => (
                         <FormItem className="md:col-span-1 flex flex-col">
-                          <FormLabel className="text-xs font-bold text-black mb-2">
+                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Tags
                           </FormLabel>
                           <FormControl>
@@ -538,7 +561,7 @@ export default function FormIniciativa() {
                                       <Button
                                         type="button"
                                         onClick={() => removeTag(index)}
-                                        className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none w-5 h-5 p-0 min-w-5 flex items-center justify-center"
+                                        className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none w-5 h-5 p-0 min-w-5 flex items-center justify-center cursor-pointer"
                                         aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
                                         variant="ghost"
                                         size="sm"
@@ -571,12 +594,12 @@ export default function FormIniciativa() {
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="font-mulish text-lg font-bold text-black">
+                  <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
                     Horários
                   </CardTitle>
 
                   <div className="flex flex-col items-center">
-                    <p className="text-xs font-bold mb-1">
+                    <p className="text-footnote font-sf-pro text-label-primary mb-1">
                       Clique para adicionar
                     </p>
                     <Button
@@ -589,15 +612,12 @@ export default function FormIniciativa() {
                           tipo: '',
                         })
                       }
-                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center"
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer"
                       style={{
-                        width: '35px',
-                        minWidth: '50px',
-                        maxWidth: '50px',
-                        height: '20px',
+                        minWidth: '130px',
+                        height: '30px',
                         borderRadius: '10px',
                         padding: 0,
-                        boxSizing: 'border-box',
                       }}
                       aria-label="Adicionar horário"
                     >
@@ -609,7 +629,7 @@ export default function FormIniciativa() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
                   {scheduleFields.length === 0 && (
-                    <div className="col-span-full text-sm text-gray-500">
+                    <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
                       Nenhum horário adicionado — clique em + para adicionar.
                     </div>
                   )}
@@ -630,7 +650,7 @@ export default function FormIniciativa() {
           <section className="w-full max-w-none mt-6">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
-                <CardTitle className="font-mulish text-lg font-bold text-black">
+                <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
                   Foto
                 </CardTitle>
               </CardHeader>
@@ -671,7 +691,7 @@ export default function FormIniciativa() {
               disabled={isSubmitting}
               variant="purple"
               size="lg"
-              className="mt-6 text-white"
+              className="mt-6 text-white cursor-pointer"
             >
               {isSubmitting
                 ? 'Salvando...'
