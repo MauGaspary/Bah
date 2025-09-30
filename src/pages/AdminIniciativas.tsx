@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom'
 import IniciativasList from '@/components/ui/List/IniciativasList'
 import AdminSearchbar from '@/components/ui/AdminSearchbar/AdminSearchbar'
 import SidebarAdm from '@/components/ui/sidebar'
 
 function AdminIniciativas() {
+  const navigate = useNavigate()
   return (
     <div>
       <div className="min-h-screen flex bg-background-secondary">
@@ -24,7 +26,7 @@ function AdminIniciativas() {
             <AdminSearchbar
               placeholder="Buscar iniciativa por categoria, palavras-chave, data..."
               buttonLabel="Nova iniciativa"
-              onButtonClick={() => console.log('Nova iniciativa')}
+              onButtonClick={() => navigate('/admin/criarIniciativa')}
             />
 
             <div className="mt-16">
