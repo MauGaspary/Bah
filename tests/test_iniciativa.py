@@ -357,7 +357,6 @@ def test_delete_iniciativa_success(client, iniciativa_fixture, auth_token, db_se
     iniciativas_ids_after = [item["id"] for item in response_list_after.json()["items"]]
     assert iniciativa_fixture["id"] not in iniciativas_ids_after
 
-    
     from app.models.iniciativa_model import Iniciativa
 
     deleted_iniciativa = (

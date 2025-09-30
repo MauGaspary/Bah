@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
@@ -8,6 +8,7 @@ from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.organizador_model import Organizador
 from app.models.tag_model import Tag
+from app.utils.exceptions import ResourceNotFound
 
 
 class AdminIniciativaRepository:
@@ -78,12 +79,30 @@ class AdminIniciativaRepository:
             query = query.filter(Iniciativa.deletado_em.is_(None))
         return query.filter(Iniciativa.id == iniciativa_id).first()
 
+    def get_by_id_active(self, iniciativa_id: str) -> Iniciativa:
+        obj = (
+            self.db.query(Iniciativa)
+            .options(
+                selectinload(Iniciativa.organizador),
+                selectinload(Iniciativa.horarios),
+                selectinload(Iniciativa.tags),
+            )
+            .filter(
+                Iniciativa.id == iniciativa_id,
+                Iniciativa.deletado_em.is_(None),
+            )
+            .first()
+        )
+        if not obj:
+            raise ResourceNotFound("Iniciativa não encontrada")
+        return obj
+
     def soft_delete(
         self, iniciativa_id: str, deletado_por: str = None
     ) -> Optional[Iniciativa]:
         iniciativa = self.get_by_id(iniciativa_id, allow_deleted=True)
         if iniciativa:
-            if iniciativa.deletado_em is None:  # Só atualiza se não estiver deletado
+            if iniciativa.deletado_em is None:
                 iniciativa.deletado_em = func.now()
                 iniciativa.deletado_por = deletado_por
                 self.db.commit()
@@ -130,3 +149,65 @@ class AdminIniciativaRepository:
             query = query.where(and_(*filters))
 
         return self.db.execute(query).scalar() or 0
+
+    def update_partial(
+        self,
+        iniciativa_id: str,
+        data: Dict[str, Any],
+        editado_por: Optional[str] = None,
+    ) -> Iniciativa:
+        """
+        Aplica alterações parciais na Iniciativa.
+        - Campos simples: atualiza somente os presentes em `data`.
+        - tags_ids: substitui o conjunto de tags.
+        - horarios: substitui a lista de horários (se fornecida).
+        - 404: se não existir ou estiver soft-deletada.
+        """
+        obj = self.get_by_id_active(iniciativa_id)
+
+        campos_simples = (
+            "titulo",
+            "descricao",
+            "link",
+            "destaque",
+            "local",
+            "imagem_url",
+            "organizador_id",
+        )
+        for campo in campos_simples:
+            if campo in data and data[campo] is not None:
+                setattr(obj, campo, data[campo])
+
+        if "tags_ids" in data and data["tags_ids"] is not None:
+            tags = self.db.query(Tag).filter(Tag.id.in_(data["tags_ids"])).all()
+            obj.tags = tags
+
+        # ---- Horários (sobrescrever se enviado)
+        # data["horarios"] esperado como lista de dicts com:
+        # { "data_evento": date, "hora_inicio": time, "hora_fim": time, "tipo": HorarioTipo }
+        if "horarios" in data and data["horarios"] is not None:
+            # Apaga horários atuais
+            for h in list(obj.horarios):
+                self.db.delete(h)
+            self.db.flush()
+            # Recria a partir do payload
+            for h in data["horarios"]:
+                obj.horarios.append(
+                    IniciativaHorario(
+                        data_evento=h.get("data_evento"),
+                        hora_inicio=h.get("hora_inicio"),
+                        hora_fim=h.get("hora_fim"),
+                        tipo=h.get("tipo"),
+                    )
+                )
+
+        obj.editado_em = func.now()
+        if editado_por:
+            obj.editado_por = editado_por
+
+        self.db.add(obj)
+        self.db.commit()
+        # garantir que retorna com relacionamentos atualizados
+        self.db.refresh(obj)
+
+        return obj

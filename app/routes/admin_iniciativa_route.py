@@ -8,7 +8,11 @@ from app.config.database import get_db
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaPatchSchema,
+    IniciativaSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 router = APIRouter()
@@ -81,3 +85,29 @@ def delete_iniciativa(
     """
     controller = AdminIniciativaController(db)
     controller.delete_iniciativa(iniciativa_id, current_user)
+
+
+@router.patch(
+    "/iniciativas/{iniciativa_id}",
+    response_model=IniciativaSchema,
+    status_code=status.HTTP_200_OK,
+)
+def patch_iniciativa(
+    iniciativa_id: str,
+    payload: IniciativaPatchSchema,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Atualiza parcialmente uma iniciativa existente.
+    - 404 se não existir/soft-deletada
+    - 422 se violar regras de validação
+    - 200 com objeto completo atualizado
+    """
+    controller = AdminIniciativaController(db)
+    # Passa o usuário autenticado como 'editado_por' (se aplicável)
+    return controller.patch_iniciativa(
+        iniciativa_id=iniciativa_id,
+        payload=payload,
+        editado_por=current_user,
+    )
