@@ -1,0 +1,15 @@
+[run]
+source = app
+omit =
+    app/scripts/*
+    */migrations/*
+    */tests/*
+    */venv/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
