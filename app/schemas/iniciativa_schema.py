@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
@@ -38,6 +38,8 @@ class IniciativaCreate(BaseModel):
 
 
 class IniciativaHorarioResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     data_evento: date
     hora_inicio: time
@@ -45,10 +47,10 @@ class IniciativaHorarioResponse(BaseModel):
     tipo: HorarioTipo
     criado_em: Optional[datetime] = None
 
-    model_config = {"from_attributes": True}
-
 
 class IniciativaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     titulo: str
     descricao: str
@@ -62,5 +64,3 @@ class IniciativaResponse(BaseModel):
     criado_por: Optional[str] = None
     editado_em: Optional[datetime] = None
     editado_por: Optional[str] = None
-
-    model_config = {"from_attributes": True}

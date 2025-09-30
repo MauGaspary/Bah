@@ -23,22 +23,9 @@ class AdminIniciativaController:
         size: int = 10,
     ) -> IniciativaListResponseSchema:
         try:
-            if created_from and created_to and created_from > created_to:
-                raise HTTPException(
-                    status_code=422,
-                    detail={
-                        "fieldErrors": {
-                            "created_from": "Data inicial deve ser menor que data final"
-                        }
-                    },
-                )
-
             return self.service.listar_iniciativas(
                 q, created_from, created_to, order_by, order_dir, page, size
             )
-        except HTTPException:
-
-            raise
         except ValueError as e:
             raise HTTPException(
                 status_code=422, detail={"fieldErrors": {"general": str(e)}}
@@ -46,4 +33,15 @@ class AdminIniciativaController:
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail={"message": "Internal server error"}
+            ) from e
+
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
+        """Soft delete de uma iniciativa"""
+        try:
+            return self.service.delete_iniciativa(iniciativa_id, deletado_por)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail={"message": str(e)})
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail={"message": "Erro ao deletar iniciativa"}
             ) from e
