@@ -1,7 +1,13 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
 
-function Modal({ children, onClose, onLogout }) {
+function Modal({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode
+  onClose: () => void
+}) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -16,7 +22,7 @@ function Modal({ children, onClose, onLogout }) {
   return createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center bg-black/50 z-40"
-      onClick={onClose} 
+      onClick={onClose}
     >
       {children}
     </div>,
