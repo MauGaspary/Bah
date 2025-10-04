@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 export interface LoginResponse {
   access_token: string
   user: {
@@ -10,6 +12,12 @@ export interface LoginResponse {
 export interface LoginCredentials {
   email: string
   password: string
+}
+
+export function logout(){
+  const navigate = useNavigate()
+  removeToken()
+  navigate('/login', { replace: true })
 }
 
 export async function login(

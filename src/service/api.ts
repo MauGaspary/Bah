@@ -1,10 +1,11 @@
 import axios from 'axios'
-import { getToken, removeToken } from './auth'
+import { getToken, logout } from '../lib/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 1000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,7 +30,7 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      removeToken()
+      logout()
     }
     return Promise.reject(error)
   }
