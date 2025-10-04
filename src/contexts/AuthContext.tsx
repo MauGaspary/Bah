@@ -1,6 +1,18 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from 'react'
 
-import { login as authLogin } from '@/lib/auth'
+import {
+  login as authLogin,
+  setToken as setAuthToken,
+  removeToken,
+  getToken,
+  is_authenticated,
+} from '@/lib/auth'
 
 interface AuthContextType {
   token: string | null
@@ -21,6 +33,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  useEffect(() => {
+    const existingToken = getToken()
+    if (existingToken && is_authenticated()) {
+      setToken(existingToken)
+      setIsAuthenticated(true)
+    }
+  }, [])
+
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
@@ -28,7 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!res.access_token) throw new Error('Token ausente')
       setToken(res.access_token)
       setIsAuthenticated(true)
-      localStorage.setItem('access_token', res.access_token)
+      setAuthToken(res.access_token)
     } finally {
       setIsLoading(false)
     }
@@ -37,6 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setToken(null)
     setIsAuthenticated(false)
+    removeToken()
   }
 
   return (

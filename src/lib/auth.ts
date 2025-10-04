@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+import { useNavigate } from 'react-router-dom'
 
 export interface LoginResponse {
   access_token: string
@@ -15,10 +14,18 @@ export interface LoginCredentials {
   password: string
 }
 
+export function logout(){
+  const navigate = useNavigate()
+  removeToken()
+  navigate('/login', { replace: true })
+}
+
 export async function login(
   email: string,
   password: string
 ): Promise<LoginResponse> {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -33,14 +40,6 @@ export async function login(
 
   const data = await response.json()
   return data
-}
-
-export function make_token(payload: Record<string, unknown>): string {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
-  const payloadEncoded = btoa(JSON.stringify(payload))
-  const signature = btoa('mock-signature')
-
-  return `${header}.${payloadEncoded}.${signature}`
 }
 
 export function verify_token(token: string): Record<string, unknown> {
@@ -58,11 +57,16 @@ export function verify_token(token: string): Record<string, unknown> {
   throw new Error('Invalid token')
 }
 
-export function extract_token(authHeader: string | null): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null
-  }
-  return authHeader.substring(7)
+export function getToken(): string | null {
+  return localStorage.getItem('access_token')
+}
+
+export function setToken(token: string): void {
+  localStorage.setItem('access_token', token)
+}
+
+export function removeToken(): void {
+  localStorage.removeItem('access_token')
 }
 
 export function is_authenticated(): boolean {
