@@ -1,11 +1,16 @@
 import { Search } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import Header from '@/components/ui/Header/Header'
+import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
+import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
+import { buildCalendarEvents } from '@/data/iniciativas'
 import { Input } from '@/components/ui/Searchbar/Searchbar'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const location = useLocation()
   const tags = [
     { name: 'Aceleração', value: 'aceleracao' },
     { name: 'Projetos', value: 'projetos' },
@@ -13,6 +18,21 @@ function HomePage() {
     { name: 'Coworking', value: 'coworking' },
     { name: 'Mentorias', value: 'mentorias' },
   ]
+
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string } | null
+    if (state?.scrollTo) {
+      // limpa o estado para evitar scroll repetido
+      history.replaceState({}, '')
+      const el = document.getElementById(state.scrollTo)
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 50)
+      }
+    }
+  }, [location.state])
+  const events = useMemo(() => buildCalendarEvents(), [])
   return (
     <>
       <Header variant="default" />
@@ -67,6 +87,36 @@ function HomePage() {
           </div>
         </section>
       </main>
+
+      {/* Mobile: Carrossel de próximos eventos */}
+      <div className="md:hidden">
+        <UpcomingCarousel events={events} />
+      </div>
+
+      {/* Desktop: Calendário com destaques */}
+      <div className="hidden md:block" id="calendar-section">
+        <CalendarSection events={events} />
+      </div>
+
+      {/* Jornada */}
+      <section id="journey-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Jornada</h2>
+      </section>
+
+      {/* Sobre nós */}
+      <section id="about-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Sobre nós</h2>
+      </section>
+
+      {/* Nossos Valores */}
+      <section id="values-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Nossos Valores</h2>
+      </section>
+
+      {/* Contato */}
+      <section id="contact-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Contato</h2>
+      </section>
     </>
   )
 }

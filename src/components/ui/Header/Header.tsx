@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { Input } from '../Searchbar/Searchbar'
 
 import { optionsItems } from './NavigationsItens'
+import type { NavigationItem } from './NavigationsItens'
 
 interface HeaderProps {
   variant?: 'default' | 'secondary' | 'custom'
@@ -68,8 +69,36 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
     return () => observer.disconnect()
   }, [])
 
-  const handleNavigation = (path: string) => {
-    navigate(path)
+  const handleNavigation = (item: NavigationItem) => {
+    const mapIdToSection: Record<string, string> = {
+      calendario: 'calendar-section',
+      jornada: 'journey-section',
+      'sobre nos': 'about-section',
+      'nossos-valores': 'values-section',
+      contato: 'contact-section',
+    }
+
+    const sectionId = mapIdToSection[item.id]
+
+    if (sectionId) {
+      const scrollToSection = () => {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }
+
+      if (window.location.pathname !== '/') {
+        navigate('/', { state: { scrollTo: sectionId } })
+      } else {
+        scrollToSection()
+      }
+
+      setIsMobileMenuOpen(false)
+      return
+    }
+
+    navigate(item.path)
     setIsMobileMenuOpen(false)
   }
 
@@ -172,7 +201,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
               {optionsItems.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => handleNavigation(item.path)}
+                  onClick={() => handleNavigation(item)}
                   className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
                 >
                   {item.label}
@@ -213,7 +242,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   {optionsItems.map(item => (
                     <li key={item.id}>
                       <button
-                        onClick={() => handleNavigation(item.path)}
+                        onClick={() => handleNavigation(item)}
                         className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-bah-green rounded-lg transition-all duration-200 text-lg font-medium font-mulish"
                       >
                         {item.label}
