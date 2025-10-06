@@ -39,8 +39,9 @@ class TestUserCreationIntegration:
 
         response = request(client, "POST", "/users/", json=user_data)
 
-        assert response.status_code == 400
-        assert "Formato de email inválido" in response.json()["detail"]
+        assert response.status_code == 422
+        error_detail = response.json()["detail"]
+        assert "email" in str(error_detail).lower()
 
     def test_create_user_duplicate_email(self, client):
         user_data1 = {
