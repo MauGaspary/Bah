@@ -7,6 +7,7 @@ from app.schemas.user_schema import UserCreate, UserResponse
 
 router = APIRouter()
 
+
 @router.post("/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     controller = UserController(db)

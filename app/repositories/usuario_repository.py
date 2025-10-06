@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
-from app.schemas.usuario_schema import UsuarioCreate
+from app.schemas.user_schema import UserCreate
 from app.utils.password_hasher import PasswordHasher
 
 
@@ -19,15 +19,15 @@ class UsuarioRepository:
     def email_exists(self, email: str) -> bool:
         return self.get_by_email(email) is not None
 
-    def create1(self, user_data: UsuarioCreate) -> Usuario:
+    def create1(self, user_data: UserCreate) -> Usuario:
         email_norm = user_data.email.strip()
         hasher = PasswordHasher()
-        usuario = Usuario (
+        usuario = Usuario(
             email=email_norm,
             senha_hash=hasher.hash(user_data.password),
             nome=user_data.nome,
             sobrenome=user_data.sobrenome,
-        ) 
+        )
         self.session.add(usuario)
         self.session.flush()
         self.session.refresh(usuario)
