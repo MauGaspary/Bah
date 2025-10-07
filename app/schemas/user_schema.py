@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, model_validator
 
+from app.utils.helpers import validate_email
+
 
 class UserCreate(BaseModel):
     nome: str = Field(min_length=1, max_length=100, description="Nome do usuário")
@@ -14,7 +16,7 @@ class UserCreate(BaseModel):
 
     @model_validator(mode="after")
     def validar_email(self):
-        if "@" not in self.email or "." not in self.email:
+        if not validate_email(self.email):
             raise ValueError("Formato de email inválido")
         return self
 
