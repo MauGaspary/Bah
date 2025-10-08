@@ -7,6 +7,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
+import api from '@/service/api'
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 
@@ -30,9 +31,25 @@ function IniciativasList() {
   useEffect(() => {
     async function fetchIniciativas() {
       try {
-        const response = await 
+        const response = await api.get<Iniciativa[]>("/admin/iniciativas");
+        setIniciativas(response.data);
+      }
+      catch (error) {
+        console.error("Erro ao carregar iniciativas", error);
+        setError("Erro ao carregar iniciativas");
+      }
+      finally {
+        setLoading(false);
       }
     }
+    fetchIniciativas();
+  }, []);
+
+  if (loading) {
+    return <p>Carregando...</p>;
+  }
+  if (error) {
+    return <div>Erro ao carregar iniciativas</div>;
   }
 
   return (
@@ -44,7 +61,7 @@ function IniciativasList() {
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
-              {Iniciativas.length} iniciativas encontradas
+              {iniciativas.length} iniciativas encontradas
             </p>
           </div>
         </div>
