@@ -6,10 +6,11 @@ import { SearchIcon } from 'lucide-react'
 type SearchbarProps = {
   placeholder: string
   buttonLabel: string
+  onSearchChange: (value: string) => void
   onButtonClick?: () => void
 }
 
-function AdminSearchbar({ placeholder, buttonLabel, onButtonClick }: SearchbarProps) {
+function AdminSearchbar({ placeholder, buttonLabel, onButtonClick, onSearchChange }: SearchbarProps) {
   const handleSearch = () => {
     console.log('Buscar')
   }
@@ -20,8 +21,10 @@ function AdminSearchbar({ placeholder, buttonLabel, onButtonClick }: SearchbarPr
         <CardHeader className="flex items-center gap-10 px-10">
           <div className="relative w-full rounded-2xl border border-gray-300 focus-within:ring-2 focus-within:ring-bah-purple focus-within:border-transparent">
             <AdminInput
+              type="text"
               className="w-full bg-background-secondary rounded-2xl"
               placeholder={placeholder}
+              onChange={e => onSearchChange(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') handleSearch()
               }}

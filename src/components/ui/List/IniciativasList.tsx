@@ -11,6 +11,10 @@ import api from '@/service/api'
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 
+interface IniciativasListProps{
+  searchQuery: string;
+}
+
 interface Iniciativa{
   id: number;
   titulo: string;
@@ -23,7 +27,7 @@ interface IniciativasResponse{
   total: number;
 }
 
-function IniciativasList() {
+function IniciativasList({searchQuery}: IniciativasListProps) {
   const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -38,7 +42,9 @@ function IniciativasList() {
   useEffect(() => {
     async function fetchIniciativas() {
       try {
-        const response = await api.get<IniciativasResponse>("/admin/iniciativas");
+        const response = await api.get<IniciativasResponse>("/admin/iniciativas", {
+          params: searchQuery ? { q: searchQuery } : {},
+        })
         console.log(response);
         setIniciativas(response.data.items);
         setTotal(response.data.total);
@@ -52,7 +58,7 @@ function IniciativasList() {
       }
     }
     fetchIniciativas();
-  }, []);
+  }, [searchQuery]);
 
   if (loading) {
     return <p>Carregando...</p>;
