@@ -5,6 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import {
   login as authLogin,
@@ -14,12 +15,9 @@ import {
   is_authenticated,
 } from '@/lib/auth'
 
-// Rotas protegidas que requerem autenticação
-const PROTECTED_ROUTES = [
-  '/admin/criarIniciativa',
-  '/admin/usuarios',
-  '/admin/iniciativas',
-]
+const isProtectedRoute = (pathname: string): boolean => {
+  return pathname.startsWith('/admin') && pathname !== '/admin'
+}
 
 interface AuthContextType {
   token: string | null
@@ -36,7 +34,9 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Inicialização síncrona para evitar piscada
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const initAuth = () => {
     try {
       const existingToken = getToken()
@@ -57,31 +57,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(
     initialState.isAuthenticated
   )
-  const [isLoading, setIsLoading] = useState(false) // Não começa loading
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    // Verifica a validade do token periodicamente
     const interval = setInterval(() => {
       if (isAuthenticated && !is_authenticated()) {
         setToken(null)
         setIsAuthenticated(false)
         removeToken()
       }
-    }, 30000) // 30 segundos
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [isAuthenticated])
 
-  // Redirecionamento imediato para rotas protegidas
   useEffect(() => {
-    const currentPath = window.location.pathname
-    const isProtectedRoute = PROTECTED_ROUTES.includes(currentPath)
+    const currentPath = location.pathname
+    const isProtected = isProtectedRoute(currentPath)
 
-    if (!isAuthenticated && isProtectedRoute) {
-      // Redirecionamento imediato
-      window.location.href = '/admin'
+    if (!isAuthenticated && isProtected) {
+      navigate('/admin', { replace: true })
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, location.pathname, navigate])
 
   const login = async (email: string, password: string) => {
     setIsLoading(true)
@@ -89,7 +86,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const res = await authLogin(email, password)
       if (!res.access_token) throw new Error('Token ausente')
 
-      // Verifica se o token é válido antes de definir como autenticado
       try {
         setAuthToken(res.access_token)
         if (is_authenticated()) {
@@ -118,12 +114,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     removeToken()
   }
 
-  // Verifica se está em rota protegida
-  const currentPath = window.location.pathname
-  const isProtectedRoute = PROTECTED_ROUTES.includes(currentPath)
+  const currentPath = location.pathname
+  const isProtected = isProtectedRoute(currentPath)
 
-  // Se não estiver autenticado em rota protegida, não renderiza nada (evita piscada)
-  if (!isAuthenticated && isProtectedRoute) {
+  if (!isAuthenticated && isProtected) {
     return null
   }
 
