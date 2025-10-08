@@ -97,7 +97,9 @@ class IniciativaService:
             query, convert_to_numpy=True, normalize_embeddings=True
         )
         try:
-            iniciativas, total = self.repository.search_by_embedding(embedding, page, size)
+            iniciativas, total = self.repository.search_by_embedding(
+                embedding, page, size
+            )
 
             filters = IniciativaFiltersSchema(q=query, page=page, size=size)
             return IniciativaListResponseSchema(

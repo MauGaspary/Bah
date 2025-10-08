@@ -47,7 +47,7 @@ class IniciativaSchema(BaseModel):
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: List[float] # isso deve ser removido, não vai pro front
+    descricao_vetor: List[float]  # isso deve ser removido, não vai pro front
     link: str
     destaque: bool
     local: Optional[str]

@@ -28,7 +28,6 @@ def search_iniciativas(
     db: Session = Depends(get_db),
     model: SentenceTransformer = Depends(get_embedding_model),
 ):
-   
     controller = IniciativaController(db, model)
     return controller.search_iniciativas(q, page, size)
 
