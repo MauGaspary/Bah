@@ -27,3 +27,18 @@ class UsuarioRepository:
         self.session.add(usuario)
         self.session.flush()
         return usuario
+
+    def get_by_id(self, user_id: str) -> Optional[Usuario]:
+        stmt = select(Usuario).where(Usuario.id == user_id)
+        return self.session.execute(stmt).scalars().first()
+
+    def delete(self, user_id: str) -> bool:
+        try:
+            deleted = self.session.query(Usuario).filter(Usuario.id == user_id).delete()
+            if deleted:
+                self.session.commit()
+                return True
+            return False
+        except Exception:
+            self.session.rollback()
+            raise
