@@ -15,6 +15,7 @@ export type CalendarEvent = {
   category: EventCategory
   location?: string
   imageUrl?: string
+  featured?: boolean
 }
 
 const categoryName: Record<EventCategory, string> = {
@@ -73,6 +74,7 @@ export function CalendarSection({
   today?: Date
 }) {
   const [current, setCurrent] = useState<Date>(new Date(today))
+  const [selected, setSelected] = useState<Date>(new Date(today))
 
   const monthWeeks = useMemo(() => getMonthMatrix(current), [current])
   const monthNumber = current.getMonth()
@@ -85,20 +87,24 @@ export function CalendarSection({
     return map
   }, [events])
 
-  const todayEvents = useMemo(() => {
-    const iso = today.toISOString().slice(0, 10)
+  const selectedEvents = useMemo(() => {
+    const iso = selected.toISOString().slice(0, 10)
     return eventsByDay.get(iso) ?? []
-  }, [eventsByDay, today])
+  }, [eventsByDay, selected])
+
+  const selectedTitle = useMemo(() => {
+    if (isSameDay(selected, today)) return 'Eventos de Hoje'
+    const fmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' })
+    return `Eventos de ${fmt.format(selected)}`
+  }, [selected, today])
 
   const highlightEvents = useMemo(() => {
-    // Heurística simples: próximos 3 do mês corrente
-    const monthStartIso = new Date(current.getFullYear(), current.getMonth(), 1)
-      .toISOString()
-      .slice(0, 7)
+    const todayIso = today.toISOString().slice(0, 10)
     return events
-      .filter(e => e.date.startsWith(monthStartIso))
+      .filter(e => e.featured === true && e.date >= todayIso)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
       .slice(0, 3)
-  }, [events, current])
+  }, [events, today])
 
   return (
     <section className="container mx-auto px-4 md:px-6 py-6 md:py-10">
@@ -152,7 +158,7 @@ export function CalendarSection({
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-y-6 px-3 md:px-5 pb-8">
+          <div className="grid grid-cols-7">
             {monthWeeks.map((week, i) => (
               <div key={i} className="contents">
                 {week.map(day => {
@@ -160,16 +166,27 @@ export function CalendarSection({
                   const iso = day.toISOString().slice(0, 10)
                   const dayEvents = eventsByDay.get(iso) ?? []
                   const isToday = isSameDay(day, today)
+                  const isSelected = isSameDay(day, selected)
                   return (
                     <div
                       key={iso}
-                      className={`h-20 md:h-28 relative border-t border-gray-100 pt-2 text-sm ${
+                      className={`h-20 md:h-28 relative border-t border-gray-100 pt-2 text-sm cursor-pointer ${
                         inMonth ? 'text-gray-900' : 'text-gray-400'
-                      }`}
+                      } ${isSelected ? 'bg-bah-purple/20 rounded-2xl' : ''}`}
+                      onClick={() => {
+                        setSelected(new Date(day))
+                        if (day.getMonth() !== monthNumber) {
+                          setCurrent(new Date(day.getFullYear(), day.getMonth(), 1))
+                        }
+                      }}
                     >
                       <div
                         className={`w-8 h-8 flex items-center justify-center rounded-full ml-2 ${
-                          isToday ? 'bg-[#E8F3C7] text-[#A3B13E]' : ''
+                          isSelected
+                            ? 'bg-bah-purple text-white'
+                            : isToday
+                            ? 'bg-[#E8F3C7] text-black'
+                            : ''
                         }`}
                       >
                         {day.getDate()}
@@ -231,13 +248,13 @@ export function CalendarSection({
 
           <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
             <div className="bg-bah-purple text-white px-5 py-3 font-semibold">
-              Eventos de Hoje
+              {selectedTitle}
             </div>
             <div className="p-4 space-y-4">
-              {todayEvents.length === 0 && (
-                <p className="text-sm text-gray-500">Nenhum evento hoje.</p>
+              {selectedEvents.length === 0 && (
+                <p className="text-sm text-gray-500">Nenhum evento neste dia.</p>
               )}
-              {todayEvents.map(e => (
+              {selectedEvents.map(e => (
                 <div
                   key={e.id}
                   className="flex gap-3 rounded-xl border border-gray-200 p-3"

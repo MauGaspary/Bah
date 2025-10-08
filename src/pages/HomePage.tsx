@@ -32,7 +32,14 @@ function HomePage() {
       }
     }
   }, [location.state])
-  const events = useMemo(() => buildCalendarEvents(), [])
+  const eventsAll = useMemo(() => buildCalendarEvents(), [])
+  const eventsNext15Days = useMemo(() => {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    const end = new Date()
+    end.setDate(end.getDate() + 15)
+    const endIso = end.toISOString().slice(0, 10)
+    return eventsAll.filter(e => e.date >= todayIso && e.date <= endIso)
+  }, [eventsAll])
   return (
     <>
       <Header variant="default" />
@@ -90,12 +97,12 @@ function HomePage() {
 
       {/* Mobile: Carrossel de próximos eventos */}
       <div className="md:hidden">
-        <UpcomingCarousel events={events} />
+        <UpcomingCarousel events={eventsNext15Days} />
       </div>
 
       {/* Desktop: Calendário com destaques */}
       <div className="hidden md:block" id="calendar-section">
-        <CalendarSection events={events} />
+        <CalendarSection events={eventsAll} />
       </div>
 
       {/* Jornada */}

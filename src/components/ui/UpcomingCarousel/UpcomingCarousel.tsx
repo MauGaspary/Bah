@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CalendarEvent } from '../CalendarSection/CalendarSection'
 
 export default function UpcomingCarousel({
@@ -9,44 +9,127 @@ export default function UpcomingCarousel({
   title?: string
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(0) // normalizado (0..events.length-1)
+  const [activeVirtualIndex, setActiveVirtualIndex] = useState(0) // índice na lista virtual
+  const virtualEvents = useMemo(() => (events.length ? [...events, ...events, ...events] : []), [events])
+  const baseOffset = events.length // início do bloco central na lista virtual
+  const scrollEndTimer = useRef<number | null>(null)
+  const isProgrammatic = useRef(false)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el || events.length === 0) return
+
+    // Centraliza no bloco do meio ao iniciar
+    const initVirtualIdx = baseOffset + 0
+    centerToVirtualIndex(initVirtualIdx, false)
+    setActiveVirtualIndex(initVirtualIdx)
+    setActiveIndex(0)
+
+    let ticking = false
     const onScroll = () => {
-      const cards = Array.from(
-        el.querySelectorAll('article[data-index]')
-      ) as HTMLElement[]
-      if (cards.length === 0) return
-      const left = el.scrollLeft
-      let bestIdx = 0
-      let bestDist = Infinity
-      for (let i = 0; i < cards.length; i++) {
-        const dist = Math.abs(cards[i].offsetLeft - left)
-        if (dist < bestDist) {
-          bestDist = dist
-          bestIdx = i
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        if (isProgrammatic.current) {
+          ticking = false
+          return
         }
-      }
-      setActiveIndex(bestIdx)
+        const cards = Array.from(
+          el.querySelectorAll('article[data-virtual-index]')
+        ) as HTMLElement[]
+        if (cards.length === 0) {
+          ticking = false
+          return
+        }
+        const left = el.scrollLeft
+        const center = left + el.clientWidth / 2
+        let bestVirtualIdx = 0
+        let bestDist = Infinity
+        for (const card of cards) {
+          const cardCenter = card.offsetLeft + card.clientWidth / 2
+          const dist = Math.abs(cardCenter - center)
+          if (dist < bestDist) {
+            bestDist = dist
+            bestVirtualIdx = Number(card.dataset.virtualIndex)
+          }
+        }
+
+        setActiveVirtualIndex(bestVirtualIdx)
+        const normalized = ((bestVirtualIdx % events.length) + events.length) % events.length
+        setActiveIndex(normalized)
+
+        // Debounce do recenter para suavizar (evita salto durante a rolagem)
+        if (scrollEndTimer.current) {
+          window.clearTimeout(scrollEndTimer.current)
+        }
+        scrollEndTimer.current = window.setTimeout(() => {
+          if (bestVirtualIdx < baseOffset) {
+            const newVIdx = bestVirtualIdx + events.length
+            isProgrammatic.current = true
+            centerToVirtualIndex(newVIdx, false)
+            setActiveVirtualIndex(newVIdx)
+            setActiveIndex(((newVIdx % events.length) + events.length) % events.length)
+            // libera a flag no próximo frame
+            requestAnimationFrame(() => {
+              isProgrammatic.current = false
+            })
+          } else if (bestVirtualIdx >= baseOffset + events.length) {
+            const newVIdx = bestVirtualIdx - events.length
+            isProgrammatic.current = true
+            centerToVirtualIndex(newVIdx, false)
+            setActiveVirtualIndex(newVIdx)
+            setActiveIndex(((newVIdx % events.length) + events.length) % events.length)
+            requestAnimationFrame(() => {
+              isProgrammatic.current = false
+            })
+          }
+        }, 80)
+        ticking = false
+      })
     }
     el.addEventListener('scroll', onScroll, { passive: true } as any)
+    // Trigger uma leitura inicial
     onScroll()
     return () => {
       el.removeEventListener('scroll', onScroll)
+      if (scrollEndTimer.current) {
+        window.clearTimeout(scrollEndTimer.current)
+        scrollEndTimer.current = null
+      }
     }
   }, [events])
 
-  const scrollToIndex = (idx: number) => {
+  const centerToVirtualIndex = (vIdx: number, smooth: boolean) => {
     const el = containerRef.current
     if (!el) return
     const card = el.querySelector(
-      `article[data-index="${idx}"]`
+      `article[data-virtual-index="${vIdx}"]`
     ) as HTMLElement | null
-    if (card) {
-      el.scrollTo({ left: card.offsetLeft, behavior: 'smooth' })
+    if (!card) return
+    const targetLeft = card.offsetLeft - (el.clientWidth - card.clientWidth) / 2
+    el.scrollTo({ left: targetLeft, behavior: smooth ? 'smooth' : 'auto' })
+  }
+
+  const scrollToIndex = (idx: number) => {
+    if (events.length === 0) return
+    const n = events.length
+    // Escolhe o clone mais próximo do índice virtual atual para suavizar o scroll
+    const c0 = baseOffset + idx - n
+    const c1 = baseOffset + idx
+    const c2 = baseOffset + idx + n
+    const cur = activeVirtualIndex
+    const candidates = [c0, c1, c2]
+    let best = c1
+    let bestDist = Math.abs(c1 - cur)
+    for (const c of candidates) {
+      const dist = Math.abs(c - cur)
+      if (dist < bestDist) {
+        best = c
+        bestDist = dist
+      }
     }
+    centerToVirtualIndex(best, true)
   }
 
   return (
@@ -70,13 +153,21 @@ export default function UpcomingCarousel({
             </div>
           )}
 
-          {events.map((ev, i) => (
+          {virtualEvents.map((ev, i) => (
             <article
-              key={ev.id}
-              data-index={i}
-              className="snap-center shrink-0 w-[88%] mx-auto"
+              key={`${ev.id}-${i}`}
+              data-virtual-index={i}
+              className={`snap-center shrink-0 w-[88%] mx-auto transform transition-all duration-300 ${
+                i === activeVirtualIndex
+                  ? 'opacity-100 scale-100 z-10'
+                  : 'opacity-70 scale-95 z-0 translate-y-1'
+              }`}
             >
-              <div className="h-56 rounded-3xl overflow-hidden shadow-md">
+              <div
+                className={`h-56 rounded-3xl overflow-hidden shadow-md transition-all duration-300 ${
+                  i === activeVirtualIndex ? '' : 'blur-[2px]'
+                }`}
+              >
                 {ev.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -99,28 +190,25 @@ export default function UpcomingCarousel({
         </div>
 
         {/* Indicadores simples */}
-        <div className="mt-4 flex justify-center gap-2">
-          {(
-            events.length === 0
-              ? [0, 1, 2]
-              : Array.from({ length: Math.min(events.length, 5) }, (_, i) => i)
-          ).map((_, i) => {
-            const key = events.length === 0 ? i : (events[i]?.id ?? i)
-            const maxDots = Math.min(events.length || 3, 5)
-            const activeDot = Math.min(activeIndex, maxDots - 1)
-            return (
-              <span
-                key={key}
-                role={events.length > 0 ? 'button' : undefined}
-                aria-label={events.length > 0 ? `Ir para card ${i + 1}` : undefined}
-                onClick={events.length > 0 ? () => scrollToIndex(i) : undefined}
-                className={`h-2 w-2 rounded-full ${
-                  i === activeDot ? 'bg-[#6B4BA9]' : 'bg-gray-300'
-                } ${events.length > 0 ? 'cursor-pointer' : ''}`}
-              />
-            )
-          })}
-        </div>
+        {events.length > 0 && (
+          <div className="mt-4 flex justify-center gap-2">
+            {Array.from({ length: events.length }, (_, i) => i).map(i => {
+              const key = events[i]?.id ?? i
+              const activeDot = Math.min(activeIndex, events.length - 1)
+              return (
+                <span
+                  key={key}
+                  role="button"
+                  aria-label={`Ir para card ${i + 1}`}
+                  onClick={() => scrollToIndex(i)}
+                  className={`h-2 w-2 rounded-full ${
+                    i === activeDot ? 'bg-[#6B4BA9]' : 'bg-gray-300'
+                  } cursor-pointer`}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )

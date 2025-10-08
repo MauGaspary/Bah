@@ -203,7 +203,7 @@ export const eventos: EventoDeIniciativa[] = [
   {
     id: 'e5',
     iniciativa_id: '55555555-5555-5555-5555-555555555555',
-    data_evento: isoDate(addDays(start, 24)),
+    data_evento: isoDate(addDays(start, 37)),
     hora_inicio: '18:30',
     hora_fim: '20:30',
     tipo: 'networking',
@@ -266,6 +266,7 @@ export function buildCalendarEvents(): CalendarEvent[] {
       category: ev.tipo,
       location,
       imageUrl,
+      featured: ini?.destaque === true,
     } satisfies CalendarEvent
   })
 }
