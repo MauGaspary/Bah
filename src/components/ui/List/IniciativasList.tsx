@@ -18,11 +18,18 @@ interface Iniciativa{
   imageUrl: string;
 }
 
+interface IniciativasResponse{
+  items: Iniciativa[];
+  total: number;
+}
+
 function IniciativasList() {
   const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string |  null>(null);
   const [currentPage, setCurrentPage] = useState (1);
+
   const itemsPerPage = 5;
   const totalPages = Math.ceil(iniciativas.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -31,8 +38,10 @@ function IniciativasList() {
   useEffect(() => {
     async function fetchIniciativas() {
       try {
-        const response = await api.get<Iniciativa[]>("/admin/iniciativas");
-        setIniciativas(response.data);
+        const response = await api.get<IniciativasResponse[]>("/admin/iniciativas");
+        console.log(response);
+        setIniciativas(response.data.items);
+        setTotal(response.data.total);
       }
       catch (error) {
         console.error("Erro ao carregar iniciativas", error);
@@ -61,7 +70,7 @@ function IniciativasList() {
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
-              {iniciativas.length} iniciativas encontradas
+              {total} iniciativas encontradas
             </p>
           </div>
         </div>
