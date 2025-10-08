@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom'
-
 export interface LoginResponse {
   access_token: string
   user: {
@@ -15,9 +13,9 @@ export interface LoginCredentials {
 }
 
 export function logout(){
-  const navigate = useNavigate()
   removeToken()
-  navigate('/login', { replace: true })
+  // Redireciona para a página de login usando window.location
+  window.location.replace('/admin')
 }
 
 export async function login(
@@ -49,9 +47,19 @@ export function verify_token(token: string): Record<string, unknown> {
       const decoded = atob(parts[1])
       try {
         const payload = JSON.parse(decoded)
-        if (payload && typeof payload === 'object')
+        if (payload && typeof payload === 'object') {
+          // Verifica se o token não expirou
+          if (payload.exp && typeof payload.exp === 'number') {
+            const currentTime = Math.floor(Date.now() / 1000)
+            if (payload.exp < currentTime) {
+              throw new Error('Token expired')
+            }
+          }
           return payload as Record<string, unknown>
-      } catch {}
+        }
+      } catch (error) {
+        throw error
+      }
     }
   }
   throw new Error('Invalid token')
