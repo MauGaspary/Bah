@@ -60,13 +60,6 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
     fetchIniciativas();
   }, [searchQuery]);
 
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
-  if (error) {
-    return <div>Erro ao carregar iniciativas</div>;
-  }
-
   return (
     <div>
       <div className="rounded-card bg-white shadow-md overflow-hidden">
@@ -84,6 +77,15 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
         <div className="flex px-6 py-2 bg-background-secondary justify-between">
           <h1 className="text-body-regular font-mulish">Iniciativa</h1>
           <h1 className="text-body-regular font-mulish mr-53.5">Ações</h1>
+        </div>
+
+        <div className="mt-4 space-y-4 text-body-regular text-center font-mulish">
+          {loading && <p className="text-label-secondary">Carregando iniciativas...</p>}
+
+          {!loading && error && (
+            <p className="text-error">{error}</p>
+          )}
+
         </div>
 
         <div className="py-2 space-y-2 ">
