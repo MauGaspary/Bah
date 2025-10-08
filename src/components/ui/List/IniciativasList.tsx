@@ -13,9 +13,9 @@ import ListItem from './ListItem'
 
 interface Iniciativa{
   id: number;
-  title: string;
-  description: string;
-  imageUrl: string;
+  titulo: string;
+  descricao: string;
+  imagem_url: string;
 }
 
 interface IniciativasResponse{
@@ -38,7 +38,7 @@ function IniciativasList() {
   useEffect(() => {
     async function fetchIniciativas() {
       try {
-        const response = await api.get<IniciativasResponse[]>("/admin/iniciativas");
+        const response = await api.get<IniciativasResponse>("/admin/iniciativas");
         console.log(response);
         setIniciativas(response.data.items);
         setTotal(response.data.total);
@@ -84,9 +84,9 @@ function IniciativasList() {
           {currentItems.map((item, index) => (
             <ListItem
               key={item.id}
-              title={item.title}
-              description={item.description}
-              imageUrl={item.imageUrl}
+              title={item.titulo}
+              description={item.descricao}
+              imageUrl={item.imagem_url}
               isLast={index === currentItems.length - 1}
               onEdit={() => console.log("Editar")}
               onDelete={() => console.log("Excluir")}
