@@ -29,8 +29,9 @@ class UsuarioRepository:
             sobrenome=user_data.sobrenome,
         )
         self.session.add(usuario)
-        self.session.flush()
+        self.session.commit()
         self.session.refresh(usuario)
+
         return usuario
 
     def create2(self, email: str, password: str, nome: str, sobrenome: str) -> Usuario:
