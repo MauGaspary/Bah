@@ -7,27 +7,33 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 
-const mockIniciativas = Array.from({ length: 22 }).map((_, i) => ({
-  id: i + 1,
-  title: `Iniciativa ${i + 1}`,
-  description: 'Descrição da iniciativa',
-  imageUrl: 'https://placehold.co/150x150.png?text=',
-}))
+interface Iniciativa{
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
 
 function IniciativasList() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
+  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string |  null>(null);
+  const [currentPage, setCurrentPage] = useState (1);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(iniciativas.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage);
 
-  const totalPages = Math.ceil(mockIniciativas.length / itemsPerPage)
-
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentItems = mockIniciativas.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  )
+  useEffect(() => {
+    async function fetchIniciativas() {
+      try {
+        const response = await 
+      }
+    }
+  }
 
   return (
     <div>
@@ -38,7 +44,7 @@ function IniciativasList() {
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
-              {mockIniciativas.length} iniciativas encontradas
+              {Iniciativas.length} iniciativas encontradas
             </p>
           </div>
         </div>
