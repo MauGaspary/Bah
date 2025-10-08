@@ -78,18 +78,18 @@ class AdminIniciativaRepository:
             query = query.filter(Iniciativa.deletado_em.is_(None))
         return query.filter(Iniciativa.id == iniciativa_id).first()
 
-    def soft_delete(
-        self, iniciativa_id: str, deletado_por: str = None
-    ) -> Optional[Iniciativa]:
+    def soft_delete(self, iniciativa_id: str, deletado_por: str) -> bool:
         iniciativa = self.get_by_id(iniciativa_id, allow_deleted=True)
-        if iniciativa:
-            if iniciativa.deletado_em is None:
-                iniciativa.deletado_em = func.now()
-                iniciativa.deletado_por = deletado_por
-                self.db.commit()
-                self.db.refresh(iniciativa)
-            return iniciativa
-        return None
+        if not iniciativa:
+            return False
+
+        if iniciativa.deletado_em is None:
+            iniciativa.deletado_em = func.now()
+            iniciativa.deletado_por = deletado_por
+            self.db.commit()
+            self.db.refresh(iniciativa)
+
+        return True
 
     def count_iniciativas(
         self,
@@ -131,7 +131,7 @@ class AdminIniciativaRepository:
 
         return self.db.execute(query).scalar() or 0
 
-    def get_by_id(self, iniciativa_id: str) -> Optional[Iniciativa]:
+    def get_iniciativa_with_relations(self, iniciativa_id: str) -> Optional[Iniciativa]:
         query = (
             select(Iniciativa)
             .options(

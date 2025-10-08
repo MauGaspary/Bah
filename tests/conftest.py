@@ -1,6 +1,7 @@
 import os
 
 os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
+os.environ["TESTING"] = "true"
 
 if os.getenv("DOCKER_ENV") == "true":
     os.environ["TESTCONTAINERS_HOST_OVERRIDE"] = "host.docker.internal"

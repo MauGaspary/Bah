@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_serializer
+from pydantic import BaseModel, ConfigDict
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
@@ -33,12 +33,11 @@ class IniciativaHorarioSchema(BaseModel):
 
 
 class IniciativaSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(from_attributes=True)
 
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: Any = None
     link: str
     destaque: bool
     local: Optional[str]
@@ -54,14 +53,6 @@ class IniciativaSchema(BaseModel):
     organizador: Optional[OrganizadorSchema]
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
-
-    @field_serializer("descricao_vetor")
-    def serialize_vector(self, value: Any) -> Optional[str]:
-        if value is None:
-            return None
-        if hasattr(value, "tolist"):
-            return str(value.tolist())
-        return str(value)
 
 
 class IniciativaFiltersSchema(BaseModel):
