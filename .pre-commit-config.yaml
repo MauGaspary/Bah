@@ -45,7 +45,8 @@ repos:
       - id: pytest
         name: pytest
         description: "test code with Pytest"
-        entry: pipenv run pytest --cov=app --cov-fail-under=80
+        entry: pipenv run pytest --cov=app --cov-fail-under=80 --cov-config=.coveragerc
         language: system
         types: [python]
         pass_filenames: false
+        exclude: ^migrations/ | ^scripts/
