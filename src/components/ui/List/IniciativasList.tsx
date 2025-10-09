@@ -7,14 +7,13 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-import api from '@/service/api'
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
+import { fetchIniciativas } from '@/service/iniciativas'
 
 import type { 
   IniciativasListProps, 
-  Iniciativa, 
-  IniciativasResponse 
+  Iniciativa 
 } from '@/interfaces/IIniciativas'
 
 function IniciativasList({searchQuery}: IniciativasListProps) {
@@ -30,14 +29,12 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
   const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
-    async function fetchIniciativas() {
+    async function loadIniciativas() {
       try {
-        const response = await api.get<IniciativasResponse>("/admin/iniciativas", {
-          params: searchQuery ? { q: searchQuery } : {},
-        })
-        console.log(response);
-        setIniciativas(response.data.items);
-        setTotal(response.data.total);
+        const data = await fetchIniciativas(searchQuery);
+        console.log(data);
+        setIniciativas(data.items);
+        setTotal(data.total);
       }
       catch (error) {
         console.error("Erro ao carregar iniciativas", error);
@@ -47,7 +44,7 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
         setLoading(false);
       }
     }
-    fetchIniciativas();
+    loadIniciativas();
   }, [searchQuery]);
 
   return (
