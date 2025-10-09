@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff , X } from 'lucide-react'
-import { useState } from 'react'
+import { Eye, EyeOff, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -18,7 +18,14 @@ function LoginAdminPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+
+  // Redireciona se já estiver autenticado
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/admin/iniciativas', { replace: true })
+    }
+  }, [isAuthenticated, authLoading, navigate])
 
   const loginSchema = z.object({
     email: z.string().email({ message: 'Email inválido' }),
@@ -50,6 +57,18 @@ function LoginAdminPage() {
   }
 
   const clearEmail = () => form.setValue('email', '')
+
+  // Mostra loading enquanto verifica autenticação
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-secondary">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bah-purple mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando autenticação...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex relative">
