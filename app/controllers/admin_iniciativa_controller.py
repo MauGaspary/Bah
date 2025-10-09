@@ -32,18 +32,16 @@ class AdminIniciativaController:
                 q, created_from, created_to, order_by, order_dir, page, size
             )
         except ValueError as e:
-            # 422 com detail string (evita falhas em testes que esperam string)
             raise HTTPException(status_code=422, detail=str(e)) from e
         except Exception as e:
             raise HTTPException(status_code=500, detail="Internal server error") from e
 
-    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str) -> None:
         """Soft delete de uma iniciativa"""
         try:
-            return self.service.delete_iniciativa(iniciativa_id, deletado_por)
+            self.service.delete_iniciativa(iniciativa_id, deletado_por)
         except ValueError as e:
-            # detail como string (os testes de 404 esperam string)
-            raise HTTPException(status_code=404, detail=str(e)) from e
+            raise HTTPException(status_code=404, detail={"message": str(e)}) from e
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail="Erro ao deletar iniciativa"

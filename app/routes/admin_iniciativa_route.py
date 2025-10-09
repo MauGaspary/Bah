@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
@@ -29,7 +28,7 @@ def create_iniciativa(
     iniciativa: IniciativaCreate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
-    model: SentenceTransformer = Depends(get_embedding_model),
+    model: Optional[object] = Depends(get_embedding_model),
 ):
     """Cria uma nova iniciativa."""
     controller = IniciativaController(db, model)
@@ -108,7 +107,6 @@ def patch_iniciativa(
     - 200 com objeto completo atualizado
     """
     controller = AdminIniciativaController(db)
-    # Passa o usuário autenticado como 'editado_por' (se aplicável)
     return controller.patch_iniciativa(
         iniciativa_id=iniciativa_id,
         payload=payload,

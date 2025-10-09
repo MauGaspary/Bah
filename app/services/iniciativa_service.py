@@ -1,7 +1,6 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException
-from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
@@ -14,7 +13,7 @@ from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
-    def __init__(self, db: Session, model: SentenceTransformer):
+    def __init__(self, db: Session, model: Optional[object]):
         self.repository = IniciativaRepository(db)
         self.model = model
 
@@ -63,7 +62,9 @@ class IniciativaService:
 
         try:
             print("model", self.model)
-            embedding = self.model.encode(
+            if self.model is None:
+                raise RuntimeError("Modelo de embedding não disponível")
+            embedding = self.model.encode(  # type: ignore
                 iniciativa_data.descricao,
                 convert_to_numpy=True,
                 normalize_embeddings=True,
@@ -87,17 +88,21 @@ class IniciativaService:
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
         iniciativa = self.repository.get_by_id(iniciativa_id)
         if not iniciativa:
-            raise ValueError("Iniciativa não encontrada")
+            raise HTTPException(status_code=404, detail="Iniciativa não encontrada")
         return IniciativaResponse.model_validate(iniciativa)
 
     def search_iniciativas(
         self, query: str, page: int, size: int
     ) -> IniciativaListResponseSchema:
-        embedding = self.model.encode(
+        if self.model is None:
+            raise ValueError("Modelo de embedding não disponível")
+        embedding = self.model.encode(  # type: ignore
             query, convert_to_numpy=True, normalize_embeddings=True
         )
         try:
-            iniciativas, total = self.repository.search_by_embedding(embedding, page, size)
+            iniciativas, total = self.repository.search_by_embedding(
+                embedding, page, size
+            )
 
             filters = IniciativaFiltersSchema(q=query, page=page, size=size)
             return IniciativaListResponseSchema(
@@ -105,6 +110,4 @@ class IniciativaService:
             )
         except Exception as e:
             print(f"Erro na busca: {type(e).__name__}: {str(e)}")
-            raise ValueError(
-                status_code=500, detail=f"Erro interno do servidor na service: {str(e)}"
-            ) from e
+            raise ValueError(f"Erro interno do servidor na service: {str(e)}") from e

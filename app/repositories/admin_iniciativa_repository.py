@@ -97,18 +97,18 @@ class AdminIniciativaRepository:
             raise ResourceNotFound("Iniciativa não encontrada")
         return obj
 
-    def soft_delete(
-        self, iniciativa_id: str, deletado_por: str = None
-    ) -> Optional[Iniciativa]:
+    def soft_delete(self, iniciativa_id: str, deletado_por: str) -> bool:
         iniciativa = self.get_by_id(iniciativa_id, allow_deleted=True)
-        if iniciativa:
-            if iniciativa.deletado_em is None:
-                iniciativa.deletado_em = func.now()
-                iniciativa.deletado_por = deletado_por
-                self.db.commit()
-                self.db.refresh(iniciativa)
-            return iniciativa
-        return None
+        if not iniciativa:
+            return False
+
+        if iniciativa.deletado_em is None:
+            iniciativa.deletado_em = func.now()
+            iniciativa.deletado_por = deletado_por
+            self.db.commit()
+            self.db.refresh(iniciativa)
+
+        return True
 
     def count_iniciativas(
         self,
@@ -182,15 +182,10 @@ class AdminIniciativaRepository:
             tags = self.db.query(Tag).filter(Tag.id.in_(data["tags_ids"])).all()
             obj.tags = tags
 
-        # ---- Horários (sobrescrever se enviado)
-        # data["horarios"] esperado como lista de dicts com:
-        # { "data_evento": date, "hora_inicio": time, "hora_fim": time, "tipo": HorarioTipo }
         if "horarios" in data and data["horarios"] is not None:
-            # Apaga horários atuais
             for h in list(obj.horarios):
                 self.db.delete(h)
             self.db.flush()
-            # Recria a partir do payload
             for h in data["horarios"]:
                 obj.horarios.append(
                     IniciativaHorario(
@@ -207,7 +202,6 @@ class AdminIniciativaRepository:
 
         self.db.add(obj)
         self.db.commit()
-        # garantir que retorna com relacionamentos atualizados
         self.db.refresh(obj)
 
         return obj

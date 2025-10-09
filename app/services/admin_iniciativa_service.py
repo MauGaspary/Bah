@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_iniciativa_repository import AdminIniciativaRepository
@@ -58,12 +57,11 @@ class AdminIniciativaService:
             items=iniciativas, total=total, filters=filters
         )
 
-    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
-        iniciativa = self.repository.soft_delete(iniciativa_id, deletado_por)
-        if not iniciativa:
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str) -> None:
+        exists = self.repository.soft_delete(iniciativa_id, deletado_por)
+        if not exists:
             raise ValueError("Iniciativa não encontrada.")
 
-    # Novo método PATCH
     def patch_iniciativa(
         self,
         iniciativa_id: str,

@@ -1,11 +1,7 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import (  # [ALTERADO] + field_validator
-    BaseModel,
-    ConfigDict,
-    field_validator,
-)
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
@@ -17,18 +13,12 @@ class TagSchema(BaseModel):
     nome: str
     descricao: Optional[str]
 
-    class ConfigDict:
-        from_attributes = True
-
 
 class OrganizadorSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
     nome: str
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaHorarioSchema(BaseModel):
@@ -40,9 +30,6 @@ class IniciativaHorarioSchema(BaseModel):
     hora_fim: time
     tipo: HorarioTipo
     criado_em: datetime
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaSchema(BaseModel):
@@ -67,31 +54,6 @@ class IniciativaSchema(BaseModel):
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
 
-    # [NOVO] normaliza pgvector/ndarray/iteráveis para list[float]
-    @field_validator("descricao_vetor", mode="before")
-    @classmethod
-    def _normalize_vec(cls, v):
-        if v is None:
-            return v
-        # numpy.ndarray -> list[float]
-        try:
-            import numpy as np  # type: ignore
-
-            if isinstance(v, np.ndarray):
-                return v.astype(float).tolist()
-        except Exception:
-            pass
-        # tuple/list -> list[float]
-        if isinstance(v, (list, tuple)):
-            return [float(x) for x in v]
-        # bytes/memoryview: não tentar parsear aqui; evita quebrar
-        if isinstance(v, (bytes, bytearray, memoryview)):
-            return None
-        return v
-
-    class ConfigDict:
-        from_attributes = True
-
 
 class IniciativaFiltersSchema(BaseModel):
     q: Optional[str] = None
@@ -109,9 +71,6 @@ class IniciativaListResponseSchema(BaseModel):
     items: List[IniciativaSchema]
     total: int
     filters: IniciativaFiltersSchema
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaHorarioPatch(BaseModel):
@@ -145,6 +104,5 @@ class IniciativaPatchSchema(BaseModel):
     imagem_url: Optional[str] = None
     organizador_id: Optional[str] = None
 
-    # Relacionamentos editáveis
     tags_ids: Optional[List[str]] = None
     horarios: Optional[List[IniciativaHorarioPatch]] = None

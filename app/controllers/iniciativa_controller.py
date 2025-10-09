@@ -1,5 +1,6 @@
-from http.client import HTTPException
-from sentence_transformers import SentenceTransformer
+from typing import Optional
+
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
@@ -7,7 +8,7 @@ from app.services.iniciativa_service import IniciativaService
 
 
 class IniciativaController:
-    def __init__(self, db: Session, model: SentenceTransformer = None):
+    def __init__(self, db: Session, model: Optional[object] = None):
         self.service = IniciativaService(db, model)
 
     def create_iniciativa(
@@ -23,7 +24,12 @@ class IniciativaController:
             raise HTTPException(500, str(e)) from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
-        return self.service.get_iniciativa_by_id(iniciativa_id)
+        try:
+            return self.service.get_iniciativa_by_id(iniciativa_id)
+        except HTTPException:
+            raise
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
 
     def search_iniciativas(self, query: str, page: int, size: int):
         try:
