@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
 from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
+from app.utils.image_utils import transformar_imagem_em_base64
 
 security = HTTPBearer()
 
@@ -36,9 +37,10 @@ def search_iniciativas(
 @router.post(
     "/", response_model=IniciativaResponse, status_code=status.HTTP_201_CREATED
 )
-def create_iniciativa(
+async def create_iniciativa(
     iniciativa: IniciativaCreate,
-    criado_por: str = "sistema",  # TODO: Obter do token de autenticação
+    file: UploadFile = File(...),
+    criado_por: str = "sistema",
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
     request: Request = None,
@@ -55,17 +57,18 @@ def create_iniciativa(
 
     Retorna 201 com o recurso criado ou 422 quando validações falham.
     """
-    model = request.app.state.embedding_model
-    controller = IniciativaController(db, model)
-    return controller.create_iniciativa(iniciativa, criado_por)
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O arquivo enviado não é uma imagem válida.",
+        )
 
+    file_content = await file.read()
 
-@router.get("/{iniciativa_id}", response_model=IniciativaResponse)
-def get_iniciativa_by_id(
-    iniciativa_id: str,
-    db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-):
-    """Busca uma iniciativa pelo ID."""
+    imagem_base64 = transformar_imagem_em_base64(file_content)
+
+    iniciativa_data = iniciativa.dict()
+    iniciativa_data["imagem_base64"] = imagem_base64
+
     controller = IniciativaController(db)
-    return controller.get_iniciativa_by_id(iniciativa_id)
+    return controller.create_iniciativa(IniciativaCreate(**iniciativa_data), criado_por)

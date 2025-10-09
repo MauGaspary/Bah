@@ -15,7 +15,7 @@ pyjwt = "2.10.1"
 python-dotenv = "1.1.1"
 bcrypt = "~=4.0.1"
 pgvector = "~=0.4.1"
-sentence-transformers = "*"
+sentence-transformers = "~=5.1.1"
 
 [dev-packages]
 black = "~=24.10.0"

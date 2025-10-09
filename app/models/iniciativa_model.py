@@ -30,7 +30,6 @@ class Iniciativa(Base):
     link = Column(Text, nullable=False)
     destaque = Column(Boolean, nullable=False, default=False, index=True)
     local = Column(String)
-    imagem_url = Column(String, nullable=False)
 
     criado_por = Column(String, ForeignKey("usuarios.id"), nullable=False, index=True)
     criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -42,3 +41,5 @@ class Iniciativa(Base):
     organizador = relationship("Organizador", backref="iniciativas")
     horarios = relationship("IniciativaHorario", back_populates="iniciativa")
     tags = relationship("Tag", secondary="iniciativa_tag", backref="iniciativas")
+
+    imagem_base64 = Column(Text, nullable=False)

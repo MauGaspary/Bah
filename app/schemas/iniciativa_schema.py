@@ -30,6 +30,7 @@ class IniciativaCreate(BaseModel):
         None, max_length=255, description="Local da iniciativa"
     )
     imagem_url: str = Field(description="URL da imagem")
+    imagem_base64: Optional[str] = Field(None, description="Imagem em formato Base64")
     destaque: bool = Field(False, description="Se a iniciativa é destaque")
     horarios: List[IniciativaHorarioCreate] = Field(
         min_length=1, description="Lista de horários da iniciativa"
@@ -58,6 +59,7 @@ class IniciativaResponse(BaseModel):
     link: str
     local: Optional[str] = None
     imagem_url: str
+    imagem_base64: Optional[str] = None
     destaque: bool
     horarios: List[IniciativaHorarioResponse]
     criado_em: Optional[datetime] = None
