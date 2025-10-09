@@ -7,27 +7,41 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
+import { fetchIniciativas } from '@/service/iniciativas'
 
-const mockIniciativas = Array.from({ length: 22 }).map((_, i) => ({
-  id: i + 1,
-  title: `Iniciativa ${i + 1}`,
-  description: 'Descrição da iniciativa',
-  imageUrl: 'https://placehold.co/150x150.png?text=',
-}))
+import type {
+  IniciativasListProps,
+  Iniciativa,
+} from '@/interfaces/IIniciativas'
 
-function IniciativasList() {
+function IniciativasList({ searchQuery }: IniciativasListProps) {
+  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+
   const itemsPerPage = 5
-
-  const totalPages = Math.ceil(mockIniciativas.length / itemsPerPage)
-
+  const totalPages = Math.ceil(iniciativas.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentItems = mockIniciativas.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  )
+  const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage)
+
+  useEffect(() => {
+    async function loadIniciativas() {
+      try {
+        const data = await fetchIniciativas(searchQuery)
+        setIniciativas(data.items)
+        setTotal(data.total)
+      } catch (error) {
+        setError('Erro ao carregar iniciativas')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadIniciativas()
+  }, [searchQuery])
 
   return (
     <div>
@@ -38,7 +52,7 @@ function IniciativasList() {
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
-              {mockIniciativas.length} iniciativas encontradas
+              {total} iniciativas encontradas
             </p>
           </div>
         </div>
@@ -48,16 +62,24 @@ function IniciativasList() {
           <h1 className="text-body-regular font-mulish mr-53.5">Ações</h1>
         </div>
 
+        <div className="mt-4 space-y-4 text-body-regular text-center font-mulish">
+          {loading && (
+            <p className="text-label-secondary">Carregando iniciativas...</p>
+          )}
+
+          {!loading && error && <p className="text-error">{error}</p>}
+        </div>
+
         <div className="py-2 space-y-2 ">
           {currentItems.map((item, index) => (
             <ListItem
               key={item.id}
-              title={item.title}
-              description={item.description}
-              imageUrl={item.imageUrl}
+              title={item.titulo}
+              description={item.descricao}
+              imageUrl={item.imagem_url}
               isLast={index === currentItems.length - 1}
-              onEdit={() => console.log("Editar")}
-              onDelete={() => console.log("Excluir")}
+              onEdit={() => console.log('Editar')}
+              onDelete={() => console.log('Excluir')}
             />
           ))}
         </div>
