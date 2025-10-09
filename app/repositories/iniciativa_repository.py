@@ -152,21 +152,22 @@ class IniciativaRepository:
 
         embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
 
-        query = text("""
+        query = text(
+            """
             SELECT i.*, count(*) OVER() AS total_count
             FROM iniciativas i
             ORDER BY i.descricao_vetor <-> :embedding
             LIMIT :limit OFFSET :offset
-        """)
+        """
+        )
 
-        result = self.db.execute(
-            query,
-            {
-                "embedding": embedding_str,
-                "limit": size,
-                "offset": offset
-            }
-        ).mappings().all()
+        result = (
+            self.db.execute(
+                query, {"embedding": embedding_str, "limit": size, "offset": offset}
+            )
+            .mappings()
+            .all()
+        )
 
         if result:
             total = result[0]["total_count"]
@@ -185,4 +186,3 @@ class IniciativaRepository:
         iniciativas = [iniciativas_dict[_id] for _id in ids]
 
         return iniciativas, total
-
