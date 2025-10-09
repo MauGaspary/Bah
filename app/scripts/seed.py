@@ -207,7 +207,6 @@ def seed_iniciativas():
             print(f"Iniciativas já existem. Encontrados {existing_count} iniciativas.")
             return
 
-        # Buscar os primeiros usuários e organizadores para usar como referência
         primeiro_usuario = db.query(Usuario).first()
         if not primeiro_usuario:
             print("Erro: Nenhum usuário encontrado. Execute seed_users() primeiro.")
@@ -377,10 +376,8 @@ def seed_iniciativas():
         ]
 
         for iniciativa_data in iniciativas_data:
-            # Criar vetor de descrição (simulado com zeros por agora)
-            descricao_vetor = [0.0] * 768  # Assumindo 768 dimensões
+            descricao_vetor = [0.0] * 768
 
-            # Criar a iniciativa
             iniciativa = Iniciativa(
                 titulo=iniciativa_data["titulo"],
                 descricao=iniciativa_data["descricao"],
@@ -395,9 +392,8 @@ def seed_iniciativas():
             )
 
             db.add(iniciativa)
-            db.flush()  # Para obter o ID da iniciativa
+            db.flush()
 
-            # Criar os horários
             for horario_data in iniciativa_data["horarios"]:
                 horario = IniciativaHorario(
                     iniciativa_id=iniciativa.id,
@@ -409,7 +405,6 @@ def seed_iniciativas():
                 )
                 db.add(horario)
 
-            # Associar tags
             if iniciativa_data.get("tag_ids"):
                 for tag_id in iniciativa_data["tag_ids"]:
                     iniciativa_tag = IniciativaTag(

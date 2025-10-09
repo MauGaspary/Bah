@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sentence_transformers import SentenceTransformer
@@ -28,6 +30,7 @@ def search_iniciativas(
     db: Session = Depends(get_db),
     model: SentenceTransformer = Depends(get_embedding_model),
 ):
+
     controller = IniciativaController(db, model)
     return controller.search_iniciativas(q, page, size)
 
@@ -37,10 +40,10 @@ def search_iniciativas(
 )
 def create_iniciativa(
     iniciativa: IniciativaCreate,
+    request: Request,
     criado_por: str = "sistema",  # TODO: Obter do token de autenticação
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    request: Request = None,
 ):
     """
     Cria uma nova iniciativa.

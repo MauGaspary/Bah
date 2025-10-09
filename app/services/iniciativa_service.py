@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException
 from sentence_transformers import SentenceTransformer
@@ -14,7 +14,7 @@ from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
-    def __init__(self, db: Session, model: SentenceTransformer):
+    def __init__(self, db: Session, model: Optional[SentenceTransformer] = None):
         self.repository = IniciativaRepository(db)
         self.model = model
 
@@ -63,7 +63,9 @@ class IniciativaService:
 
         try:
             print("model", self.model)
-            embedding = self.model.encode(
+            if self.model is None:
+                raise RuntimeError("Modelo de embedding não disponível")
+            embedding = self.model.encode(  # type: ignore
                 iniciativa_data.descricao,
                 convert_to_numpy=True,
                 normalize_embeddings=True,
@@ -87,13 +89,15 @@ class IniciativaService:
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
         iniciativa = self.repository.get_by_id(iniciativa_id)
         if not iniciativa:
-            raise ValueError("Iniciativa não encontrada")
+            raise HTTPException(status_code=404, detail="Iniciativa não encontrada")
         return IniciativaResponse.model_validate(iniciativa)
 
     def search_iniciativas(
         self, query: str, page: int, size: int
     ) -> IniciativaListResponseSchema:
-        embedding = self.model.encode(
+        if self.model is None:
+            raise ValueError("Modelo de embedding não disponível")
+        embedding = self.model.encode(  # type: ignore
             query, convert_to_numpy=True, normalize_embeddings=True
         )
         try:
@@ -107,6 +111,4 @@ class IniciativaService:
             )
         except Exception as e:
             print(f"Erro na busca: {type(e).__name__}: {str(e)}")
-            raise ValueError(
-                status_code=500, detail=f"Erro interno do servidor na service: {str(e)}"
-            ) from e
+            raise ValueError(f"Erro interno do servidor na service: {str(e)}") from e

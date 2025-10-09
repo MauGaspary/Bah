@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
@@ -13,18 +13,12 @@ class TagSchema(BaseModel):
     nome: str
     descricao: Optional[str]
 
-    class ConfigDict:
-        from_attributes = True
-
 
 class OrganizadorSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
     nome: str
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaHorarioSchema(BaseModel):
@@ -37,9 +31,6 @@ class IniciativaHorarioSchema(BaseModel):
     tipo: HorarioTipo
     criado_em: datetime
 
-    class ConfigDict:
-        from_attributes = True
-
 
 class IniciativaSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -47,7 +38,6 @@ class IniciativaSchema(BaseModel):
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: List[float]  # isso deve ser removido, não vai pro front
     link: str
     destaque: bool
     local: Optional[str]
@@ -63,9 +53,6 @@ class IniciativaSchema(BaseModel):
     organizador: Optional[OrganizadorSchema]
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
-
-    class ConfigDict:
-        from_attributes = True
 
 
 class IniciativaFiltersSchema(BaseModel):
@@ -85,5 +72,37 @@ class IniciativaListResponseSchema(BaseModel):
     total: int
     filters: IniciativaFiltersSchema
 
-    class ConfigDict:
-        from_attributes = True
+
+class IniciativaHorarioPatch(BaseModel):
+    data_evento: Optional[date] = None
+    hora_inicio: Optional[time] = None
+    hora_fim: Optional[time] = None
+    tipo: Optional[HorarioTipo] = None
+
+    @field_validator("hora_fim")
+    @classmethod
+    def _fim_depois_de_inicio(cls, v, info):
+        inicio = info.data.get("hora_inicio")
+        if v and inicio and v <= inicio:
+            raise ValueError("hora_fim deve ser maior que hora_inicio")
+        return v
+
+    @field_validator("data_evento")
+    @classmethod
+    def _nao_retroativa(cls, v):
+        if v and v < date.today():
+            raise ValueError("data_evento não pode ser retroativa")
+        return v
+
+
+class IniciativaPatchSchema(BaseModel):
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    link: Optional[str] = None
+    destaque: Optional[bool] = None
+    local: Optional[str] = None
+    imagem_url: Optional[str] = None
+    organizador_id: Optional[str] = None
+
+    tags_ids: Optional[List[str]] = None
+    horarios: Optional[List[IniciativaHorarioPatch]] = None

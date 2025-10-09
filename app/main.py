@@ -1,9 +1,9 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from sentence_transformers import SentenceTransformer
 
 from app.config.settings import Settings
 from app.middleware.auth_middleware import JWTMiddleware
@@ -46,8 +46,13 @@ def create_app(settings=None):
 
     app.state.settings = settings
 
-    model = SentenceTransformer("intfloat/multilingual-e5-base")
-    app.state.embedding_model = model
+    if not os.getenv("TESTING", "false").lower() == "true":
+        from sentence_transformers import SentenceTransformer
+
+        model = SentenceTransformer("intfloat/multilingual-e5-base")
+        app.state.embedding_model = model
+    else:
+        app.state.embedding_model = None
 
     app.include_router(demo_router, prefix="/demo", tags=["demo"])
     app.include_router(admin_iniciativa_router, prefix="/admin", tags=["admin"])
