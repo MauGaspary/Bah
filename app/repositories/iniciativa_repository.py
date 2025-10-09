@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import numpy as np
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.iniciativa_horario_model import IniciativaHorario
@@ -9,20 +9,25 @@ from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
 from app.models.organizador_model import Organizador
 from app.models.tag_model import Tag
-from app.schemas.iniciativa_schema import IniciativaCreate
+from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, iniciativa_data: IniciativaCreate, criado_por: str) -> Iniciativa:
-        temp_vector = np.random.rand(768).tolist()
+    def create(
+        self,
+        iniciativa_data: IniciativaCreate,
+        criado_por: str,
+        descricao_vetor: List[float],
+    ) -> Iniciativa:
 
         db_iniciativa = Iniciativa(
             titulo=iniciativa_data.titulo,
             descricao=iniciativa_data.descricao,
-            descricao_vetor=temp_vector,
+            descricao_vetor=descricao_vetor,
             organizador_id=iniciativa_data.organizador_id,
             link=iniciativa_data.link,
             local=iniciativa_data.local,
@@ -138,3 +143,46 @@ class IniciativaRepository:
             conflitos.extend(conflitos_horario)
 
         return conflitos
+
+    def search_by_embedding(self, embedding: List[float], page: int, size: int):
+        offset = (page - 1) * size
+
+        if isinstance(embedding, np.ndarray):
+            embedding = embedding.tolist()
+
+        embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
+
+        query = text("""
+            SELECT i.*, count(*) OVER() AS total_count
+            FROM iniciativas i
+            ORDER BY i.descricao_vetor <-> :embedding
+            LIMIT :limit OFFSET :offset
+        """)
+
+        result = self.db.execute(
+            query,
+            {
+                "embedding": embedding_str,
+                "limit": size,
+                "offset": offset
+            }
+        ).mappings().all()
+
+        if result:
+            total = result[0]["total_count"]
+        else:
+            total = 0
+
+        ids = [row["id"] for row in result]
+        iniciativas = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.id.in_(ids))
+            .options(selectinload(Iniciativa.horarios))
+            .all()
+        )
+
+        iniciativas_dict = {i.id: i for i in iniciativas}
+        iniciativas = [iniciativas_dict[_id] for _id in ids]
+
+        return iniciativas, total
+

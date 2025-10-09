@@ -51,8 +51,6 @@ class IniciativaSchema(BaseModel):
     id: str
     titulo: str
     descricao: str
-    # [ALTERADO] de str -> Optional[List[float]] com normalização
-    descricao_vetor: Optional[List[float]] = None
     link: str
     destaque: bool
     local: Optional[str]

@@ -1,14 +1,36 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
+from app.config.model import get_embedding_model
+from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
+from app.dependencies.auth import get_current_user
+from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 security = HTTPBearer()
 
 router = APIRouter()
+
+
+@router.get(
+    "/search",
+    response_model=IniciativaListResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+def search_iniciativas(
+    q: str = Query(..., description="Texto da busca semântica"),
+    page: int = Query(1, ge=1, description="Número da página"),
+    size: int = Query(10, ge=1, le=100, description="Itens por página"),
+    db: Session = Depends(get_db),
+    model: SentenceTransformer = Depends(get_embedding_model),
+):
+   
+    controller = IniciativaController(db, model)
+    return controller.search_iniciativas(q, page, size)
 
 
 @router.post(
@@ -19,6 +41,7 @@ def create_iniciativa(
     criado_por: str = "sistema",  # TODO: Obter do token de autenticação
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request = None,
 ):
     """
     Cria uma nova iniciativa.
@@ -32,7 +55,8 @@ def create_iniciativa(
 
     Retorna 201 com o recurso criado ou 422 quando validações falham.
     """
-    controller = IniciativaController(db)
+    model = request.app.state.embedding_model
+    controller = IniciativaController(db, model)
     return controller.create_iniciativa(iniciativa, criado_por)
 
 
