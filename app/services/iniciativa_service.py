@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from fastapi import HTTPException
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
@@ -13,7 +14,7 @@ from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
-    def __init__(self, db: Session, model: Optional[object]):
+    def __init__(self, db: Session, model: Optional[SentenceTransformer] = None):
         self.repository = IniciativaRepository(db)
         self.model = model
 
