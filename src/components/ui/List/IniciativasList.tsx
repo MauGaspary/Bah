@@ -11,41 +11,37 @@ import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 import { fetchIniciativas } from '@/service/iniciativas'
 
-import type { 
-  IniciativasListProps, 
-  Iniciativa 
+import type {
+  IniciativasListProps,
+  Iniciativa,
 } from '@/interfaces/IIniciativas'
 
-function IniciativasList({searchQuery}: IniciativasListProps) {
-  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string |  null>(null);
-  const [currentPage, setCurrentPage] = useState (1);
+function IniciativasList({ searchQuery }: IniciativasListProps) {
+  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(iniciativas.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage);
+  const itemsPerPage = 5
+  const totalPages = Math.ceil(iniciativas.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage)
 
   useEffect(() => {
     async function loadIniciativas() {
       try {
-        const data = await fetchIniciativas(searchQuery);
-        console.log(data);
-        setIniciativas(data.items);
-        setTotal(data.total);
-      }
-      catch (error) {
-        console.error("Erro ao carregar iniciativas", error);
-        setError("Erro ao carregar iniciativas");
-      }
-      finally {
-        setLoading(false);
+        const data = await fetchIniciativas(searchQuery)
+        setIniciativas(data.items)
+        setTotal(data.total)
+      } catch (error) {
+        setError('Erro ao carregar iniciativas')
+      } finally {
+        setLoading(false)
       }
     }
-    loadIniciativas();
-  }, [searchQuery]);
+    loadIniciativas()
+  }, [searchQuery])
 
   return (
     <div>
@@ -67,12 +63,11 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
         </div>
 
         <div className="mt-4 space-y-4 text-body-regular text-center font-mulish">
-          {loading && <p className="text-label-secondary">Carregando iniciativas...</p>}
-
-          {!loading && error && (
-            <p className="text-error">{error}</p>
+          {loading && (
+            <p className="text-label-secondary">Carregando iniciativas...</p>
           )}
 
+          {!loading && error && <p className="text-error">{error}</p>}
         </div>
 
         <div className="py-2 space-y-2 ">
@@ -83,8 +78,8 @@ function IniciativasList({searchQuery}: IniciativasListProps) {
               description={item.descricao}
               imageUrl={item.imagem_url}
               isLast={index === currentItems.length - 1}
-              onEdit={() => console.log("Editar")}
-              onDelete={() => console.log("Excluir")}
+              onEdit={() => console.log('Editar')}
+              onDelete={() => console.log('Excluir')}
             />
           ))}
         </div>
