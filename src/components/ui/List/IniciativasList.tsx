@@ -11,21 +11,11 @@ import api from '@/service/api'
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 
-interface IniciativasListProps{
-  searchQuery: string;
-}
-
-interface Iniciativa{
-  id: number;
-  titulo: string;
-  descricao: string;
-  imagem_url: string;
-}
-
-interface IniciativasResponse{
-  items: Iniciativa[];
-  total: number;
-}
+import type { 
+  IniciativasListProps, 
+  Iniciativa, 
+  IniciativasResponse 
+} from '@/interfaces/IIniciativas'
 
 function IniciativasList({searchQuery}: IniciativasListProps) {
   const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
