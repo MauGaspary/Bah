@@ -3,6 +3,8 @@ import { useState } from 'react'
 
 import Header from '@/components/ui/Header/Header'
 import { Input } from '@/components/ui/Searchbar/Searchbar'
+import LogoImg from '@/assets/logo.png'
+import BackgroundImg from '@/assets/background.png'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -17,12 +19,13 @@ function HomePage() {
     <>
       <Header variant="default" />
       <main
-        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
+        className="min-h-screen h-full overflow-x-hidden bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
+        style={{ backgroundImage: `url(${BackgroundImg})` }}
         id="home-section"
       >
         <section className="container mx-auto px-4 py-8 md:py-20">
           <img
-            src="../src/assets/logo.png"
+            src={LogoImg}
             alt="logo"
             className="w-32 md:w-40 h-24 md:h-30 mb-3 mx-auto hidden md:block"
           />
