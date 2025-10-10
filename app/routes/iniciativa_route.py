@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, Request, File, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
@@ -29,7 +31,7 @@ def search_iniciativas(
     db: Session = Depends(get_db),
     model: SentenceTransformer = Depends(get_embedding_model),
 ):
-   
+
     controller = IniciativaController(db, model)
     return controller.search_iniciativas(q, page, size)
 
@@ -39,11 +41,15 @@ def search_iniciativas(
 )
 async def create_iniciativa(
     iniciativa: IniciativaCreate,
+<<<<<<< HEAD
     file: UploadFile = File(...),
     criado_por: str = "sistema",
+=======
+    request: Request,
+    criado_por: str = "sistema",  # TODO: Obter do token de autenticação
+>>>>>>> feat/US12
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    request: Request = None,
 ):
     """
     Cria uma nova iniciativa.

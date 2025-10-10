@@ -1,13 +1,13 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_iniciativa_repository import AdminIniciativaRepository
 from app.schemas.admin_iniciativa_schemas import (
     IniciativaFiltersSchema,
     IniciativaListResponseSchema,
+    IniciativaPatchSchema,
     IniciativaSchema,
 )
 
@@ -57,7 +57,25 @@ class AdminIniciativaService:
             items=iniciativas, total=total, filters=filters
         )
 
-    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str = None) -> None:
-        iniciativa = self.repository.soft_delete(iniciativa_id, deletado_por)
-        if not iniciativa:
+    def delete_iniciativa(self, iniciativa_id: str, deletado_por: str) -> None:
+        exists = self.repository.soft_delete(iniciativa_id, deletado_por)
+        if not exists:
             raise ValueError("Iniciativa não encontrada.")
+
+    def patch_iniciativa(
+        self,
+        iniciativa_id: str,
+        payload: IniciativaPatchSchema,
+        editado_por: Optional[str] = None,
+    ) -> IniciativaSchema:
+        """
+        Aplica alterações parciais na iniciativa e retorna o objeto completo atualizado.
+        Regras 404/422 já são garantidas pelo repo e pelos validadores do schema.
+        """
+        data: Dict[str, Any] = payload.model_dump(exclude_none=True)
+        updated = self.repository.update_partial(
+            iniciativa_id=iniciativa_id,
+            data=data,
+            editado_por=editado_por,
+        )
+        return IniciativaSchema.model_validate(updated)
