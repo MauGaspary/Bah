@@ -193,11 +193,7 @@ function LoginAdminPage() {
       <div className="w-1/2 bg-bah-purple flex items-center justify-center">
         <div className="text-center">
           <div className="mb-6">
-            <img
-              src={LogoImg}
-              alt="BAH Logo"
-              className="w-72 h-auto mx-auto"
-            />
+            <img src={LogoImg} alt="BAH Logo" className="w-72 h-auto mx-auto" />
           </div>
         </div>
       </div>
