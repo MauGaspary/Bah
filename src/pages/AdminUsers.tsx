@@ -25,8 +25,9 @@ function AdminUsuarios() {
               placeholder="Buscar usuários por nome, email, região..."
               buttonLabel="Novo usuário"
               onButtonClick={() => console.log('Novo usuário')}
-              onSearchChange={function (): void {
-                throw new Error('Function not implemented.')
+              onSearchChange={(searchValue: string) => {
+                // Implementar busca no futuro
+                console.log('Buscar:', searchValue)
               }}
             />
 
