@@ -1,6 +1,6 @@
 workflow:
   rules:
-    - when: never
+    - when: always
 
 image: node:22
 
@@ -13,7 +13,10 @@ default:
     - corepack enable
     - npm ci
 
-stages: [quality]
+stages:
+  - quality
+  - build
+  - deploy
 
 lint:
   stage: quality
@@ -35,10 +38,43 @@ typecheck:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH'
-# (opcional) quando vocês adicionarem testes (Vitest), descomente:
-# test:
-#   stage: quality
-#   script: [ "npm run test -- --run" ]
-#   rules:
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#     - if: '$CI_COMMIT_BRANCH'
+
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+deploy_preview:
+  stage: deploy
+  image: node:22
+  before_script:
+    - npm install -g vercel@latest
+    - corepack enable
+    - npm ci
+  script:
+    - vercel --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --confirm
+  environment:
+    name: preview
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+deploy_production:
+  stage: deploy
+  image: node:22
+  before_script:
+    - npm install -g vercel@latest
+    - corepack enable
+    - npm ci
+  script:
+    - vercel --prod --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --confirm
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
