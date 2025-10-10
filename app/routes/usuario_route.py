@@ -13,25 +13,15 @@ security = HTTPBearer()
 router = APIRouter()
 
 
-@router.post(
-    "/users", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED
-)
+@router.delete("/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_usuario(
     usuario_id: str,
     db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> bool:
-    """Deleta um usuário."""
-    controller = db
-    return controller.delete_usuario(usuario_id)
-
-
-@router.get("/{usuario_id}", response_model=UsuarioResponse)
-def get_usuario_by_id(
-    usuario_id: str,
-    db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
-    """Busca um usuário pelo ID."""
+    """
+    Deleta um usuário pelo ID.
+    - Idempotente: múltiplas chamadas retornam 204
+    - Retorna 404 se o usuário não existir
+    """
     controller = UsuarioController(db)
-    return controller.get_usuario_by_id(str(usuario_id))
+    controller.delete_usuario(usuario_id)
