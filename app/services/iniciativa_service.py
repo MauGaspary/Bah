@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
-from app.schemas.admin_iniciativa_schemas import (
-    IniciativaFiltersSchema,
-    IniciativaListResponseSchema,
+from app.schemas.admin_iniciativa_schemas import IniciativaFiltersSchema
+from app.schemas.iniciativa_schema import (
+    IniciativaCreate,
+    IniciativaListResponse,
+    IniciativaResponse,
 )
-from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
@@ -95,9 +96,7 @@ class IniciativaService:
     def search_iniciativas(
         self, query: str, page: int, size: int
     ) -> IniciativaListResponseSchema:
-        if self.model is None:
-            raise ValueError("Modelo de embedding não disponível")
-        embedding = self.model.encode(  # type: ignore
+        embedding = self.model.encode(
             query, convert_to_numpy=True, normalize_embeddings=True
         )
         try:
@@ -106,7 +105,7 @@ class IniciativaService:
             )
 
             filters = IniciativaFiltersSchema(q=query, page=page, size=size)
-            return IniciativaListResponseSchema(
+            return IniciativaListResponse(
                 items=iniciativas, total=total, filters=filters
             )
         except Exception as e:

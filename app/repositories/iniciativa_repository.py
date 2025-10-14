@@ -4,6 +4,7 @@ import numpy as np
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
@@ -55,6 +56,16 @@ class IniciativaRepository:
                     iniciativa_id=db_iniciativa.id, tag_id=tag_id
                 )
                 self.db.add(db_iniciativa_tag)
+
+        if iniciativa_data.descricoes_extras:
+            for texto in iniciativa_data.descricoes_extras:
+                db_extra = DescricoesExtras(
+                    iniciativa_id=db_iniciativa.id,
+                    descricao=texto,
+                    # PLACEHOLDER DE VETOR ALTERAR DPS
+                    descricao_vetor=descricao_vetor,
+                )
+                self.db.add(db_extra)
 
         self.db.commit()
         self.db.refresh(db_iniciativa)

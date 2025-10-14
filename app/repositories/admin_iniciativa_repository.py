@@ -29,6 +29,7 @@ class AdminIniciativaRepository:
             selectinload(Iniciativa.organizador),
             selectinload(Iniciativa.horarios),
             selectinload(Iniciativa.tags),
+            selectinload(Iniciativa.descricoes_extras),
         )
 
         filters = []
@@ -74,7 +75,12 @@ class AdminIniciativaRepository:
     def get_by_id(
         self, iniciativa_id: str, allow_deleted: bool = False
     ) -> Optional[Iniciativa]:
-        query = self.db.query(Iniciativa)
+        query = self.db.query(Iniciativa).options(
+            selectinload(Iniciativa.organizador),
+            selectinload(Iniciativa.horarios),
+            selectinload(Iniciativa.tags),
+            selectinload(Iniciativa.descricoes_extras),
+        )
         if not allow_deleted:
             query = query.filter(Iniciativa.deletado_em.is_(None))
         return query.filter(Iniciativa.id == iniciativa_id).first()

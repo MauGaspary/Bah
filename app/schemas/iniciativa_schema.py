@@ -4,6 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
+from app.schemas.admin_iniciativa_schemas import IniciativaFiltersSchema
 
 
 class IniciativaHorarioCreate(BaseModel):
@@ -35,6 +36,9 @@ class IniciativaCreate(BaseModel):
         min_length=1, description="Lista de horários da iniciativa"
     )
     tag_ids: Optional[List[str]] = Field(None, description="Lista de IDs das tags")
+    descricoes_extras: Optional[List[str]] = Field(
+        default=None, description="Lista de descrições extras"
+    )
 
 
 class IniciativaHorarioResponse(BaseModel):
@@ -64,3 +68,11 @@ class IniciativaResponse(BaseModel):
     criado_por: Optional[str] = None
     editado_em: Optional[datetime] = None
     editado_por: Optional[str] = None
+
+
+class IniciativaListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    items: List[IniciativaResponse]
+    total: int
+    filters: IniciativaFiltersSchema

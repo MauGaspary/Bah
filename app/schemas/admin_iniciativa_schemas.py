@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
+
 class descricoesExtrasSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
