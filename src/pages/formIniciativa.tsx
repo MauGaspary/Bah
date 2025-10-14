@@ -364,12 +364,12 @@ export default function FormIniciativa() {
         <Toaster position="top-right" reverseOrder={false} />
 
         <header className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-large-title font-kanit text-[#5a2d86]">
+          <div className="text-left">
+            <h1 className="text-large-title font-mulish text-[#5a2d86]">
               {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
             </h1>
             <p className="text-body-regular font-sf-pro text-label-secondary">
-              {isEditing ? 'Editar a iniciativa' : 'Criar nova iniciativa'}
+              {isEditing ? 'Edite sua iniciativa' : 'Crie aqui sua nova iniciativa'}
             </p>
           </div>
           <Button
@@ -685,7 +685,7 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          <div className="w-full mt-6 flex justify-start">
+          <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
               disabled={isSubmitting}

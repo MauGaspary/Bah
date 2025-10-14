@@ -33,7 +33,7 @@ function AdminIniciativas() {
               onButtonClick={() => navigate('/admin/criarIniciativa')}
             />
 
-            <div className="mt-16">
+            <div className="mt-8">
               <IniciativasList searchQuery={searchTerm} />
             </div>
           </div>

@@ -26,21 +26,21 @@ function ListItem(props: ListItemProps) {
   const { imageUrl, isLast, onEdit, onDelete } = props
 
   return (
-    <div className="relative w-full last:shadow-none">
+    <div className="relative w-full last:shadow-none pb-4">
       {!isLast && (
         <div className="absolute inset-x-0 bottom-0 h-2 shadow-[0_1px_1px_rgba(0,0,0,0.1)] pointer-events-none" />
       )}
 
-      <div className="flex justify-between gap-4">
-        <div className="pl-8">
+      <div className="flex justify-between gap-4 pt-3">
+        <div className="pl-6">
           <img
             src={imageUrl}
             alt={props.title}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-14 h-14 rounded-full object-cover"
           />
         </div>
 
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-col flex-1 min-w-0 justify-center">
           <h1 className="text-title3-semibold font-mulish truncate">
             {props.title}
           </h1>

@@ -34,7 +34,7 @@ function UsuariosList() {
       <div className="rounded-card bg-white shadow-md  overflow-hidden">
         <div className="bg-bah-purple px-6 py-6">
           <div className="flex justify-between items-end">
-            <h1 className="text-medium-title font-mulish text-white self-center">
+            <h1 className="text-title3-regular font-mulish text-white self-center">
               Usuários Cadastrados
             </h1>
             <p className="text-body-regular font-mulish text-white">
@@ -63,7 +63,7 @@ function UsuariosList() {
           ))}
         </div>
       </div>
-      <div className="py-4">
+      <div className="py-8">
         <Pagination>
           <PaginationContent>
             <PaginationItem>
