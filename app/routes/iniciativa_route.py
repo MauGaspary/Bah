@@ -8,8 +8,11 @@ from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
-from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
+from app.schemas.iniciativa_schema import (
+    IniciativaCreate,
+    IniciativaListResponse,
+    IniciativaResponse,
+)
 
 security = HTTPBearer()
 
@@ -18,7 +21,7 @@ router = APIRouter()
 
 @router.get(
     "/search",
-    response_model=IniciativaListResponseSchema,
+    response_model=IniciativaListResponse,
     status_code=status.HTTP_200_OK,
 )
 def search_iniciativas(
@@ -28,7 +31,7 @@ def search_iniciativas(
     db: Session = Depends(get_db),
     model: SentenceTransformer = Depends(get_embedding_model),
 ):
-   
+
     controller = IniciativaController(db, model)
     return controller.search_iniciativas(q, page, size)
 

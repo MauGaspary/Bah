@@ -10,7 +10,10 @@ from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 router = APIRouter()
@@ -32,14 +35,14 @@ def create_iniciativa(
     return controller.create_iniciativa(iniciativa, current_user)
 
 
-@router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaResponse)
+@router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaSchema)
 def get_iniciativa_by_id(
     iniciativa_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
     """Busca uma iniciativa pelo ID."""
-    controller = IniciativaController(db)
+    controller = AdminIniciativaController(db)
     return controller.get_iniciativa_by_id(iniciativa_id)
 
 

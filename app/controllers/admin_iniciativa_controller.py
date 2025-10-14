@@ -4,7 +4,10 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+)
 from app.services.admin_iniciativa_service import AdminIniciativaService
 
 
@@ -44,4 +47,14 @@ class AdminIniciativaController:
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail={"message": "Erro ao deletar iniciativa"}
+            ) from e
+
+    def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:
+        try:
+            return self.service.get_iniciativa_by_id(iniciativa_id)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail={"message": str(e)})
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail={"message": "Erro ao buscar iniciativa"}
             ) from e

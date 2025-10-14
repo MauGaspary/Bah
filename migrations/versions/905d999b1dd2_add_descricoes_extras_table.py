@@ -5,14 +5,16 @@ Revises: f31120b21f1a
 Create Date: 2025-10-07 23:15:41.329168
 
 """
+
+import os
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-import os
+from alembic import op
 from sqlalchemy import text
 
 MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "768"))
+
 
 def _vector_extension_available(connection) -> bool:
     try:
@@ -25,8 +27,8 @@ def _vector_extension_available(connection) -> bool:
 
 
 # revision identifiers, used by Alembic.
-revision: str = '905d999b1dd2'
-down_revision: Union[str, None] = 'f31120b21f1a'
+revision: str = "905d999b1dd2"
+down_revision: Union[str, None] = "f31120b21f1a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -41,11 +43,18 @@ def upgrade() -> None:
     # Criar tabela já com tipo adequado
     if has_vector:
         op.create_table(
-            'descricoes_extras',
-            sa.Column('id', sa.String(), primary_key=True, nullable=False),
-            sa.Column('iniciativa_id', sa.String(), sa.ForeignKey('iniciativas.id', ondelete='CASCADE'), nullable=False),
-            sa.Column('descricao', sa.String(), nullable=False),
-            sa.Column('descricao_vetor', sa.TEXT(), nullable=False),  # placeholder temporário
+            "descricoes_extras",
+            sa.Column("id", sa.String(), primary_key=True, nullable=False),
+            sa.Column(
+                "iniciativa_id",
+                sa.String(),
+                sa.ForeignKey("iniciativas.id", ondelete="CASCADE"),
+                nullable=False,
+            ),
+            sa.Column("descricao", sa.String(), nullable=False),
+            sa.Column(
+                "descricao_vetor", sa.TEXT(), nullable=False
+            ),  # placeholder temporário
         )
         # Ajustar para VECTOR(dim)
         op.execute(
@@ -53,34 +62,41 @@ def upgrade() -> None:
         )
     else:
         op.create_table(
-            'descricoes_extras',
-            sa.Column('id', sa.String(), primary_key=True, nullable=False),
-            sa.Column('iniciativa_id', sa.String(), sa.ForeignKey('iniciativas.id', ondelete='CASCADE'), nullable=False),
-            sa.Column('descricao', sa.String(), nullable=False),
-            sa.Column('descricao_vetor', sa.Text(), nullable=False),
+            "descricoes_extras",
+            sa.Column("id", sa.String(), primary_key=True, nullable=False),
+            sa.Column(
+                "iniciativa_id",
+                sa.String(),
+                sa.ForeignKey("iniciativas.id", ondelete="CASCADE"),
+                nullable=False,
+            ),
+            sa.Column("descricao", sa.String(), nullable=False),
+            sa.Column("descricao_vetor", sa.Text(), nullable=False),
         )
 
     # Alteração já existente (mantida do autogenerate)
     op.alter_column(
-        'iniciativas',
-        'organizador_id',
+        "iniciativas",
+        "organizador_id",
         existing_type=sa.VARCHAR(),
         nullable=False,
     )
 
     # Índice separado para consultas por iniciativa_id (se necessário)
-    op.create_index('ix_descricoes_extras_iniciativa_id', 'descricoes_extras', ['iniciativa_id'])
+    op.create_index(
+        "ix_descricoes_extras_iniciativa_id", "descricoes_extras", ["iniciativa_id"]
+    )
 
 
 def downgrade() -> None:
     # Reverter índice e tabela
-    op.drop_index('ix_descricoes_extras_iniciativa_id', table_name='descricoes_extras')
-    op.drop_table('descricoes_extras')
+    op.drop_index("ix_descricoes_extras_iniciativa_id", table_name="descricoes_extras")
+    op.drop_table("descricoes_extras")
 
     # Reverter alteração da coluna iniciativas.organizador_id
     op.alter_column(
-        'iniciativas',
-        'organizador_id',
+        "iniciativas",
+        "organizador_id",
         existing_type=sa.VARCHAR(),
         nullable=True,
     )

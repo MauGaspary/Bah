@@ -42,3 +42,10 @@ class Iniciativa(Base):
     organizador = relationship("Organizador", backref="iniciativas")
     horarios = relationship("IniciativaHorario", back_populates="iniciativa")
     tags = relationship("Tag", secondary="iniciativa_tag", backref="iniciativas")
+    descricoes_extras = relationship(
+        "DescricoesExtras",
+        back_populates="iniciativa",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
+    )
