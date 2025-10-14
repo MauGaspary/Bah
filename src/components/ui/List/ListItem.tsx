@@ -31,8 +31,8 @@ function ListItem(props: ListItemProps) {
         <div className="absolute inset-x-0 bottom-0 h-2 shadow-[0_1px_1px_rgba(0,0,0,0.1)] pointer-events-none" />
       )}
 
-      <div className="flex justify-between gap-4 pt-3">
-        <div className="pl-6">
+      <div className="flex justify-between gap-4 pt-2">
+        <div className="pl-6 pt-2">
           <img
             src={imageUrl}
             alt={props.title}

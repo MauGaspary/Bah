@@ -70,7 +70,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
           {!loading && error && <p className="text-error">{error}</p>}
         </div>
 
-        <div className="py-2 space-y-4">
+        <div className="pb-2 space-y-3">
           {currentItems.map((item, index) => (
             <ListItem
               key={item.id}
