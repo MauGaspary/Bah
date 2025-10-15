@@ -123,7 +123,7 @@ export const iniciativas: Iniciativa[] = [
     descricao_vetor: [0.3, 0.3, 0.3],
     organizador_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     link: 'https://exemplo.com/meetup-ia',
-    destaque: false,
+    destaque: true,
     local: 'Online',
     imagem_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop',
     criado_por: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',

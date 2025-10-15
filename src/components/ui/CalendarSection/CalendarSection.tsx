@@ -100,8 +100,13 @@ export function CalendarSection({
 
   const highlightEvents = useMemo(() => {
     const todayIso = today.toISOString().slice(0, 10)
+    const end = new Date(today)
+    end.setDate(end.getDate() + 15)
+    const endIso = end.toISOString().slice(0, 10)
     return events
-      .filter(e => e.featured === true && e.date >= todayIso)
+      .filter(
+        e => e.featured === true && e.date >= todayIso && e.date <= endIso
+      )
       .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
       .slice(0, 3)
   }, [events, today])
