@@ -24,10 +24,9 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<{
-    isOpen: boolean
-    iniciativa: Iniciativa | null
-  }>({ isOpen: false, iniciativa: null })
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [iniciativaToDelete, setIniciativaToDelete] =
+    useState<Iniciativa | null>(null)
 
   const itemsPerPage = 5
   const totalPages = Math.ceil(iniciativas.length / itemsPerPage)
@@ -50,17 +49,19 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
   }, [searchQuery])
 
   const openDeleteConfirm = (iniciativa: Iniciativa) => {
-    setConfirmDelete({ isOpen: true, iniciativa })
+    setIsDeleteModalOpen(true)
+    setIniciativaToDelete(iniciativa)
   }
 
   const closeDeleteConfirm = () => {
-    setConfirmDelete({ isOpen: false, iniciativa: null })
+    setIsDeleteModalOpen(false)
+    setIniciativaToDelete(null)
   }
 
   const handleConfirmDelete = async () => {
-    if (!confirmDelete.iniciativa) return
+    if (!iniciativaToDelete) return
 
-    const { id } = confirmDelete.iniciativa
+    const { id } = iniciativaToDelete
     setDeletingId(id)
 
     try {
@@ -151,12 +152,12 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
       </div>
 
       <ConfirmModal
-        isOpen={confirmDelete.isOpen}
+        isOpen={isDeleteModalOpen}
         title="Excluir Iniciativa"
-        message={`Tem certeza que deseja excluir a iniciativa "${confirmDelete.iniciativa?.titulo}"?`}
+        message={`Tem certeza que deseja excluir a iniciativa "${iniciativaToDelete?.titulo}"?`}
         confirmText="Excluir"
         cancelText="Cancelar"
-        isLoading={deletingId === confirmDelete.iniciativa?.id}
+        isLoading={deletingId === iniciativaToDelete?.id}
         onConfirm={handleConfirmDelete}
         onCancel={closeDeleteConfirm}
       />
