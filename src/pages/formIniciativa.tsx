@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast, { Toaster } from 'react-hot-toast'
-import { Camera, Star } from 'lucide-react'
+import { Camera, Star, Trash2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
@@ -170,13 +170,13 @@ const ScheduleItem: React.FC<{
           <Button
             type="button"
             onClick={() => onRemove(index)}
-            className="text-white px-3 py-1 transition cursor-pointer"
+            className="px-2 py-1 transition cursor-pointer flex items-center justify-center"
             aria-label={`Remover horário ${index + 1}`}
-            variant="destructive"
+            variant="ghost"
             size="sm"
-            style={{ borderRadius: '10px' }}
+            style={{ borderRadius: '8px', minWidth: '36px', height: '36px' }}
           >
-            Remover
+            <Trash2Icon className="w-4 h-4 text-red-500" />
           </Button>
         </div>
 

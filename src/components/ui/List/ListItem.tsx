@@ -41,12 +41,12 @@ function ListItem(props: ListItemProps) {
         </div>
 
         <div className="flex flex-col flex-1 min-w-0 justify-center">
-          <h1 className="text-title3-semibold font-mulish truncate">
+          <h1 className="text-body-semibold font-mulish truncate">
             {props.title}
           </h1>
 
           {props.variant === 'usuario' ? (
-            <p className="text-body-regular font-mulish text-label-secondary line-clamp-2 underline decoration-label-secondary/50">
+            <p className="text-callout-regular font-mulish text-label-secondary line-clamp-2 underline decoration-label-secondary/50">
               {props.email}
             </p>
           ) : (
@@ -59,22 +59,22 @@ function ListItem(props: ListItemProps) {
         <div className="flex gap-3 self-center pr-16 pb-2">
           <Button
             variant="list"
-            className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95"
+            className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95"
             onClick={onEdit}
           >
-            <SquarePenIcon className="w-4 h-4 text-editar" />
-            <span className="text-body-regular font-mulish text-editar">
+            <SquarePenIcon className="w-3 h-3 text-editar" />
+            <span className="text-subheadline-regular font-mulish text-editar text-xs">
               Editar
             </span>
           </Button>
 
           <Button
             variant="list"
-            className="cursor-pointer border-excluir-secondary/60 h-8 min-w-0 px-2 py-1 text-sm flex active:scale-95 active:bg-error"
+            className="cursor-pointer border-excluir-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95 active:bg-error"
             onClick={onDelete}
           >
-            <Trash2Icon className="w-4 h-4 text-excluir" />
-            <span className="text-body-regular font-mulish text-excluir">
+            <Trash2Icon className="w-3 h-3 text-excluir" />
+            <span className="text-subheadline-regular font-mulish text-excluir text-xs">
               Excluir
             </span>
           </Button>

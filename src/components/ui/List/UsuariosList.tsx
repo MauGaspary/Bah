@@ -45,10 +45,10 @@ function UsuariosList() {
 
         <div className="flex px-6 py-2 bg-background-secondary justify-between">
           <h1 className="text-body-regular font-mulish">Usuário</h1>
-          <h1 className="text-body-regular font-mulish mr-53.5">Ações</h1>
+          <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
-        <div className="py-2 space-y-2">
+        <div className="space-y-3">
           {currentItems.map((item, index) => (
             <ListItem
               key={item.id}
@@ -69,6 +69,7 @@ function UsuariosList() {
             <PaginationItem>
               <PaginationPrevious
                 href="#"
+                disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               />
             </PaginationItem>
@@ -88,6 +89,7 @@ function UsuariosList() {
             <PaginationItem>
               <PaginationNext
                 href="#"
+                disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               />
             </PaginationItem>
