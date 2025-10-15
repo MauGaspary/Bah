@@ -149,7 +149,7 @@ class IniciativaService:
 
     def build_calendario_response(self, ref: date, rows: Sequence, tags_by_iniciativa: Mapping[str, List[TagSchema]]) -> CalendarioMensalResponse:
         """
-        Gera esqueleto (todos os dias), agrupa itens e
+        Gera um esqueleto (todos os dias), agrupa itens e
         retorna o DTO final com mes="YYYY-MM" e lista de DiaCalendario.
         """
 
