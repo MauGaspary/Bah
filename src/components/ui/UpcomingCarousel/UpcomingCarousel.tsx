@@ -134,7 +134,7 @@ export default function UpcomingCarousel({
 
   return (
     <section className="md:hidden px-4 py-8">
-      <h3 className="text-4xl font-bold text-center font-mulish mb-3">
+      <h3 className="text-3xl md:text-4xl font-bold text-center font-mulish mb-3">
         {title}
       </h3>
       <div className="h-1 w-40 bg-[#B9D77E] rounded-full mx-auto mb-6" />

@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { Search, ChevronDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -44,7 +44,7 @@ function HomePage() {
     <>
       <Header variant="default" />
       <main
-        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
+        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center relative"
         id="home-section"
       >
         <section className="container mx-auto px-4 py-8 md:py-20">
@@ -92,11 +92,28 @@ function HomePage() {
               </button>
             ))}
           </div>
+          {/* Botão para descer até o calendário/carrossel — movido para fora da section */}
         </section>
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6">
+          <button
+            type="button"
+            aria-label="Ir para o calendário"
+            onClick={() => {
+              const targetId = window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+              const el = document.getElementById(targetId)
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }}
+            className="rounded-full p-2 text-white/90 hover:text-white transition-colors animate-bounce"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </button>
+        </div>
       </main>
 
       {/* Mobile: Carrossel de próximos eventos */}
-      <div className="md:hidden">
+      <div className="md:hidden" id="calendar-section-mobile">
         <UpcomingCarousel events={eventsNext15Days} />
       </div>
 

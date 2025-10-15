@@ -78,7 +78,10 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
       contato: 'contact-section',
     }
 
-    const sectionId = mapIdToSection[item.id]
+    let sectionId = mapIdToSection[item.id]
+    if (item.id === 'calendario' && typeof window !== 'undefined') {
+      sectionId = window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+    }
 
     if (sectionId) {
       const scrollToSection = () => {
@@ -146,7 +149,27 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
         }}
       >
         <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center relative w-20 h-16 ">
+          <div
+            className="flex items-center relative w-20 h-16 cursor-pointer"
+            onClick={() => {
+              const sectionId = 'home-section'
+              const scrollToSection = () => {
+                const el = document.getElementById(sectionId)
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }
+
+              if (window.location.pathname !== '/') {
+                navigate('/', { state: { scrollTo: sectionId } })
+              } else {
+                scrollToSection()
+              }
+              setIsMobileMenuOpen(false)
+            }}
+            aria-label="Ir para início"
+            role="button"
+          >
             <img
               src="/src/assets/bah-bg-white.png"
               alt="Logo"
