@@ -9,7 +9,8 @@ import {
 
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
-import { fetchIniciativas } from '@/service/iniciativas'
+import ConfirmModal from '../ConfirmModal'
+import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 import type {
   IniciativasListProps,
@@ -22,6 +23,10 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [iniciativaToDelete, setIniciativaToDelete] =
+    useState<Iniciativa | null>(null)
 
   const itemsPerPage = 5
   const totalPages = Math.ceil(iniciativas.length / itemsPerPage)
@@ -42,6 +47,35 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
     }
     loadIniciativas()
   }, [searchQuery])
+
+  const openDeleteConfirm = (iniciativa: Iniciativa) => {
+    setIsDeleteModalOpen(true)
+    setIniciativaToDelete(iniciativa)
+  }
+
+  const closeDeleteConfirm = () => {
+    setIsDeleteModalOpen(false)
+    setIniciativaToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!iniciativaToDelete) return
+
+    const { id } = iniciativaToDelete
+    setDeletingId(id)
+
+    try {
+      await deleteIniciativa(id)
+      // Remove a iniciativa da lista local
+      setIniciativas(prev => prev.filter(item => item.id !== id))
+      setTotal(prev => prev - 1)
+      closeDeleteConfirm()
+    } catch (error) {
+      setError('Erro ao excluir iniciativa')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div>
@@ -78,8 +112,9 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
               description={item.descricao}
               imageUrl={item.imagem_url}
               isLast={index === currentItems.length - 1}
-              onEdit={() => console.log('Editar')}
-              onDelete={() => console.log('Excluir')}
+              isDeleting={deletingId === item.id}
+              onEdit={() => console.log('Editar iniciativa', item.id)}
+              onDelete={() => openDeleteConfirm(item)}
             />
           ))}
         </div>
@@ -115,6 +150,17 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Excluir Iniciativa"
+        message={`Tem certeza que deseja excluir a iniciativa "${iniciativaToDelete?.titulo}"?`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        isLoading={deletingId === iniciativaToDelete?.id}
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteConfirm}
+      />
     </div>
   )
 }

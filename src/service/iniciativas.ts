@@ -8,3 +8,7 @@ export async function fetchIniciativas(searchQuery?: string): Promise<Iniciativa
     })
     return response.data
   }
+
+export async function deleteIniciativa(iniciativaId: number): Promise<void> {
+  await api.delete(`/admin/iniciativas/${iniciativaId}`)
+}
