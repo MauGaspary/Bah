@@ -23,6 +23,7 @@ class IniciativaRepository:
         iniciativa_data: IniciativaCreate,
         criado_por: str,
         descricao_vetor: List[float],
+        descricoes_extras_vetores: List[List[float]],
     ) -> Iniciativa:
 
         db_iniciativa = Iniciativa(
@@ -50,22 +51,23 @@ class IniciativaRepository:
             )
             self.db.add(db_horario)
 
+        if iniciativa_data.descricoes_extras:
+            for texto, embedding_extra in zip(
+                iniciativa_data.descricoes_extras, descricoes_extras_vetores
+            ):
+                db_extra = DescricoesExtras(
+                    iniciativa_id=db_iniciativa.id,
+                    descricao=texto,
+                    descricao_vetor=embedding_extra,
+                )
+                self.db.add(db_extra)
+
         if iniciativa_data.tag_ids:
             for tag_id in iniciativa_data.tag_ids:
                 db_iniciativa_tag = IniciativaTag(
                     iniciativa_id=db_iniciativa.id, tag_id=tag_id
                 )
                 self.db.add(db_iniciativa_tag)
-
-        if iniciativa_data.descricoes_extras:
-            for texto in iniciativa_data.descricoes_extras:
-                db_extra = DescricoesExtras(
-                    iniciativa_id=db_iniciativa.id,
-                    descricao=texto,
-                    # PLACEHOLDER DE VETOR ALTERAR DPS
-                    descricao_vetor=descricao_vetor,
-                )
-                self.db.add(db_extra)
 
         self.db.commit()
         self.db.refresh(db_iniciativa)

@@ -63,15 +63,26 @@ class IniciativaService:
                 pass
 
         try:
-            print("model", self.model)
             embedding = self.model.encode(
                 iniciativa_data.descricao,
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
 
+            embeddings_descricoes_extras = []
+            for description_for_search in iniciativa_data.descricoes_extras or []:
+                embedding_extra = self.model.encode(
+                    description_for_search,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                embeddings_descricoes_extras.append(embedding_extra)
+
             iniciativa = self.repository.create(
-                iniciativa_data, criado_por, descricao_vetor=embedding
+                iniciativa_data,
+                criado_por,
+                descricao_vetor=embedding,
+                descricoes_extras_vetores=embeddings_descricoes_extras,
             )
 
             return IniciativaResponse.model_validate(iniciativa)
