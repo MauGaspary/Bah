@@ -83,3 +83,13 @@ class AdminIniciativaController:
             raise HTTPException(
                 status_code=500, detail={"message": "Erro ao buscar iniciativa"}
             ) from e
+
+    def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:
+        try:
+            return self.service.get_iniciativa_by_id(iniciativa_id)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail={"message": str(e)})
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail={"message": "Erro ao buscar iniciativa"}
+            ) from e

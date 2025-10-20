@@ -107,7 +107,7 @@ class IniciativaService:
 
     def search_iniciativas(
         self, query: str, page: int, size: int
-    ) -> IniciativaListResponseSchema:
+    ) -> IniciativaListResponse:
         embedding = self.model.encode(
             query, convert_to_numpy=True, normalize_embeddings=True
         )

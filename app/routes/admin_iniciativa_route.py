@@ -9,7 +9,10 @@ from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 router = APIRouter()

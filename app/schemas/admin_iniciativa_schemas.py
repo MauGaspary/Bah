@@ -13,6 +13,13 @@ class descricoesExtrasSchema(BaseModel):
     descricao: str
 
 
+class descricoesExtrasSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    descricao: str
+
+
 class TagSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
