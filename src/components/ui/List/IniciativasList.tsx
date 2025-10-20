@@ -124,7 +124,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
           ))}
         </div>
       </div>
-      <div className="py-4 bg-background-secondary fixed bottom-0 right-0 left-[15%]">
+      <div className="py-4 fixed bottom-0 right-0 left-[15%]">
         <div className="px-6">
           <Pagination>
             <PaginationContent>
