@@ -9,6 +9,7 @@ from app.middleware.auth_middleware import JWTMiddleware
 from app.routes.admin_iniciativa_route import router as admin_iniciativa_router
 from app.routes.auth_routes import router as auth_router
 from app.routes.demo_route import router as demo_router
+from app.routes.iniciativa_route import router as iniciativa_router
 from app.routes.organizador_route import router as organizador_router
 from app.utils.exception_handlers import domain_exception_handler, value_error_handler
 from app.utils.exceptions import DomainException
@@ -50,6 +51,7 @@ def create_app(settings=None):
         organizador_router, prefix="/organizadores", tags=["organizadores"]
     )
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
+    app.include_router(iniciativa_router, prefix="/iniciativas", tags=["iniciativas"])
 
     app.add_exception_handler(DomainException, domain_exception_handler)
     app.add_exception_handler(ValueError, value_error_handler)

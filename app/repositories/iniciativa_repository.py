@@ -1,7 +1,7 @@
+from datetime import date
 from typing import Dict, List, Optional
 
-from datetime import date
-from sqlalchemy import and_, or_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.iniciativa_horario_model import IniciativaHorario
@@ -145,45 +145,44 @@ class IniciativaRepository:
         WHERE h.data_evento BETWEEN :first_day AND :last_day AND i.deletado_em IS NULL
         ORDER BY h.data_evento ASC, h.hora_inicio ASC, i.titulo ASC
         """
-        
+
         first_day = data.replace(day=1)
         last_day = self._get_last_day_of_month(data)
-        
-    
+
         query = (
             select(
-                Iniciativa.id.label('iniciativa_id'),
+                Iniciativa.id.label("iniciativa_id"),
                 Iniciativa.titulo,
                 Iniciativa.descricao,
                 Iniciativa.link,
                 Iniciativa.local,
                 Iniciativa.imagem_url,
                 Iniciativa.destaque,
-                IniciativaHorario.id.label('horario_id'),
+                IniciativaHorario.id.label("horario_id"),
                 IniciativaHorario.data_evento,
                 IniciativaHorario.hora_inicio,
                 IniciativaHorario.hora_fim,
-                IniciativaHorario.tipo
+                IniciativaHorario.tipo,
             )
             .select_from(
                 IniciativaHorario.__table__.join(
                     Iniciativa.__table__,
-                    Iniciativa.id == IniciativaHorario.iniciativa_id
+                    Iniciativa.id == IniciativaHorario.iniciativa_id,
                 )
             )
             .where(
                 and_(
                     IniciativaHorario.data_evento.between(first_day, last_day),
-                    Iniciativa.deletado_em.is_(None)
+                    Iniciativa.deletado_em.is_(None),
                 )
             )
             .order_by(
                 IniciativaHorario.data_evento.asc(),
                 IniciativaHorario.hora_inicio.asc(),
-                Iniciativa.titulo.asc()
+                Iniciativa.titulo.asc(),
             )
         )
-        
+
         result = self.db.execute(query)
         return result.fetchall()
 
@@ -192,56 +191,46 @@ class IniciativaRepository:
         Carrega tags em lote:
         Pega a lista de iniciativa_id retornados na query acima.
         Busca uma vez:
-        SELECT it.iniciativa_id, t.id, t.nome, t.descricao  
-        FROM iniciativa_tags it  
-        JOIN tags t ON t.id = it.tag_id  
-        WHERE it.iniciativa_id IN (:ids)  
+        SELECT it.iniciativa_id, t.id, t.nome, t.descricao
+        FROM iniciativa_tags it
+        JOIN tags t ON t.id = it.tag_id
+        WHERE it.iniciativa_id IN (:ids)
         ORDER BY t.nome ASC;
         """
         if not rows:
             return {}
-        
+
         iniciativa_ids = [row.iniciativa_id for row in rows]
-        
+
         query = (
-            select(
-                IniciativaTag.iniciativa_id,
-                Tag.id,
-                Tag.nome,
-                Tag.descricao
-            )
+            select(IniciativaTag.iniciativa_id, Tag.id, Tag.nome, Tag.descricao)
             .select_from(
                 IniciativaTag.__table__.join(
-                    Tag.__table__,
-                    Tag.id == IniciativaTag.tag_id
+                    Tag.__table__, Tag.id == IniciativaTag.tag_id
                 )
             )
             .where(IniciativaTag.iniciativa_id.in_(iniciativa_ids))
             .order_by(Tag.nome.asc())
         )
-        
+
         result = self.db.execute(query)
         rows_tags = result.fetchall()
-        
+
         tags_by_iniciativa = {}
         for row in rows_tags:
             iniciativa_id = row.iniciativa_id
             if iniciativa_id not in tags_by_iniciativa:
                 tags_by_iniciativa[iniciativa_id] = []
-            
-            tag = TagSchema(
-                id=row.id,
-                nome=row.nome,
-                descricao=row.descricao
-            )
+
+            tag = TagSchema(id=row.id, nome=row.nome, descricao=row.descricao)
             tags_by_iniciativa[iniciativa_id].append(tag)
-        
+
         return tags_by_iniciativa
 
     def _get_last_day_of_month(self, data: date) -> date:
         """Retorna o último dia do mês"""
         import calendar
-        
+
         last_day_num = calendar.monthrange(data.year, data.month)[1]
         return data.replace(day=last_day_num)
 
@@ -250,16 +239,16 @@ class IniciativaRepository:
         Criar índice se não existir: iniciativa_horarios (data_evento, hora_inicio)
         Confirmar iniciativas.deletado_em (soft delete) já existe
         """
-        
+
         index_name = "idx_iniciativa_horarios_data_hora"
-        
+
         check_index_query = """ 
         SELECT EXISTS (
             SELECT 1 FROM pg_indexes 
             WHERE indexname = :index_name
         )
         """
-        
+
         result = self.db.execute(
             select(func.text(check_index_query)).params(index_name=index_name)
         )

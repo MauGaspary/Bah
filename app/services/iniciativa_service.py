@@ -1,12 +1,19 @@
-from typing import List, Dict, Mapping, Sequence
+from datetime import date, time
+from typing import Dict, List, Mapping, Sequence
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from datetime import date, time
 
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
-from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse, CalendarioMensalResponse, CalendarioIniciativaItem, DiaCalendario, TagSchema
+from app.schemas.iniciativa_schema import (
+    CalendarioIniciativaItem,
+    CalendarioMensalResponse,
+    DiaCalendario,
+    IniciativaCreate,
+    IniciativaResponse,
+    TagSchema,
+)
 
 
 class IniciativaService:
@@ -104,15 +111,17 @@ class IniciativaService:
         last_day_num = calendar.monthrange(ref.year, ref.month)[1]
         last_day = ref.replace(day=last_day_num)
 
-        days=[]
+        days = []
         current = first_day
         while current <= last_day:
             days.append(current)
             current = date(current.year, current.month, current.day + 1)
 
         return days
-    
-    def group_horarios_by_day(self, rows: Sequence, tags_by_iniciativa: Mapping[str, List[TagSchema]]) -> Dict[date, List[CalendarioIniciativaItem]]:
+
+    def group_horarios_by_day(
+        self, rows: Sequence, tags_by_iniciativa: Mapping[str, List[TagSchema]]
+    ) -> Dict[date, List[CalendarioIniciativaItem]]:
         """
         Constrói itens (um por horário) e agrupa por data_evento.
         Ordena dentro do dia por (hora_inicio ASC, titulo ASC).
@@ -134,7 +143,7 @@ class IniciativaService:
                 local=row.local,
                 imagem_url=row.imagem_url,
                 destaque=row.destaque,
-                tags=tags_by_iniciativa.get(row.iniciativa_id, [])
+                tags=tags_by_iniciativa.get(row.iniciativa_id, []),
             )
 
             data_evento = row.data_evento
@@ -147,7 +156,12 @@ class IniciativaService:
 
         return grouped
 
-    def build_calendario_response(self, ref: date, rows: Sequence, tags_by_iniciativa: Mapping[str, List[TagSchema]]) -> CalendarioMensalResponse:
+    def build_calendario_response(
+        self,
+        ref: date,
+        rows: Sequence,
+        tags_by_iniciativa: Mapping[str, List[TagSchema]],
+    ) -> CalendarioMensalResponse:
         """
         Gera um esqueleto (todos os dias), agrupa itens e
         retorna o DTO final com mes="YYYY-MM" e lista de DiaCalendario.
@@ -160,13 +174,8 @@ class IniciativaService:
         dias = []
         for day in month_days:
             iniciativas = grouped_horarios.get(day, [])
-            dias.append(DiaCalendario(
-                data=day, 
-                iniciativas=iniciativas
-            ))
-        
-        return CalendarioMensalResponse(
-            mes=f"{ref.year:04d}-{ref.month:02d}",
-            dias=dias
-        )
+            dias.append(DiaCalendario(data=day, iniciativas=iniciativas))
 
+        return CalendarioMensalResponse(
+            mes=f"{ref.year:04d}-{ref.month:02d}", dias=dias
+        )
