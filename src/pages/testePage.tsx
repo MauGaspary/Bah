@@ -1,5 +1,5 @@
 import Header from '@/components/ui/Header/Header'
-import { SelectInput } from '@/components/ui/Searchbar/SelectInput'
+import SearchDropdown from '@/components/ui/Searchbar/SearchDropdown'
 
 function TestePage() {
   const tags = [
@@ -37,7 +37,7 @@ function TestePage() {
             sua jornada
           </p>
           <div className="flex justify-center max-w-3xl mx-auto mb-8 md:mb-4 px-4">
-            <SelectInput />
+            <SearchDropdown />
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
