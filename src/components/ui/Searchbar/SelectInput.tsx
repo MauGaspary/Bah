@@ -4,7 +4,7 @@ import { Search } from 'lucide-react'
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import ListItem from "@/components/ui/List/ListItem"
+import SearchItem from "@/components/ui/Searchbar/SearchItem"
 import { Input } from "@/components/ui/Searchbar/Searchbar"
 import { cn } from "@/lib/utils"
 
@@ -115,19 +115,16 @@ export function SelectInput() {
             "animate-in fade-in-0 slide-in-from-top-2 duration-200"
           )}
         >
-          {filteredResults.map((item, index) => (
+          {filteredResults.map((item) => (
             <div
               key={item.id}
               onClick={() => handleSelectItem(item)}
               className="cursor-pointer hover:bg-gray-50 transition-colors py-2 first:rounded-t-lg last:rounded-b-lg"
             >
-              <ListItem
+              <SearchItem
                 imageUrl={item.imageUrl}
                 title={item.title}
                 description={item.description}
-                isLast={index === filteredResults.length - 1}
-                onEdit={() => {}}
-                onDelete={() => {}}
               />
             </div>
           ))}
