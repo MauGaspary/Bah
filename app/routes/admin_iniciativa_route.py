@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -9,8 +9,10 @@ from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
+from sentence_transformers import SentenceTransformer
 from app.schemas.admin_iniciativa_schemas import (
     IniciativaListResponseSchema,
+    IniciativaPatchSchema,
     IniciativaSchema,
 )
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
@@ -20,7 +22,7 @@ router = APIRouter()
 
 @router.post(
     "/iniciativas/",
-    response_model=IniciativaResponse,
+    response_model=IniciativaSchema,
     status_code=status.HTTP_201_CREATED,
 )
 def create_iniciativa(
@@ -30,8 +32,12 @@ def create_iniciativa(
     model: Optional[object] = Depends(get_embedding_model),
 ):
     """Cria uma nova iniciativa."""
-    controller = IniciativaController(db, model)
-    return controller.create_iniciativa(iniciativa, current_user)
+    controller = IniciativaController(
+        db, cast(Optional[SentenceTransformer], model)
+    )
+    created = controller.create_iniciativa(iniciativa, current_user)
+    admin_controller = AdminIniciativaController(db)
+    return admin_controller.get_iniciativa_by_id(created.id)
 
 
 @router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaSchema)
@@ -98,9 +104,9 @@ def patch_iniciativa(
     payload: IniciativaPatchSchema,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
+    model: Optional[object] = Depends(get_embedding_model),
 ):
-    """
-    Atualiza parcialmente uma iniciativa existente.
+    """Atualiza parcialmente uma iniciativa existente.
     - 404 se não existir/soft-deletada
     - 422 se violar regras de validação
     - 200 com objeto completo atualizado
@@ -110,4 +116,5 @@ def patch_iniciativa(
         iniciativa_id=iniciativa_id,
         payload=payload,
         editado_por=current_user,
+        model=model,
     )

@@ -52,6 +52,7 @@ class AdminIniciativaController:
         iniciativa_id: str,
         payload: IniciativaPatchSchema,
         editado_por: Optional[str] = None,
+        model: Optional[object] = None,
     ) -> IniciativaSchema:
         """
         Aplica alterações parciais em uma iniciativa e retorna o objeto completo atualizado.
@@ -64,6 +65,7 @@ class AdminIniciativaController:
                 iniciativa_id=iniciativa_id,
                 payload=payload,
                 editado_por=editado_por,
+                model=model,
             )
         except ResourceNotFound as e:
             raise HTTPException(status_code=404, detail=str(e)) from e
@@ -72,16 +74,6 @@ class AdminIniciativaController:
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail="Erro ao atualizar iniciativa"
-            ) from e
-
-    def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:
-        try:
-            return self.service.get_iniciativa_by_id(iniciativa_id)
-        except ValueError as e:
-            raise HTTPException(status_code=404, detail={"message": str(e)})
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail={"message": "Erro ao buscar iniciativa"}
             ) from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:

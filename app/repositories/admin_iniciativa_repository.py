@@ -8,6 +8,7 @@ from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.organizador_model import Organizador
 from app.models.tag_model import Tag
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.utils.exceptions import ResourceNotFound
 
 
@@ -92,6 +93,7 @@ class AdminIniciativaRepository:
                 selectinload(Iniciativa.organizador),
                 selectinload(Iniciativa.horarios),
                 selectinload(Iniciativa.tags),
+                selectinload(Iniciativa.descricoes_extras),
             )
             .filter(
                 Iniciativa.id == iniciativa_id,
@@ -161,6 +163,7 @@ class AdminIniciativaRepository:
         iniciativa_id: str,
         data: Dict[str, Any],
         editado_por: Optional[str] = None,
+        model: Optional[object] = None,
     ) -> Iniciativa:
         """
         Aplica alterações parciais na Iniciativa.
@@ -201,6 +204,34 @@ class AdminIniciativaRepository:
                         tipo=h.get("tipo"),
                     )
                 )
+
+        
+        if (
+            "descricoes_extras_update" in data
+            and data["descricoes_extras_update"] is not None
+        ):
+            for extra_data in data["descricoes_extras_update"]:
+                extra_id = extra_data.get("id")
+                if not extra_id:
+                    continue
+                extra: Optional[DescricoesExtras] = (
+                    self.db.query(DescricoesExtras)
+                    .filter(
+                        DescricoesExtras.id == extra_id,
+                        DescricoesExtras.iniciativa_id == obj.id,
+                    )
+                    .first()
+                )
+                if not extra:
+                    raise ResourceNotFound("Descrição extra não encontrada")
+
+                if "descricao" in extra_data and extra_data["descricao"] is not None:
+                    extra.descricao = extra_data["descricao"]
+                if (
+                    "descricao_vetor" in extra_data
+                    and extra_data["descricao_vetor"] is not None
+                ):
+                    extra.descricao_vetor = extra_data["descricao_vetor"]
 
         obj.editado_em = func.now()
         if editado_por:

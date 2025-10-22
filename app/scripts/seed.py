@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.config.database import SessionLocal
 from app.models.demo_model import Demo
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
