@@ -103,9 +103,6 @@ class IniciativaHorarioPatch(BaseModel):
         return v
 
 
- 
-
-
 class DescricaoExtraUpdateSchema(BaseModel):
     id: str
     descricao: str
@@ -123,3 +120,5 @@ class IniciativaPatchSchema(BaseModel):
     tags_ids: Optional[List[str]] = None
     horarios: Optional[List[IniciativaHorarioPatch]] = None
     descricoes_extras_update: Optional[List[DescricaoExtraUpdateSchema]] = None
+    descricoes_extras_delete_ids: Optional[List[str]] = None
+    descricoes_extras_add: Optional[List[str]] = None

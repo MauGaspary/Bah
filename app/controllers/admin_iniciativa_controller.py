@@ -72,8 +72,9 @@ class AdminIniciativaController:
         except ValueError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
         except Exception as e:
+
             raise HTTPException(
-                status_code=500, detail="Erro ao atualizar iniciativa"
+                status_code=500, detail=f"Erro ao atualizar iniciativa: {str(e)}"
             ) from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:

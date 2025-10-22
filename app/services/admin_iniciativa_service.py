@@ -82,7 +82,6 @@ class AdminIniciativaService:
         """
         data: Dict[str, Any] = payload.model_dump(exclude_none=True)
 
-       
         if "descricoes_extras_update" in data and data["descricoes_extras_update"]:
             if model is None:
                 raise ValueError(
@@ -93,12 +92,10 @@ class AdminIniciativaService:
             for item in data["descricoes_extras_update"]:
                 texto: str = item.get("descricao")
                 if not texto:
-                    
                     descricoes_atualizadas.append(item)
                     continue
 
-               
-                vetor = model.encode( 
+                vetor = model.encode(
                     texto, convert_to_numpy=True, normalize_embeddings=True
                 )
                 novo_item = dict(item)
@@ -106,6 +103,20 @@ class AdminIniciativaService:
                 descricoes_atualizadas.append(novo_item)
 
             data["descricoes_extras_update"] = descricoes_atualizadas
+
+        if "descricoes_extras_add" in data and data["descricoes_extras_add"]:
+            if model is None:
+                raise ValueError(
+                    "Modelo de embedding não disponível para adicionar descrições extras"
+                )
+            textos = data["descricoes_extras_add"]
+            extras_novos = []
+            for texto in textos:
+                vetor = model.encode(
+                    texto, convert_to_numpy=True, normalize_embeddings=True
+                )
+                extras_novos.append({"descricao": texto, "descricao_vetor": vetor})
+            data["descricoes_extras_add"] = extras_novos
 
         updated = self.repository.update_partial(
             iniciativa_id=iniciativa_id,

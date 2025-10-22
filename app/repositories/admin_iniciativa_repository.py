@@ -4,11 +4,11 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.organizador_model import Organizador
 from app.models.tag_model import Tag
-from app.models.descricoes_extras_model import DescricoesExtras
 from app.utils.exceptions import ResourceNotFound
 
 
@@ -205,7 +205,6 @@ class AdminIniciativaRepository:
                     )
                 )
 
-        
         if (
             "descricoes_extras_update" in data
             and data["descricoes_extras_update"] is not None
@@ -233,12 +232,67 @@ class AdminIniciativaRepository:
                 ):
                     extra.descricao_vetor = extra_data["descricao_vetor"]
 
+        if (
+            "descricoes_extras_delete_ids" in data
+            and data["descricoes_extras_delete_ids"] is not None
+        ):
+            ids_to_delete = list(set(data["descricoes_extras_delete_ids"]))
+            if ids_to_delete:
+                
+                existing = (
+                    self.db.query(DescricoesExtras.id)
+                    .filter(
+                        DescricoesExtras.iniciativa_id == obj.id,
+                        DescricoesExtras.id.in_(ids_to_delete),
+                    )
+                    .all()
+                )
+                existing_ids = {row[0] for row in existing}
+
+                if not existing_ids:
+                    raise ResourceNotFound("Descrição extra não encontrada")
+
+                
+                (
+                    self.db.query(DescricoesExtras)
+                    .filter(
+                        DescricoesExtras.iniciativa_id == obj.id,
+                        DescricoesExtras.id.in_(existing_ids),
+                    )
+                    .delete(synchronize_session=False)
+                )
+
+                
+                if obj.descricoes_extras:
+                    obj.descricoes_extras = [
+                        e for e in obj.descricoes_extras if e.id not in existing_ids
+                    ]
+
+                self.db.flush()
+
+        if (
+            "descricoes_extras_add" in data
+            and data["descricoes_extras_add"] is not None
+        ):
+            for novo in data["descricoes_extras_add"]:
+                descricao = novo.get("descricao")
+                descricao_vetor = novo.get("descricao_vetor")
+                if not descricao or descricao_vetor is None:
+                    continue
+
+                self.db.add(
+                    DescricoesExtras(
+                        iniciativa_id=obj.id,
+                        descricao=descricao,
+                        descricao_vetor=descricao_vetor,
+                    )
+                )
+
         obj.editado_em = func.now()
         if editado_por:
             obj.editado_por = editado_por
 
         self.db.add(obj)
         self.db.commit()
-        self.db.refresh(obj)
-
-        return obj
+        
+        return self.get_by_id_active(iniciativa_id)
