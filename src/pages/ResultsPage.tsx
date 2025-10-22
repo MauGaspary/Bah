@@ -1,49 +1,77 @@
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Header from '@/components/ui/Header/Header'
 import CardItem from '@/components/ui/CardItem'
+import { searchIniciativas } from '@/service/search'
+import type { Iniciativa } from '@/interfaces/IIniciativas'
 
 function ResultsPage() {
-    return (
-        <div>
-            <Header variant="default" />
-            <main className="min-h-screen bg-white py-8">
-                <div className="container mx-auto px-4 max-w-4xl">
-                    <div className="flex flex-col gap-4 pt-20">
-                     <CardItem 
-                        imageUrl="https://placehold.co/150x150.png?text=Initiative" 
-                        title="Iniciativa 1 " 
-                        description="Descrição da iniciativa 1" 
-                        hora_inicio="17:30:00.573Z"
-                        hora_fim="19:30:00.573Z"
-                     />
+  const [searchParams] = useSearchParams()
+  const [results, setResults] = useState<Iniciativa[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+  const query = searchParams.get('q') || ''
 
-                     <CardItem 
-                        imageUrl="https://placehold.co/150x150.png?text=Initiative" 
-                        title="Iniciativa 1 " 
-                        description="Descrição da iniciativa 1" 
-                        hora_inicio="17:30:00.573Z"
-                        hora_fim="19:30:00.573Z"
-                     />
+  useEffect(() => {
+    async function fetchResults() {
+      setIsLoading(true)
+      try {
+        const response = await searchIniciativas({
+          q: query,
+          size: 20,
+        })
+        setResults(response.items)
+        setTotal(response.total)
+      } catch (error) {
+        console.error('Erro ao buscar resultados:', error)
+        setResults([])
+        setTotal(0)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-                     <CardItem 
-                        imageUrl="https://placehold.co/150x150.png?text=Initiative" 
-                        title="Iniciativa 1 " 
-                        description="Descrição da iniciativa 1" 
-                        hora_inicio="17:30:00.573Z"
-                        hora_fim="19:30:00.573Z"
-                     />
+    fetchResults()
+  }, [query])
 
-                     <CardItem 
-                        imageUrl="https://placehold.co/150x150.png?text=Initiative" 
-                        title="Iniciativa 1 " 
-                        description="Descrição da iniciativa 1" 
-                        hora_inicio="17:30:00.573Z"
-                        hora_fim="19:30:00.573Z"
-                     />
-                    </div>
-                </div>
-            </main>
+  return (
+    <div>
+      <Header variant="default" />
+      <main className="min-h-screen bg-white py-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="pt-20">
+            <h1 className="text-2xl font-bold mb-2">
+              Resultados para: "{query}"
+            </h1>
+            <p className="text-label-secondary mb-6">
+              {total} {total === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+            </p>
+
+            {isLoading ? (
+              <div className="text-center py-8">Carregando...</div>
+            ) : results.length === 0 ? (
+              <div className="text-center py-8 text-label-secondary">
+                Nenhum resultado encontrado
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8">
+                {results.map(iniciativa => (
+                  <CardItem
+                    key={iniciativa.id}
+                    imageUrl={iniciativa.imagem_url}
+                    title={iniciativa.titulo}
+                    description={iniciativa.descricao}
+                    hora_inicio={iniciativa.horarios[0]?.hora_inicio || '00:00:00'}
+                    hora_fim={iniciativa.horarios[0]?.hora_fim || '00:00:00'}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-    )
+      </main>
+    </div>
+  )
 }
 
 export default ResultsPage

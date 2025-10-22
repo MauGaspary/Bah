@@ -22,7 +22,7 @@ function CardItem(props: CardItemProps) {
         <img
           src={imageUrl}
           alt={props.title}
-          className="rounded-l-4xl object-cover"
+          className="w-48 h-48 rounded-l-4xl object-cover"
         />
       </div>
 

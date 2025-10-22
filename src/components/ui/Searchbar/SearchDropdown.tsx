@@ -6,45 +6,16 @@ import { useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/Searchbar/Searchbar'
 import SearchItem from '@/components/ui/Searchbar/SearchItem'
 import { cn } from '@/lib/utils'
-
-const mockIniciativas = [
-  {
-    id: '1',
-    imageUrl: 'https://placehold.co/100x100',
-    title: 'Recicla Mais',
-    description: 'Projeto de reciclagem comunitária',
-  },
-  {
-    id: '2',
-    imageUrl: 'https://placehold.co/100x100',
-    title: 'Energia Solar Popular',
-    description: 'Iniciativa para casas com energia limpa',
-  },
-  {
-    id: '3',
-    imageUrl: 'https://placehold.co/100x100',
-    title: 'Horta Urbana',
-    description: 'Cultivo colaborativo em espaços públicos',
-  },
-  {
-    id: '4',
-    imageUrl: 'https://placehold.co/100x100',
-    title: 'Reflorestamento Local',
-    description: 'Plantio de árvores nativas na região',
-  },
-  {
-    id: '5',
-    imageUrl: 'https://placehold.co/100x100',
-    title: 'Mobilidade Sustentável',
-    description: 'Incentivo ao uso de bicicletas e transporte público',
-  },
-]
+import { searchIniciativas } from '@/service/search'
+import type { Iniciativa } from '@/interfaces/IIniciativas'
 
 function SearchDropdown() {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [filteredResults, setFilteredResults] = useState<Iniciativa[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
@@ -53,13 +24,29 @@ function SearchDropdown() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const filteredResults = debouncedQuery.trim()
-    ? mockIniciativas.filter(
-        item =>
-          item.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(debouncedQuery.toLowerCase())
-      )
-    : []
+  useEffect(() => {
+    async function fetchResults() {
+      if (!debouncedQuery.trim()) {
+        setFilteredResults([])
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const response = await searchIniciativas({
+          q: debouncedQuery,
+          size: 5,
+        })
+        setFilteredResults(response.items)
+      } catch (error) {
+        console.error('Erro ao buscar resultados da busca:', error)
+        setFilteredResults([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchResults()
+  }, [debouncedQuery])
 
   useEffect(() => {
     function handleClickOutside(event: Event) {
@@ -79,7 +66,7 @@ function SearchDropdown() {
     setIsOpen(filteredResults.length > 0)
   }, [filteredResults.length])
 
-  const handleSelectItem = (item: (typeof mockIniciativas)[0]) => {
+  const handleSelectItem = (item: Iniciativa) => {
     setIsOpen(false)
     setIsFullscreen(false)
     navigate(`/iniciativa/${item.id}`)
@@ -104,6 +91,10 @@ function SearchDropdown() {
     <>
       <div ref={containerRef} className="relative w-full max-w-2xl">
         <form
+          onSubmit={e => {
+            e.preventDefault()
+            handleSearchClick()
+          }}
           className={cn(
             'flex items-center w-full bg-white overflow-hidden h-12 shadow-lg',
             isOpen ? 'rounded-t-3xl' : 'rounded-full'
@@ -125,7 +116,7 @@ function SearchDropdown() {
           </div>
         </form>
 
-        {!isFullscreen && isOpen && filteredResults.length > 0 && (
+        {!isFullscreen && isOpen && (
           <div
             className={cn(
               'absolute top-full left-0 right-0 bg-white rounded-b-3xl shadow-2xl',
@@ -133,15 +124,25 @@ function SearchDropdown() {
               'animate-in fade-in-0 slide-in-from-top-2 duration-200'
             )}
           >
-            {filteredResults.map(item => (
-              <div
-                key={item.id}
-                onClick={() => handleSelectItem(item)}
-                className="cursor-pointer hover:bg-gray-50 transition-colors py-2"
-              >
-                <SearchItem {...item} />
+            {isLoading ? (
+              <div className="text-center text-label-secondary py-4">
+                Carregando resultados...
               </div>
-            ))}
+            ) : (
+              filteredResults.map(item => (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectItem(item)}
+                  className="cursor-pointer hover:bg-gray-50 transition-colors py-2"
+                >
+                  <SearchItem
+                    imageUrl={item.imagem_url}
+                    title={item.titulo}
+                    description={item.descricao}
+                  />
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>
@@ -167,8 +168,12 @@ function SearchDropdown() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-2">
-            {filteredResults.length === 0 && debouncedQuery.trim() ? (
-              <p className="text-center text-gray-500 mt-6">
+            {isLoading ? (
+              <p className="text-center text-label-secondary py-4">
+                Carregando resultados...
+              </p>
+            ) : filteredResults.length === 0 && debouncedQuery.trim() ? (
+              <p className="text-center text-label-secondary py-4">
                 Nenhum resultado encontrado
               </p>
             ) : (
@@ -178,7 +183,11 @@ function SearchDropdown() {
                   onClick={() => handleSelectItem(item)}
                   className="cursor-pointer hover:bg-gray-50 transition-colors p-2 rounded-lg"
                 >
-                  <SearchItem {...item} />
+                  <SearchItem
+                    imageUrl={item.imagem_url}
+                    title={item.titulo}
+                    description={item.descricao}
+                  />
                 </div>
               ))
             )}
@@ -188,4 +197,4 @@ function SearchDropdown() {
     </>
   )
 }
-export default SearchDropdown;
+export default SearchDropdown
