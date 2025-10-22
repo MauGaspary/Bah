@@ -1,11 +1,7 @@
-import { Search } from 'lucide-react'
-import { useState } from 'react'
-
 import Header from '@/components/ui/Header/Header'
-import { Input } from '@/components/ui/Searchbar/Searchbar'
+import SearchDropdown from '@/components/ui/Searchbar/SearchDropdown'
 
 function HomePage() {
-  const [searchQuery, setSearchQuery] = useState('')
   const tags = [
     { name: 'Aceleração', value: 'aceleracao' },
     { name: 'Projetos', value: 'projetos' },
@@ -41,18 +37,7 @@ function HomePage() {
             sua jornada
           </p>
           <div className="flex justify-center max-w-3xl mx-auto mb-8 md:mb-4 px-4">
-            <form className="flex items-center w-full max-w-2xl bg-white rounded-full overflow-hidden h-12 shadow-lg">
-              <Input
-                type="text"
-                placeholder="Conheça as iniciativas"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="flex-1 px-6 py-3 text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-semibold"
-              />
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 cursor-pointer bg-bah-purple">
-                <Search className="h-4 w-4 text-white" />
-              </div>
-            </form>
+            <SearchDropdown />
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">

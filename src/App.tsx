@@ -8,7 +8,6 @@ import FormIniciativa from './pages/formIniciativa'
 import HomePage from './pages/HomePage'
 import IniciativaPage from './pages/IniciativaPage'
 import LoginAdminPage from './pages/LoginAdminPage'
-import TestePage from './pages/testePage'
 import ResultsPage from './pages/ResultsPage'
 
 function App() {
@@ -24,7 +23,6 @@ function App() {
           <Route path="/admin/criarIniciativa" element={<FormIniciativa />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
           <Route path="/admin/iniciativas" element={<AdminIniciativas />} />
-          <Route path="/teste" element={<TestePage />} />
         </Routes>
       </AuthProvider>
     </Router>

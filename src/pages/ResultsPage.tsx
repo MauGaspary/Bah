@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Header from '@/components/ui/Header/Header'
-import CardItem from '@/components/ui/CardItem'
-import { searchIniciativas } from '@/service/search'
+
 import type { Iniciativa } from '@/interfaces/IIniciativas'
+
+import CardItem from '@/components/ui/CardItem'
+import Header from '@/components/ui/Header/Header'
+import { searchIniciativas } from '@/service/search'
 
 function ResultsPage() {
   const [searchParams] = useSearchParams()
@@ -44,7 +46,8 @@ function ResultsPage() {
               Resultados para: "{query}"
             </h1>
             <p className="text-label-secondary mb-6">
-              {total} {total === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+              {total}{' '}
+              {total === 1 ? 'resultado encontrado' : 'resultados encontrados'}
             </p>
 
             {isLoading ? (
@@ -58,10 +61,13 @@ function ResultsPage() {
                 {results.map(iniciativa => (
                   <CardItem
                     key={iniciativa.id}
+                    id={iniciativa.id}
                     imageUrl={iniciativa.imagem_url}
                     title={iniciativa.titulo}
                     description={iniciativa.descricao}
-                    hora_inicio={iniciativa.horarios[0]?.hora_inicio || '00:00:00'}
+                    hora_inicio={
+                      iniciativa.horarios[0]?.hora_inicio || '00:00:00'
+                    }
                     hora_fim={iniciativa.horarios[0]?.hora_fim || '00:00:00'}
                   />
                 ))}

@@ -151,7 +151,7 @@ function SearchDropdown() {
         <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in fade-in duration-200">
           <div className="flex items-center gap-2 p-4 border-b border-gray-200">
             <button onClick={() => setIsFullscreen(false)}>
-              <X className="w-6 h-6 text-gray-600" />
+              <X className="w-6 h-6 text-label-secondary" />
             </button>
             <Input
               autoFocus
@@ -167,7 +167,7 @@ function SearchDropdown() {
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2">
+          <div className="flex-1 overflow-y-auto p-2 pl-0">
             {isLoading ? (
               <p className="text-center text-label-secondary py-4">
                 Carregando resultados...
