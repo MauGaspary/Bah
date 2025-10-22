@@ -65,10 +65,7 @@ function ResultsPage() {
                     imageUrl={iniciativa.imagem_url}
                     title={iniciativa.titulo}
                     description={iniciativa.descricao}
-                    hora_inicio={
-                      iniciativa.horarios[0]?.hora_inicio || '00:00:00'
-                    }
-                    hora_fim={iniciativa.horarios[0]?.hora_fim || '00:00:00'}
+                    horarios={iniciativa.horarios}
                   />
                 ))}
               </div>

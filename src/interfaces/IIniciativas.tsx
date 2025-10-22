@@ -16,6 +16,7 @@ export interface IniciativasResponse{
 }
 
 export interface Horario {
+    id?: string;
     hora_inicio: string;
     hora_fim: string;
 }

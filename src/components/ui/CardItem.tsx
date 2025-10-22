@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 
+import type { Horario } from '@/interfaces/IIniciativas'
+
 import { Badge } from '@/components/badge'
 
 type CardItemProps = {
@@ -7,8 +9,7 @@ type CardItemProps = {
   imageUrl: string
   title: string
   description: string
-  hora_inicio: string
-  hora_fim: string
+  horarios: Horario[]
 }
 
 const formatTime = (timeString: string): string => {
@@ -16,7 +17,7 @@ const formatTime = (timeString: string): string => {
 }
 
 function CardItem(props: CardItemProps) {
-  const { id, imageUrl, title, description, hora_inicio, hora_fim } = props
+  const { id, imageUrl, title, description, horarios } = props
   const navigate = useNavigate()
 
   const handleClick = () => {
@@ -48,9 +49,16 @@ function CardItem(props: CardItemProps) {
           </div>
 
           <div className="flex w-full flex-nowrap gap-2 overflow-x-auto">
-            <Badge className="bg-bah-green flex" variant="default">
-              {formatTime(hora_inicio)} - {formatTime(hora_fim)}
-            </Badge>
+            {horarios.map((horario, index) => (
+              <Badge
+                key={horario.id || index}
+                className="bg-bah-green flex"
+                variant="default"
+              >
+                {formatTime(horario.hora_inicio)} -{' '}
+                {formatTime(horario.hora_fim)}
+              </Badge>
+            ))}
           </div>
         </div>
       </div>
