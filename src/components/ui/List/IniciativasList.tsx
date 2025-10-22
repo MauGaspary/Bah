@@ -1,3 +1,12 @@
+import { useState, useEffect } from 'react'
+
+import ConfirmModal from '../ConfirmModal'
+import ListItem from './ListItem'
+
+import type {
+  IniciativasListProps,
+  Iniciativa,
+} from '@/interfaces/IIniciativas'
 import {
   Pagination,
   PaginationContent,
@@ -6,15 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-
-import { useState, useEffect } from 'react'
-import ListItem from './ListItem'
-import { fetchIniciativas } from '@/service/iniciativas'
-
-import type {
-  IniciativasListProps,
-  Iniciativa,
-} from '@/interfaces/IIniciativas'
+import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [iniciativas, setIniciativas] = useState<Iniciativa[]>([])
@@ -22,30 +23,72 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [iniciativaToDelete, setIniciativaToDelete] =
+    useState<Iniciativa | null>(null)
 
   const itemsPerPage = 5
-  const totalPages = Math.ceil(iniciativas.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentItems = iniciativas.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(total / itemsPerPage))
 
   useEffect(() => {
     async function loadIniciativas() {
       try {
-        const data = await fetchIniciativas(searchQuery)
+        setLoading(true)
+        const data = await fetchIniciativas(
+          searchQuery,
+          currentPage,
+          itemsPerPage
+        )
+        console.log(data)
         setIniciativas(data.items)
         setTotal(data.total)
-      } catch (error) {
+      } catch {
         setError('Erro ao carregar iniciativas')
       } finally {
         setLoading(false)
       }
     }
     loadIniciativas()
+  }, [searchQuery, currentPage])
+
+  useEffect(() => {
+    // Reset to first page when search changes
+    setCurrentPage(1)
   }, [searchQuery])
+
+  const openDeleteConfirm = (iniciativa: Iniciativa) => {
+    setIsDeleteModalOpen(true)
+    setIniciativaToDelete(iniciativa)
+  }
+
+  const closeDeleteConfirm = () => {
+    setIsDeleteModalOpen(false)
+    setIniciativaToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!iniciativaToDelete) return
+
+    const { id } = iniciativaToDelete
+    setDeletingId(id)
+
+    try {
+      await deleteIniciativa(id)
+      // Remove a iniciativa da lista local
+      setIniciativas(prev => prev.filter(item => item.id !== id))
+      setTotal(prev => prev - 1)
+      closeDeleteConfirm()
+    } catch {
+      setError('Erro ao excluir iniciativa')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div>
-      <div className="rounded-card bg-white shadow-md overflow-hidden">
+      <div className="rounded-card bg-white shadow-md overflow-hidden flex flex-col">
         <div className="bg-bah-purple px-6 py-6">
           <div className="flex justify-between items-end">
             <h1 className="text-title3-regular font-mulish text-white self-center">
@@ -62,61 +105,71 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
           <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
-        <div className="mt-4 space-y-4 text-body-regular text-center font-mulish">
-          {loading && (
-            <p className="text-label-secondary">Carregando iniciativas...</p>
-          )}
-
-          {!loading && error && <p className="text-error">{error}</p>}
-        </div>
+        {!loading && error && <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
+          <p className="text-error">{error}</p>
+        </div>}
 
         <div className="space-y-3">
-          {currentItems.map((item, index) => (
+          {iniciativas.map((item, index) => (
             <ListItem
               key={item.id}
               title={item.titulo}
               description={item.descricao}
               imageUrl={item.imagem_url}
-              isLast={index === currentItems.length - 1}
-              onEdit={() => console.log('Editar')}
-              onDelete={() => console.log('Excluir')}
+              isLast={index === iniciativas.length - 1}
+              isDeleting={deletingId === item.id}
+              onEdit={() => console.warn('Editar iniciativa', item.id)}
+              onDelete={() => openDeleteConfirm(item)}
             />
           ))}
         </div>
       </div>
-      <div className="py-8">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              />
-            </PaginationItem>
-
-            {[...Array(totalPages).keys()].map(i => (
-              <PaginationItem key={i}>
-                <PaginationLink
+      <div className="py-4 fixed bottom-0 right-0 left-[15%]">
+        <div className="py-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
                   href="#"
-                  isActive={currentPage === i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                />
               </PaginationItem>
-            ))}
 
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              {[...Array(totalPages).keys()].map(i => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    href="#"
+                    isActive={currentPage === i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() =>
+                    setCurrentPage(p => Math.min(totalPages, p + 1))
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Excluir Iniciativa"
+        message={`Tem certeza que deseja excluir a iniciativa "${iniciativaToDelete?.titulo}"?`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        isLoading={deletingId === iniciativaToDelete?.id}
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteConfirm}
+      />
     </div>
   )
 }

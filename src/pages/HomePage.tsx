@@ -1,11 +1,16 @@
-import { Search } from 'lucide-react'
-import { useState } from 'react'
+import { Search, ChevronDown } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import Header from '@/components/ui/Header/Header'
+import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
+import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
+import { buildCalendarEvents } from '@/data/iniciativas'
 import { Input } from '@/components/ui/Searchbar/Searchbar'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const location = useLocation()
   const tags = [
     { name: 'Aceleração', value: 'aceleracao' },
     { name: 'Projetos', value: 'projetos' },
@@ -13,11 +18,33 @@ function HomePage() {
     { name: 'Coworking', value: 'coworking' },
     { name: 'Mentorias', value: 'mentorias' },
   ]
+
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string } | null
+    if (state?.scrollTo) {
+      // limpa o estado para evitar scroll repetido
+      history.replaceState({}, '')
+      const el = document.getElementById(state.scrollTo)
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 50)
+      }
+    }
+  }, [location.state])
+  const eventsAll = useMemo(() => buildCalendarEvents(), [])
+  const eventsNext15Days = useMemo(() => {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    const end = new Date()
+    end.setDate(end.getDate() + 15)
+    const endIso = end.toISOString().slice(0, 10)
+    return eventsAll.filter(e => e.date >= todayIso && e.date <= endIso)
+  }, [eventsAll])
   return (
     <>
       <Header variant="default" />
       <main
-        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center"
+        className="min-h-screen h-full overflow-x-hidden bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center  bg-no-repeat md:bg-fixed w-full flex items-center justify-center relative"
         id="home-section"
       >
         <section className="container mx-auto px-4 py-8 md:py-20">
@@ -65,8 +92,55 @@ function HomePage() {
               </button>
             ))}
           </div>
+          {/* Botão para descer até o calendário/carrossel — movido para fora da section */}
         </section>
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6">
+          <button
+            type="button"
+            aria-label="Ir para o calendário"
+            onClick={() => {
+              const targetId = window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+              const el = document.getElementById(targetId)
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }}
+            className="rounded-full p-2 text-white/90 hover:text-white transition-colors animate-bounce"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </button>
+        </div>
       </main>
+
+      {/* Mobile: Carrossel de próximos eventos */}
+      <div className="md:hidden" id="calendar-section-mobile">
+        <UpcomingCarousel events={eventsNext15Days} />
+      </div>
+
+      {/* Desktop: Calendário com destaques */}
+      <div className="hidden md:block" id="calendar-section">
+        <CalendarSection events={eventsAll} />
+      </div>
+
+      {/* Jornada */}
+      <section id="journey-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Jornada</h2>
+      </section>
+
+      {/* Sobre nós */}
+      <section id="about-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Sobre nós</h2>
+      </section>
+
+      {/* Nossos Valores */}
+      <section id="values-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Nossos Valores</h2>
+      </section>
+
+      {/* Contato */}
+      <section id="contact-section" className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">Contato</h2>
+      </section>
     </>
   )
 }

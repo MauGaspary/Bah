@@ -4,6 +4,7 @@ import { Button } from '../button'
 type BaseProps = {
   imageUrl: string
   isLast?: boolean
+  isDeleting?: boolean
   onEdit?: () => void
   onDelete?: () => void
 }
@@ -23,7 +24,7 @@ type UsuarioVariant = {
 type ListItemProps = BaseProps & (DefaultVariant | UsuarioVariant)
 
 function ListItem(props: ListItemProps) {
-  const { imageUrl, isLast, onEdit, onDelete } = props
+  const { imageUrl, isLast, isDeleting, onEdit, onDelete } = props
 
   return (
     <div className="relative w-full last:shadow-none pb-4">
@@ -72,6 +73,7 @@ function ListItem(props: ListItemProps) {
             variant="list"
             className="cursor-pointer border-excluir-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95 active:bg-error"
             onClick={onDelete}
+            disabled={isDeleting}
           >
             <Trash2Icon className="w-3 h-3 text-excluir" />
             <span className="text-subheadline-regular font-mulish text-excluir text-xs">
