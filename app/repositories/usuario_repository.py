@@ -19,7 +19,7 @@ class UsuarioRepository:
     def email_exists(self, email: str) -> bool:
         return self.get_by_email(email) is not None
 
-    def create1(self, user_data: UserCreate) -> Usuario:
+    def create(self, user_data: UserCreate) -> Usuario:
         email_norm = user_data.email.strip()
         hasher = PasswordHasher()
         usuario = Usuario(
@@ -32,17 +32,4 @@ class UsuarioRepository:
         self.session.commit()
         self.session.refresh(usuario)
 
-        return usuario
-
-    def create2(self, email: str, password: str, nome: str, sobrenome: str) -> Usuario:
-        email_norm = email.strip()
-        hasher = PasswordHasher()
-        usuario = Usuario(
-            email=email_norm,
-            senha_hash=hasher.hash(password),
-            nome=nome,
-            sobrenome=sobrenome,
-        )
-        self.session.add(usuario)
-        self.session.flush()
         return usuario

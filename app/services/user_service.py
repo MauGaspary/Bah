@@ -19,7 +19,7 @@ class UserService:
             raise EmailAlreadyExistsException("Email já está em uso")
 
         try:
-            user = self.repository.create1(user_data)
+            user = self.repository.create(user_data)
             return UserResponse.model_validate(user)
         except Exception as e:
             raise HTTPException(
