@@ -216,7 +216,7 @@ class IniciativaRepository:
         result = self.db.execute(query)
         rows_tags = result.fetchall()
 
-        tags_by_iniciativa = {}
+        tags_by_iniciativa: Dict[str, List[TagSchema]] = {}
         for row in rows_tags:
             iniciativa_id = row.iniciativa_id
             if iniciativa_id not in tags_by_iniciativa:
@@ -242,9 +242,9 @@ class IniciativaRepository:
 
         index_name = "idx_iniciativa_horarios_data_hora"
 
-        check_index_query = """ 
+        check_index_query = """
         SELECT EXISTS (
-            SELECT 1 FROM pg_indexes 
+            SELECT 1 FROM pg_indexes
             WHERE indexname = :index_name
         )
         """
@@ -255,7 +255,7 @@ class IniciativaRepository:
 
         if not result.scalar():
             create_index_query = """
-            CREATE INDEX idx_iniciativa_horarios_data_hora 
+            CREATE INDEX idx_iniciativa_horarios_data_hora
             ON iniciativa_horarios (data_evento, hora_inicio)
             """
             self.db.execute(create_index_query)

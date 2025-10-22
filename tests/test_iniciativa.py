@@ -1,7 +1,7 @@
-from datetime import date, time
+from datetime import date, datetime, time
 
-import pytest
-
+from app.models.iniciativa_horario_model import HorarioTipo
+from app.models.iniciativa_model import Iniciativa
 from tests.helpers import request, request_auth
 
 
@@ -384,58 +384,39 @@ def test_calendario_fevereiro_ano_comum(client):
 
 
 def test_calendario_bordas_primeiro_ultimo_dia(
-    client, organizador_fixture, usuario_fixture, auth_token
+    client, organizador_fixture, usuario_fixture, iniciativa_factory
 ):
     """Teste: iniciativas no primeiro e último dia do mês aparecem corretamente"""
-    payload_primeiro_dia = {
-        "titulo": "Iniciativa Primeiro Dia",
-        "descricao": "Evento no primeiro dia do mês",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+
+    iniciativa_factory(
+        titulo="Iniciativa Primeiro Dia",
+        descricao="Evento no primeiro dia do mês",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-10-01",
-                "hora_inicio": "09:00:00",
-                "hora_fim": "12:00:00",
-                "tipo": "presencial",
+                "data_evento": date(2025, 10, 1),
+                "hora_inicio": time(9, 0),
+                "hora_fim": time(12, 0),
+                "tipo": HorarioTipo.PRESENCIAL,
             }
         ],
-    }
-
-    response1 = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload_primeiro_dia,
     )
-    assert response1.status_code == 201
 
-    payload_ultimo_dia = {
-        "titulo": "Iniciativa Último Dia",
-        "descricao": "Evento no último dia do mês",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+    iniciativa_factory(
+        titulo="Iniciativa Último Dia",
+        descricao="Evento no último dia do mês",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-10-31",
-                "hora_inicio": "14:00:00",
-                "hora_fim": "18:00:00",
-                "tipo": "online",
+                "data_evento": date(2025, 10, 31),
+                "hora_inicio": time(14, 0),
+                "hora_fim": time(18, 0),
+                "tipo": HorarioTipo.ONLINE,
             }
         ],
-    }
-
-    response2 = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload_ultimo_dia,
     )
-    assert response2.status_code == 201
 
     response = request(client, "GET", "/iniciativas/calendario?data=2025-10-15")
 
@@ -458,34 +439,26 @@ def test_calendario_bordas_primeiro_ultimo_dia(
 
 
 def test_calendario_soft_delete_nao_aparece(
-    client, organizador_fixture, usuario_fixture, auth_token
+    client, organizador_fixture, usuario_fixture, iniciativa_factory, db_session
 ):
     """Teste: iniciativas soft-deletadas não aparecem no calendário"""
-    payload = {
-        "titulo": "Iniciativa Para Deletar",
-        "descricao": "Será deletada (soft delete)",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+
+    iniciativa_data = iniciativa_factory(
+        titulo="Iniciativa Para Deletar",
+        descricao="Será deletada (soft delete)",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-11-15",
-                "hora_inicio": "10:00:00",
-                "hora_fim": "12:00:00",
-                "tipo": "presencial",
+                "data_evento": date(2025, 11, 15),
+                "hora_inicio": time(10, 0),
+                "hora_fim": time(12, 0),
+                "tipo": HorarioTipo.PRESENCIAL,
             }
         ],
-    }
-
-    response_create = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload,
     )
-    assert response_create.status_code == 201
-    iniciativa_id = response_create.json()["id"]
+
+    iniciativa_id = iniciativa_data["id"]
 
     response_antes = request(client, "GET", "/iniciativas/calendario?data=2025-11-15")
     assert response_antes.status_code == 200
@@ -498,19 +471,12 @@ def test_calendario_soft_delete_nao_aparece(
         for ini in dia_15_antes["iniciativas"]
     )
 
-    from datetime import datetime
-
-    from app.config.database import SessionLocal
-    from app.models.iniciativa_model import Iniciativa
-
-    db = SessionLocal()
-    try:
-        iniciativa = db.query(Iniciativa).filter(Iniciativa.id == iniciativa_id).first()
-        iniciativa.deletado_em = datetime.utcnow()
-        iniciativa.deletado_por = usuario_fixture["id"]
-        db.commit()
-    finally:
-        db.close()
+    iniciativa = (
+        db_session.query(Iniciativa).filter(Iniciativa.id == iniciativa_id).first()
+    )
+    iniciativa.deletado_em = datetime.utcnow()
+    iniciativa.deletado_por = usuario_fixture["id"]
+    db_session.commit()
 
     response_depois = request(client, "GET", "/iniciativas/calendario?data=2025-11-15")
     assert response_depois.status_code == 200
@@ -527,83 +493,54 @@ def test_calendario_soft_delete_nao_aparece(
 
 
 def test_calendario_multiplos_horarios_mesmo_dia_ordenacao(
-    client, organizador_fixture, usuario_fixture, auth_token
+    client, organizador_fixture, usuario_fixture, iniciativa_factory
 ):
     """Teste: dois horários no mesmo dia → 09:00 antes de 14:00; empate por título"""
-    payload1 = {
-        "titulo": "B - Iniciativa Tarde",
-        "descricao": "Evento da tarde",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+
+    iniciativa_factory(
+        titulo="B - Iniciativa Tarde",
+        descricao="Evento da tarde",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-12-10",
-                "hora_inicio": "14:00:00",
-                "hora_fim": "18:00:00",
-                "tipo": "online",
+                "data_evento": date(2025, 12, 10),
+                "hora_inicio": time(14, 0),
+                "hora_fim": time(18, 0),
+                "tipo": HorarioTipo.ONLINE,
             }
         ],
-    }
-
-    response1 = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload1,
     )
-    assert response1.status_code == 201
 
-    payload2 = {
-        "titulo": "A - Iniciativa Manhã",
-        "descricao": "Evento da manhã",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+    iniciativa_factory(
+        titulo="A - Iniciativa Manhã",
+        descricao="Evento da manhã",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-12-10",
-                "hora_inicio": "09:00:00",
-                "hora_fim": "12:00:00",
-                "tipo": "presencial",
+                "data_evento": date(2025, 12, 10),
+                "hora_inicio": time(9, 0),
+                "hora_fim": time(12, 0),
+                "tipo": HorarioTipo.PRESENCIAL,
             }
         ],
-    }
-
-    response2 = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload2,
     )
-    assert response2.status_code == 201
 
-    payload3 = {
-        "titulo": "Z - Iniciativa Último Nome",
-        "descricao": "Evento com nome Z",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "horarios": [
+    iniciativa_factory(
+        titulo="Z - Iniciativa Último Nome",
+        descricao="Evento com nome Z",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        horarios=[
             {
-                "data_evento": "2025-12-10",
-                "hora_inicio": "09:00:00",
-                "hora_fim": "11:00:00",
-                "tipo": "hibrido",
+                "data_evento": date(2025, 12, 10),
+                "hora_inicio": time(9, 0),
+                "hora_fim": time(11, 0),
+                "tipo": HorarioTipo.HIBRIDO,
             }
         ],
-    }
-
-    response3 = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload3,
     )
-    assert response3.status_code == 201
 
     response = request(client, "GET", "/iniciativas/calendario?data=2025-12-10")
 
@@ -627,34 +564,25 @@ def test_calendario_multiplos_horarios_mesmo_dia_ordenacao(
 
 
 def test_calendario_com_tags(
-    client, organizador_fixture, tag_fixture, usuario_fixture, auth_token
+    client, organizador_fixture, tag_fixture, usuario_fixture, iniciativa_factory
 ):
     """Teste: calendário retorna tags das iniciativas"""
-    payload = {
-        "titulo": "Iniciativa Com Tags",
-        "descricao": "Evento com tags",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "tag_ids": [tag_fixture["id"]],
-        "horarios": [
+
+    iniciativa_factory(
+        titulo="Iniciativa Com Tags",
+        descricao="Evento com tags",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        tag_ids=[tag_fixture["id"]],
+        horarios=[
             {
-                "data_evento": "2025-12-20",
-                "hora_inicio": "10:00:00",
-                "hora_fim": "12:00:00",
-                "tipo": "presencial",
+                "data_evento": date(2025, 12, 20),
+                "hora_inicio": time(10, 0),
+                "hora_fim": time(12, 0),
+                "tipo": HorarioTipo.PRESENCIAL,
             }
         ],
-    }
-
-    response_create = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload,
     )
-    assert response_create.status_code == 201
 
     response = request(client, "GET", "/iniciativas/calendario?data=2025-12-20")
 
@@ -676,35 +604,26 @@ def test_calendario_com_tags(
 
 
 def test_calendario_todos_campos_presentes(
-    client, organizador_fixture, usuario_fixture, auth_token
+    client, organizador_fixture, usuario_fixture, iniciativa_factory
 ):
     """Teste: verifica que todos os campos do schema estão presentes"""
-    payload = {
-        "titulo": "Iniciativa Completa",
-        "descricao": "Evento com todos os campos",
-        "organizador_id": organizador_fixture["id"],
-        "link": "https://example.com",
-        "imagem_url": "https://example.com/image.jpg",
-        "local": "Porto Alegre",
-        "destaque": True,
-        "horarios": [
+
+    iniciativa_factory(
+        titulo="Iniciativa Completa",
+        descricao="Evento com todos os campos",
+        organizador_id=organizador_fixture["id"],
+        usuario_id=usuario_fixture["id"],
+        local="Porto Alegre",
+        destaque=True,
+        horarios=[
             {
-                "data_evento": "2026-01-15",
-                "hora_inicio": "10:00:00",
-                "hora_fim": "12:00:00",
-                "tipo": "hibrido",
+                "data_evento": date(2026, 1, 15),
+                "hora_inicio": time(10, 0),
+                "hora_fim": time(12, 0),
+                "tipo": HorarioTipo.HIBRIDO,
             }
         ],
-    }
-
-    response_create = request_auth(
-        client,
-        "POST",
-        f"/admin/iniciativas/?criado_por={usuario_fixture['id']}",
-        token=auth_token,
-        json=payload,
     )
-    assert response_create.status_code == 201
 
     response = request(client, "GET", "/iniciativas/calendario?data=2026-01-15")
 
@@ -730,7 +649,7 @@ def test_calendario_todos_campos_presentes(
     assert "hora_fim" in iniciativa
     assert iniciativa["hora_fim"] == "12:00:00"
     assert "tipo" in iniciativa
-    assert iniciativa["tipo"] == "hibrido"
+    assert iniciativa["tipo"] == "HIBRIDO"
     assert "link" in iniciativa
     assert iniciativa["link"] == "https://example.com"
     assert "local" in iniciativa

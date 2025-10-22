@@ -4,9 +4,11 @@ from typing import Dict, List, Mapping, Sequence
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.models.iniciativa_horario_model import HorarioTipo
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
 from app.schemas.iniciativa_schema import (
+    CalendarioHorarioTipo,
     CalendarioIniciativaItem,
     CalendarioMensalResponse,
     DiaCalendario,
@@ -19,6 +21,15 @@ from app.schemas.iniciativa_schema import (
 class IniciativaService:
     def __init__(self, db: Session):
         self.repository = IniciativaRepository(db)
+
+    def _convert_horario_tipo(self, tipo: HorarioTipo) -> CalendarioHorarioTipo:
+        """Converte o enum do model para o enum do schema de calendário"""
+        mapping = {
+            HorarioTipo.PRESENCIAL: CalendarioHorarioTipo.PRESENCIAL,
+            HorarioTipo.ONLINE: CalendarioHorarioTipo.ONLINE,
+            HorarioTipo.HIBRIDO: CalendarioHorarioTipo.HIBRIDO,
+        }
+        return mapping[tipo]
 
     def create_iniciativa(
         self, iniciativa_data: IniciativaCreate, criado_por: str
@@ -94,9 +105,9 @@ class IniciativaService:
     def get_calendario_mensal(self, data: date) -> CalendarioMensalResponse:
         """Retorna o calendário de iniciativas para o mês especificado"""
         try:
-            rows = self.repository.get_calendario_mensal(data)
-            tags_by_iniciativa = self.repository.get_tags_by_iniciativa(rows)
-            return self.build_calendario_mensal(data, rows, tags_by_iniciativa)
+            rows = self.repository.get_horarios_do_mes(data)
+            tags_by_iniciativa = self.repository.get_tags_por_iniciativa(rows)
+            return self.build_calendario_response(data, rows, tags_by_iniciativa)
 
         except Exception as e:
             print(f"Erro no calendário: {type(e).__name__}: {str(e)}")
@@ -105,6 +116,7 @@ class IniciativaService:
     def build_month_days(self, ref: date) -> List[date]:
         """Retorna todos os dias do mes de ref, ordenados"""
         import calendar
+        from datetime import timedelta
 
         first_day = ref.replace(day=1)
 
@@ -115,7 +127,7 @@ class IniciativaService:
         current = first_day
         while current <= last_day:
             days.append(current)
-            current = date(current.year, current.month, current.day + 1)
+            current = current + timedelta(days=1)
 
         return days
 
@@ -128,7 +140,7 @@ class IniciativaService:
         Preenche tags a partir de tags_by_iniciativa.
         """
 
-        grouped = {}
+        grouped: Dict[date, List[CalendarioIniciativaItem]] = {}
 
         for row in rows:
             item = CalendarioIniciativaItem(
@@ -138,7 +150,7 @@ class IniciativaService:
                 descricao=row.descricao,
                 hora_inicio=row.hora_inicio,
                 hora_fim=row.hora_fim,
-                tipo=row.tipo,
+                tipo=self._convert_horario_tipo(row.tipo),
                 link=row.link,
                 local=row.local,
                 imagem_url=row.imagem_url,

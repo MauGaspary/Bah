@@ -42,17 +42,6 @@ def create_iniciativa(
     return controller.create_iniciativa(iniciativa, criado_por)
 
 
-@router.get("/{iniciativa_id}", response_model=IniciativaResponse)
-def get_iniciativa_by_id(
-    iniciativa_id: str,
-    db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-):
-    """Busca uma iniciativa pelo ID."""
-    controller = IniciativaController(db)
-    return controller.get_iniciativa_by_id(iniciativa_id)
-
-
 @router.get("/calendario", response_model=CalendarioMensalResponse)
 def get_calendario_mensal(
     data: date = Query(..., description="Data de referência para o mês (YYYY-MM-DD)"),
@@ -72,3 +61,14 @@ def get_calendario_mensal(
 
     controller = IniciativaController(db)
     return controller.get_calendario_mensal(data)
+
+
+@router.get("/{iniciativa_id}", response_model=IniciativaResponse)
+def get_iniciativa_by_id(
+    iniciativa_id: str,
+    db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    """Busca uma iniciativa pelo ID."""
+    controller = IniciativaController(db)
+    return controller.get_iniciativa_by_id(iniciativa_id)

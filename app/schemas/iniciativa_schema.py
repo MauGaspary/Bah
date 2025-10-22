@@ -67,7 +67,7 @@ class IniciativaResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class HorarioTipo(str, Enum):
+class CalendarioHorarioTipo(str, Enum):
     PRESENCIAL = "PRESENCIAL"
     ONLINE = "ONLINE"
     HIBRIDO = "HIBRIDO"
@@ -75,7 +75,7 @@ class HorarioTipo(str, Enum):
 
 class TagSchema(BaseModel):
     id: str
-    name: str
+    nome: str
     descricao: Optional[str] = None
 
 
@@ -86,7 +86,7 @@ class CalendarioIniciativaItem(BaseModel):
     descricao: str
     hora_inicio: time
     hora_fim: time
-    tipo: HorarioTipo
+    tipo: CalendarioHorarioTipo
     link: str
     local: Optional[str] = None
     imagem_url: str
@@ -100,5 +100,5 @@ class DiaCalendario(BaseModel):
 
 
 class CalendarioMensalResponse(BaseModel):
-    mes: str  # YYYY-MM é pra ser nesse formato
+    mes: str
     dias: List[DiaCalendario]
