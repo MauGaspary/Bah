@@ -1,8 +1,10 @@
-import { Calendar1, MapPinned, CalendarDays, Clock9 } from "lucide-react"
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import axios from "axios"
+import { getIniciativaById } from "@/service/search";
+import type { Iniciativa } from "@/interfaces/IIniciativas";
 
+import { Link } from "react-router-dom";
+import HorarioCard from "@/components/ui/HorarioCard"
 import Header from "@/components/ui/Header/Header"
 import {
   Carousel,
@@ -12,126 +14,78 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 
-interface IniciativaPageProps {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  horarios: Array<{
-    id: string;
-    dia: string;
-    modalidade: string;
-    data: string;
-    horario: string;
-  }>;
-}
-
-/*
-  Mock data para testes do card de horários  
-
-const horarios = [
-  {
-    id: "seg",
-    dia: "Segunda",
-    modalidade: "Presencial",
-    data: "18 de agosto 2025",
-    horario: "13:00 - 18:00",
-  },
-  {
-    id: "qua",
-    dia: "Quarta",
-    modalidade: "Online",
-    data: "20 de agosto 2025",
-    horario: "09:00 - 12:00",
-  },
-  {
-    id: "sex",
-    dia: "Sexta",
-    modalidade: "Presencial",
-    data: "22 de agosto 2025",
-    horario: "14:00 - 18:00",
-  },
-]
-
-*/
-
-
-
 function IniciativaPage() {
 
-  function HorarioCard({ item }: { item: typeof iniciativa.horarios[number] }) {
-    return (
-      <div className="w-full max-w justify-center items-center md:max-w-sm mx-auto">
-        <div className="h-full flex justify-center border border-purple-200 rounded-xl bg-white dark:bg-gray-800 py-3 flex-col items-start gap-5 shadow-sm">
-          <div className="flex flex-col w-full justify-center items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-purple-100 flex items-center justify-center text-bah-purple">
-              <Calendar1 />
-            </div>
-            <h3 className="text-2xl font-semibold dark:text-white">{item.dia}</h3>
-          </div>
-
-          <div className="flex w-full justify-center items-center gap-3">
-              <MapPinned className="w-6 h-6 text-bah-purple"/>
-              <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                  {item.modalidade}
-              </div>
-          </div>
-
-          <div className="flex w-full justify-center items-center gap-3">
-              <CalendarDays className="w-6 h-6 text-bah-purple"/>
-              <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                  {item.data}
-              </div>
-          </div>
-
-          <div className="flex w-full justify-center items-center gap-3">
-              <Clock9 className="w-6 h-6 text-bah-purple"/>
-              <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                  {item.horario}
-              </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const { id } = useParams<{ id: string }>()
-  const [iniciativa, setIniciativa] = useState<any>(null);
+  const [iniciativa, setIniciativa] = useState<Iniciativa | null>(null);
 
   useEffect(() => {
-    if(id){
-      axios.get<IniciativaPageProps>(`/iniciativas/${id}`).then((response) => {
-        setIniciativa(response.data);
-      }).catch((error) => {
-        console.error("Error fetching iniciativa data:", error);
-      //  navigate('/not-found'); // Redirect to a not-found page or handle the error as needed
-      });
-    }  
+    async function fetchIniciativa() {
+      if (id) {
+        try {
+          const response = await getIniciativaById(id);
+          setIniciativa(response);
+          console.log(response);
+        } catch (error) {
+          console.error("Error fetching iniciativa data:", error);
+          // navigate('/not-found'); 
+        }  
+      }
+    }
+
+    fetchIniciativa();
+
   }, [id]);
 
   if(!iniciativa){
-      return <div>Carregando...</div>;
+      return;
   }
+
+  const processedHorarios = (iniciativa.horarios ?? []).map((horario) => {
+    const h: any = horario
+    const date = h.data_evento ? new Date(`${h.data_evento}T00:00:00`) : null
+    const weekdayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
+    const dia = date ? weekdayNames[date.getDay()] : ''
+    const data = date
+      ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date)
+      : ''
+    const modalidade = h.tipo ? String(h.tipo).charAt(0).toUpperCase() + String(h.tipo).slice(1) : ''
+
+    return {
+      ...h,
+      dia,
+      data,
+      modalidade,
+    }
+  })
 
   return (
     <>
       <Header />
-
+      
       <section
-        className={"relative min-h-[280px] md:min-h-[360px] w-full bg-[url({iniciativa.imageUrl})] bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end"}
+        className={"relative min-h-[280px] md:min-h-[360px] w-full bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end"}
         aria-label="Hero da iniciativa"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 pointer-events-none">
+          <img
+            src={iniciativa.imagem_url}
+            alt={iniciativa.titulo}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         <div className="w-full max-w-100vw mx-auto px-4 py-10 md:py-16">
           <div className="relative">
             <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-4/3 md:translate-y-5/3 z-10">
-              <button
-                className="bg-purple-600 text-white px-6 md:px-10 py-2 md:py-3 rounded-xl text-sm md:text-base shadow-md hover:bg-purple-700 transition cursor-pointer"
-                aria-label="Inscrever-se"
-              >
-                <span className="text-xl">Inscrever-se</span>
-              </button>
+              <Link to={iniciativa.link ?? '#'}>
+                <button
+                  className="bg-purple-600 text-white px-6 md:px-10 py-2 md:py-3 rounded-xl text-sm md:text-base shadow-md hover:bg-purple-700 transition cursor-pointer"
+                  aria-label="Inscrever-se"
+                >
+                  <span className="text-xl">Inscrever-se</span>
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -139,9 +93,9 @@ function IniciativaPage() {
 
       <main className="w-full max-w-6xl mx-auto px-4 py-10 md:py-16">
         <article className="prose prose-lg dark:prose-invert mx-auto text-center max-w-3xl">
-          <h1 className="text-2xl md:text-4xl font-bold">{iniciativa.title}</h1>
+          <h1 className="text-2xl md:text-4xl font-bold">{iniciativa.titulo}</h1>
           <p className="mt-2 text-base md:text-lg text-gray-700 dark:text-gray-300">
-            {iniciativa.description}
+            {iniciativa.descricao}
           </p>
         </article>
 
@@ -149,7 +103,7 @@ function IniciativaPage() {
           <div className="flex justify-center items-center md:hidden">
             <Carousel className="w-full max-w-xs">
                 <CarouselContent>
-                    {iniciativa.horarios.map((h, index) => (
+                    {processedHorarios.map((h, index) => (
                         <CarouselItem key={index}>
                             <div className="p-1">
                                 <HorarioCard item={h} />
@@ -163,8 +117,8 @@ function IniciativaPage() {
           </div>
 
           <div className="hidden md:grid md:grid-cols-3 md:gap-6">
-            {iniciativa.horarios.map((h) => (
-              <div key={h.id} className="px-2">
+            {processedHorarios.map((h) => (
+              <div key={(h as any).id ?? Math.random().toString()} className="px-2">
                 <HorarioCard item={h} />
               </div>
             ))}
