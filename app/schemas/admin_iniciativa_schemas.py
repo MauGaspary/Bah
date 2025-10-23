@@ -6,6 +6,13 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from app.models.iniciativa_horario_model import HorarioTipo
 
 
+class descricoesExtrasSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    descricao: str
+
+
 class TagSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -53,6 +60,7 @@ class IniciativaSchema(BaseModel):
     organizador: Optional[OrganizadorSchema]
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
+    descricoes_extras: List[descricoesExtrasSchema]
 
 
 class IniciativaFiltersSchema(BaseModel):
@@ -95,6 +103,11 @@ class IniciativaHorarioPatch(BaseModel):
         return v
 
 
+class DescricaoExtraUpdateSchema(BaseModel):
+    id: str
+    descricao: str
+
+
 class IniciativaPatchSchema(BaseModel):
     titulo: Optional[str] = None
     descricao: Optional[str] = None
@@ -106,3 +119,6 @@ class IniciativaPatchSchema(BaseModel):
 
     tags_ids: Optional[List[str]] = None
     horarios: Optional[List[IniciativaHorarioPatch]] = None
+    descricoes_extras_update: Optional[List[DescricaoExtraUpdateSchema]] = None
+    descricoes_extras_delete_ids: Optional[List[str]] = None
+    descricoes_extras_add: Optional[List[str]] = None

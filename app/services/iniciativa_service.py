@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
-from app.schemas.admin_iniciativa_schemas import (
-    IniciativaFiltersSchema,
-    IniciativaListResponseSchema,
+from app.schemas.admin_iniciativa_schemas import IniciativaFiltersSchema
+from app.schemas.iniciativa_schema import (
+    IniciativaCreate,
+    IniciativaListResponse,
+    IniciativaResponse,
 )
-from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 
 class IniciativaService:
@@ -71,8 +72,20 @@ class IniciativaService:
                 normalize_embeddings=True,
             )
 
+            embeddings_descricoes_extras = []
+            for description_for_search in iniciativa_data.descricoes_extras or []:
+                embedding_extra = self.model.encode(
+                    description_for_search,
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                embeddings_descricoes_extras.append(embedding_extra)
+
             iniciativa = self.repository.create(
-                iniciativa_data, criado_por, descricao_vetor=embedding
+                iniciativa_data,
+                criado_por,
+                descricao_vetor=embedding,
+                descricoes_extras_vetores=embeddings_descricoes_extras,
             )
 
             return IniciativaResponse.model_validate(iniciativa)
@@ -94,10 +107,8 @@ class IniciativaService:
 
     def search_iniciativas(
         self, query: str, page: int, size: int
-    ) -> IniciativaListResponseSchema:
-        if self.model is None:
-            raise ValueError("Modelo de embedding não disponível")
-        embedding = self.model.encode(  # type: ignore
+    ) -> IniciativaListResponse:
+        embedding = self.model.encode(
             query, convert_to_numpy=True, normalize_embeddings=True
         )
         try:
@@ -106,7 +117,7 @@ class IniciativaService:
             )
 
             filters = IniciativaFiltersSchema(q=query, page=page, size=size)
-            return IniciativaListResponseSchema(
+            return IniciativaListResponse(
                 items=iniciativas, total=total, filters=filters
             )
         except Exception as e:

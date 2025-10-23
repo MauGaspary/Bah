@@ -4,6 +4,7 @@ import numpy as np
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
@@ -22,6 +23,7 @@ class IniciativaRepository:
         iniciativa_data: IniciativaCreate,
         criado_por: str,
         descricao_vetor: List[float],
+        descricoes_extras_vetores: List[List[float]],
     ) -> Iniciativa:
 
         db_iniciativa = Iniciativa(
@@ -48,6 +50,17 @@ class IniciativaRepository:
                 tipo=horario_data.tipo,
             )
             self.db.add(db_horario)
+
+        if iniciativa_data.descricoes_extras:
+            for texto, embedding_extra in zip(
+                iniciativa_data.descricoes_extras, descricoes_extras_vetores
+            ):
+                db_extra = DescricoesExtras(
+                    iniciativa_id=db_iniciativa.id,
+                    descricao=texto,
+                    descricao_vetor=embedding_extra,
+                )
+                self.db.add(db_extra)
 
         if iniciativa_data.tag_ids:
             for tag_id in iniciativa_data.tag_ids:
