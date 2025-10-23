@@ -67,7 +67,7 @@ class IniciativaService:
             if self.model is None:
                 raise RuntimeError("Modelo de embedding não disponível")
             embedding = self.model.encode(  # type: ignore
-                iniciativa_data.descricao,
+                iniciativa_data.descricao.lower(),
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
@@ -75,7 +75,7 @@ class IniciativaService:
             embeddings_descricoes_extras = []
             for description_for_search in iniciativa_data.descricoes_extras or []:
                 embedding_extra = self.model.encode(
-                    description_for_search,
+                    description_for_search.lower(),
                     convert_to_numpy=True,
                     normalize_embeddings=True,
                 )
@@ -109,7 +109,7 @@ class IniciativaService:
         self, query: str, page: int, size: int
     ) -> IniciativaListResponse:
         embedding = self.model.encode(
-            query, convert_to_numpy=True, normalize_embeddings=True
+            query.lower(), convert_to_numpy=True, normalize_embeddings=True
         )
         try:
             iniciativas, total = self.repository.search_by_embedding(

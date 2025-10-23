@@ -165,37 +165,53 @@ class IniciativaRepository:
 
         embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
 
-        query = text(
-            """
-            SELECT i.*, count(*) OVER() AS total_count
-            FROM iniciativas i
-            ORDER BY i.descricao_vetor <-> :embedding
-            LIMIT :limit OFFSET :offset
-        """
-        )
-
-        result = (
-            self.db.execute(
-                query, {"embedding": embedding_str, "limit": size, "offset": offset}
+        query = text("""
+            WITH q AS (
+                SELECT (:embedding)::vector AS emb
+            ),
+            all_sims AS (
+                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM iniciativas i
+                UNION ALL
+                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM descricoes_extras de
+            ),
+            best AS (
+                SELECT id, MAX(sim) AS best_sim
+                FROM all_sims
+                GROUP BY id
             )
-            .mappings()
-            .all()
-        )
+            SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
+            FROM best
+            JOIN iniciativas i ON i.id = best.id
+            ORDER BY best.best_sim DESC
+            LIMIT :limit OFFSET :offset
+        """)
 
-        if result:
-            total = result[0]["total_count"]
-        else:
-            total = 0
+        rows = self.db.execute(query, {
+            "embedding": embedding_str,
+            "limit": size,
+            "offset": offset,
+        }).mappings().all()
 
-        ids = [row["id"] for row in result]
+        total = rows[0]["total_count"] if rows else 0
+        if not rows:
+            return [], 0
+
+        # imprime similaridade (somente logs)
+        for r in rows:
+            sim = r["best_sim"] or 0.0
+            print(f"[SIM] ID={r['id']} | sim={sim:.4f} | título={r.get('titulo','')}")
+
+        # agora buscamos as entidades e preservamos a ordem do ranking
+        ids = [r["id"] for r in rows]
         iniciativas = (
             self.db.query(Iniciativa)
             .filter(Iniciativa.id.in_(ids))
             .options(selectinload(Iniciativa.horarios))
             .all()
         )
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids]
 
-        iniciativas_dict = {i.id: i for i in iniciativas}
-        iniciativas = [iniciativas_dict[_id] for _id in ids]
-
-        return iniciativas, total
+        return ordered, total
