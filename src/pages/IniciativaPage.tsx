@@ -1,5 +1,9 @@
 import { Calendar1, MapPinned, CalendarDays, Clock9 } from "lucide-react"
+import { useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
+import Header from "@/components/ui/Header/Header"
 import {
   Carousel,
   CarouselContent,
@@ -7,7 +11,23 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import Header from "@/components/ui/Header/Header"
+
+interface IniciativaPageProps {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  horarios: Array<{
+    id: string;
+    dia: string;
+    modalidade: string;
+    data: string;
+    horario: string;
+  }>;
+}
+
+/*
+  Mock data para testes do card de horários  
 
 const horarios = [
   {
@@ -33,49 +53,72 @@ const horarios = [
   },
 ]
 
-function HorarioCard({ item }: { item: typeof horarios[number] }) {
-  return (
-    <div className="w-full max-w justify-center items-center md:max-w-sm mx-auto">
-      <div className="h-full flex items-center justify-center border border-purple-200 rounded-xl bg-white dark:bg-gray-800 py-3 flex flex-col items-start gap-5 shadow-sm">
-        <div className="flex flex-col w-full justify-center items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-purple-100 flex items-center justify-center text-bah-purple">
-            <Calendar1 />
-          </div>
-          <h3 className="text-2xl font-semibold dark:text-white">{item.dia}</h3>
-        </div>
+*/
 
-        <div className="flex w-full justify-center items-center gap-3">
-            <MapPinned className="w-6 h-6 text-bah-purple"/>
-            <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                {item.modalidade}
-            </div>
-        </div>
 
-        <div className="flex w-full justify-center items-center gap-3">
-            <CalendarDays className="w-6 h-6 text-bah-purple"/>
-            <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                {item.data}
-            </div>
-        </div>
-
-        <div className="flex w-full justify-center items-center gap-3">
-            <Clock9 className="w-6 h-6 text-bah-purple"/>
-            <div className="text-sm text-gray-600 dark:text-gray-300"> 
-                {item.horario}
-            </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function IniciativaPage() {
+
+  function HorarioCard({ item }: { item: typeof iniciativa.horarios[number] }) {
+    return (
+      <div className="w-full max-w justify-center items-center md:max-w-sm mx-auto">
+        <div className="h-full flex justify-center border border-purple-200 rounded-xl bg-white dark:bg-gray-800 py-3 flex-col items-start gap-5 shadow-sm">
+          <div className="flex flex-col w-full justify-center items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-purple-100 flex items-center justify-center text-bah-purple">
+              <Calendar1 />
+            </div>
+            <h3 className="text-2xl font-semibold dark:text-white">{item.dia}</h3>
+          </div>
+
+          <div className="flex w-full justify-center items-center gap-3">
+              <MapPinned className="w-6 h-6 text-bah-purple"/>
+              <div className="text-sm text-gray-600 dark:text-gray-300"> 
+                  {item.modalidade}
+              </div>
+          </div>
+
+          <div className="flex w-full justify-center items-center gap-3">
+              <CalendarDays className="w-6 h-6 text-bah-purple"/>
+              <div className="text-sm text-gray-600 dark:text-gray-300"> 
+                  {item.data}
+              </div>
+          </div>
+
+          <div className="flex w-full justify-center items-center gap-3">
+              <Clock9 className="w-6 h-6 text-bah-purple"/>
+              <div className="text-sm text-gray-600 dark:text-gray-300"> 
+                  {item.horario}
+              </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const { id } = useParams<{ id: string }>()
+  const [iniciativa, setIniciativa] = useState<any>(null);
+
+  useEffect(() => {
+    if(id){
+      axios.get<IniciativaPageProps>(`/iniciativas/${id}`).then((response) => {
+        setIniciativa(response.data);
+      }).catch((error) => {
+        console.error("Error fetching iniciativa data:", error);
+      //  navigate('/not-found'); // Redirect to a not-found page or handle the error as needed
+      });
+    }  
+  }, [id]);
+
+  if(!iniciativa){
+      return <div>Carregando...</div>;
+  }
+
   return (
     <>
       <Header />
 
       <section
-        className="relative min-h-[280px] md:min-h-[360px] w-full bg-[url('../src/assets/background.png')] bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end"
+        className={"relative min-h-[280px] md:min-h-[360px] w-full bg-[url({iniciativa.imageUrl})] bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end"}
         aria-label="Hero da iniciativa"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 pointer-events-none" />
@@ -96,11 +139,9 @@ function IniciativaPage() {
 
       <main className="w-full max-w-6xl mx-auto px-4 py-10 md:py-16">
         <article className="prose prose-lg dark:prose-invert mx-auto text-center max-w-3xl">
-          <h1 className="text-2xl md:text-4xl font-bold">Iniciativa X</h1>
+          <h1 className="text-2xl md:text-4xl font-bold">{iniciativa.title}</h1>
           <p className="mt-2 text-base md:text-lg text-gray-700 dark:text-gray-300">
-            Descrição do evento — aqui vai um parágrafo com informações principais. Pode conter até
-            algumas linhas para explicar do que se trata a iniciativa, público alvo e outros detalhes
-            relevantes.
+            {iniciativa.description}
           </p>
         </article>
 
@@ -108,7 +149,7 @@ function IniciativaPage() {
           <div className="flex justify-center items-center md:hidden">
             <Carousel className="w-full max-w-xs">
                 <CarouselContent>
-                    {horarios.map((h, index) => (
+                    {iniciativa.horarios.map((h, index) => (
                         <CarouselItem key={index}>
                             <div className="p-1">
                                 <HorarioCard item={h} />
@@ -122,7 +163,7 @@ function IniciativaPage() {
           </div>
 
           <div className="hidden md:grid md:grid-cols-3 md:gap-6">
-            {horarios.map((h) => (
+            {iniciativa.horarios.map((h) => (
               <div key={h.id} className="px-2">
                 <HorarioCard item={h} />
               </div>
