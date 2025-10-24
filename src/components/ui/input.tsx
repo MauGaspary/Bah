@@ -14,7 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(
-            'w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent ring-offset-0',
+            'w-full px-4 py-2.75 border border-gray-300 rounded-lg outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent ring-offset-0',
             trailing ? 'pr-10' : ''
           )}
           {...props}

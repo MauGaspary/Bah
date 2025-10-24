@@ -1,5 +1,9 @@
 import api from './api'
-import type { IniciativasResponse } from '@/interfaces/IIniciativas'
+import type {
+  IniciativasResponse,
+  IniciativaCreate,
+  Iniciativa,
+} from '@/interfaces/IIniciativas'
 
 export async function fetchIniciativas(
   searchQuery?: string,
@@ -19,4 +23,11 @@ export async function fetchIniciativas(
 
 export async function deleteIniciativa(iniciativaId: number): Promise<void> {
   await api.delete(`/admin/iniciativas/${iniciativaId}`)
+}
+
+export async function createIniciativa(
+  iniciativaData: IniciativaCreate
+): Promise<Iniciativa> {
+  const response = await api.post<Iniciativa>('/iniciativas', iniciativaData)
+  return response.data
 }
