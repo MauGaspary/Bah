@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type KeyboardEvent } from 'react'
+import React, { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import SidebarAdm from '@/components/ui/sidebar'
+import * as iniciativasService from '@/service/iniciativas'
 
 type Option = { value: string; label: string }
 
@@ -145,6 +146,9 @@ const initiativeSchema = z.object({
   descricao: z
     .string()
     .min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
+  descricoes_extras: z
+    .array(z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres.'))
+    .optional(),
   isAtivo: z.boolean(),
   tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
   schedules: z.array(scheduleSchema),
@@ -252,6 +256,7 @@ const ScheduleItem: React.FC<{
 
 export default function FormIniciativa() {
   const [isEditing, setIsEditing] = useState(false)
+  const MAX_DESCRICOES = 5
 
   const form = useForm<InitiativeFormData>({
     resolver: zodResolver(initiativeSchema),
@@ -262,6 +267,7 @@ export default function FormIniciativa() {
       link2: '',
       organizador: '',
       descricao: '',
+      descricoes_extras: [],
       isAtivo: false,
       tags: [],
       schedules: [],
@@ -292,6 +298,23 @@ export default function FormIniciativa() {
     remove: removeSchedule,
   } = useFieldArray({ control, name: 'schedules' })
 
+  const {
+    fields: descricaoFields,
+    append: appendDescricao,
+    remove: removeDescricao,
+  } = useFieldArray({ control, name: 'descricoes_extras' })
+
+  const descricoesListRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = descricoesListRef.current
+    if (!el) return
+    const maxScrollTop = Math.max(0, el.scrollHeight - el.clientHeight)
+    if (el.scrollTop > maxScrollTop) {
+      el.scrollTop = maxScrollTop
+    }
+  }, [descricaoFields.length])
+
   const handleNewTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -303,17 +326,29 @@ export default function FormIniciativa() {
     }
   }
 
-  const onSubmit = (data: InitiativeFormData) => {
-    const fotoFileList = data.foto as unknown as FileList | undefined | null
-    const foto =
-      fotoFileList && fotoFileList.length > 0 ? fotoFileList[0] : undefined
-    const { newTag, ...payload } = data
-    console.log('Payload submetido:', { ...payload, foto })
-    toast.success(
-      isEditing
-        ? 'Iniciativa atualizada com sucesso!'
-        : 'Iniciativa criada com sucesso!'
-    )
+  const onSubmit = async (data: InitiativeFormData) => {
+    const payload = {
+      titulo: data.titulo,
+      descricao: data.descricao,
+      organizador_id: data.organizador || '',
+      link: data.link1 || data.link2 || '',
+      local: data.local,
+      imagem_url: '',
+      destaque: data.isAtivo,
+      horarios: [],
+      tag_ids: [],
+      descricoes_extras: data.descricoes_extras ?? [],
+    }
+    try {
+      await iniciativasService.createIniciativa(payload)
+      toast.success(
+        isEditing
+          ? 'Iniciativa atualizada com sucesso!'
+          : 'Iniciativa criada com sucesso!'
+      )
+    } catch (e) {
+      toast.error('Falha ao salvar a iniciativa')
+    }
   }
 
   useEffect(() => {
@@ -325,6 +360,7 @@ export default function FormIniciativa() {
         link2: '',
         organizador: 'Equipe BAH',
         descricao: 'Descrição de exemplo para o modo de edição.',
+        descricoes_extras: ['Descrição extra 1'],
         isAtivo: false,
         tags: ['React', 'TypeScript'],
         schedules: [
@@ -348,6 +384,7 @@ export default function FormIniciativa() {
         link2: '',
         organizador: '',
         descricao: '',
+        descricoes_extras: [],
         isAtivo: false,
         tags: [],
         schedules: [],
@@ -383,7 +420,7 @@ export default function FormIniciativa() {
           </Button>
         </header>
 
-        <Form form={form} onSubmit={onSubmit} className="w-full">
+        <Form<InitiativeFormData> form={form} onSubmit={onSubmit} className="w-full">
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -523,7 +560,7 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="descricao">
                       {({ field }) => (
                         <FormItem className="md:col-span-2 flex flex-col">
@@ -586,6 +623,92 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="w-full max-w-none mt-8">
+            <Card className="bg-white border-gray-100 shadow-sm w-full">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
+                    Descrições extras
+                  </CardTitle>
+                  <div className="flex flex-col items-center">
+                    <p className="text-footnote font-sf-pro text-label-primary mb-1">
+                      Clique para adicionar
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        descricaoFields.length < MAX_DESCRICOES && appendDescricao('')
+                      }
+                      disabled={descricaoFields.length >= MAX_DESCRICOES}
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer"
+                      style={{
+                        minWidth: '130px',
+                        height: '30px',
+                        borderRadius: '10px',
+                        padding: 0,
+                      }}
+                      aria-label="Adicionar descrição extra"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div ref={descricoesListRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+                  {descricaoFields.length === 0 && (
+                    <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
+                      Nenhuma descrição extra adicionada — clique em + para adicionar.
+                    </div>
+                  )}
+
+                  {descricaoFields.map((field, index) => (
+                    <Card key={field.id} className="bg-gray-50 border-gray-100">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="text-callout-semibold font-sf-pro-text text-label-primary">
+                            Descrição extra {index + 1}
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() => removeDescricao(index)}
+                            className="text-white px-3 py-1 transition cursor-pointer"
+                            aria-label={`Remover descrição extra ${index + 1}`}
+                            variant="destructive"
+                            size="sm"
+                            style={{ borderRadius: '10px' }}
+                          >
+                            Remover
+                          </Button>
+                        </div>
+
+                        <FormField name={`descricoes_extras.${index}`}>
+                          {({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  placeholder="Digite a descrição"
+                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                              </FormControl>
+                              <FormMessage name={`descricoes_extras.${index}`} />
+                            </FormItem>
+                          )}
+                        </FormField>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {descricaoFields.length >= MAX_DESCRICOES && (
+                  <p className="text-xs text-label-secondary mt-3">
+                    Limite de {MAX_DESCRICOES} descrições atingido.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </section>
