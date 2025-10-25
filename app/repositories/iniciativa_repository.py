@@ -165,7 +165,8 @@ class IniciativaRepository:
 
         embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
 
-        query = text("""
+        query = text(
+            """
             WITH q AS (
                 SELECT (:embedding)::vector AS emb
             ),
@@ -186,13 +187,21 @@ class IniciativaRepository:
             JOIN iniciativas i ON i.id = best.id
             ORDER BY best.best_sim DESC
             LIMIT :limit OFFSET :offset
-        """)
+        """
+        )
 
-        rows = self.db.execute(query, {
-            "embedding": embedding_str,
-            "limit": size,
-            "offset": offset,
-        }).mappings().all()
+        rows = (
+            self.db.execute(
+                query,
+                {
+                    "embedding": embedding_str,
+                    "limit": size,
+                    "offset": offset,
+                },
+            )
+            .mappings()
+            .all()
+        )
 
         total = rows[0]["total_count"] if rows else 0
         if not rows:
