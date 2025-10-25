@@ -91,7 +91,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
       <div className="rounded-card bg-white shadow-md overflow-hidden flex flex-col">
         <div className="bg-bah-purple px-6 py-6">
           <div className="flex justify-between items-end">
-            <h1 className="text-medium-title font-mulish text-white self-center">
+            <h1 className="text-title3-regular font-mulish text-white self-center">
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
@@ -102,14 +102,14 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
 
         <div className="flex px-6 py-2 bg-background-secondary justify-between">
           <h1 className="text-body-regular font-mulish">Iniciativa</h1>
-          <h1 className="text-body-regular font-mulish mr-53.5">Ações</h1>
+          <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
         {!loading && error && <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
           <p className="text-error">{error}</p>
         </div>}
 
-        <div className="pb-2 space-y-2 flex-1">
+        <div className="space-y-3">
           {iniciativas.map((item, index) => (
             <ListItem
               key={item.id}
@@ -125,7 +125,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
         </div>
       </div>
       <div className="py-4 fixed bottom-0 right-0 left-[15%]">
-        <div className="px-6">
+        <div className="py-8">
           <Pagination>
             <PaginationContent>
               <PaginationItem>

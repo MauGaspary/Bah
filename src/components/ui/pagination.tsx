@@ -60,32 +60,46 @@ function PaginationLink({ className, isActive, ...props }: PaginationLinkProps) 
 
 function PaginationPrevious({
   className,
+  disabled,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) {
+}: React.ComponentProps<typeof PaginationLink> & { disabled?: boolean }) {
   return (
     <PaginationLink
       aria-label="Go to previous page"
-      className={cn("gap-1 px-2 py-1 text-sm", className)}
+      aria-disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
+      className={cn(
+        "gap-1 px-2 py-1 text-sm",
+        disabled && "opacity-50 pointer-events-none cursor-not-allowed",
+        className
+      )}
       {...props}
     >
-      <MoveLeftIcon className="w-3 h-3" />
-      <span className="hidden sm:block">Anterior</span>
+      {/* <MoveLeftIcon className="w-3 h-3" /> */}
+      <span className="text-subheadline-regular font-mulish hidden sm:block">Anterior</span>
     </PaginationLink>
   )
 }
 
 function PaginationNext({
   className,
+  disabled,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) {
+}: React.ComponentProps<typeof PaginationLink> & { disabled?: boolean }) {
   return (
     <PaginationLink
-      aria-label="Go to next page"
-      className={cn("gap-1 px-2 py-1 text-sm", className)}
+      aria-label="Go to previous page"
+      aria-disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
+      className={cn(
+        "gap-1 px-2 py-1 text-sm",
+        disabled && "opacity-50 pointer-events-none cursor-not-allowed",
+        className
+      )}
       {...props}
     >
-      <span className="hidden sm:block">Próximo</span>
-      <MoveRightIcon className="w-3 h-3" />
+      {/* <MoveLeftIcon className="w-3 h-3" /> */}
+      <span className="text-subheadline-regular font-mulish hidden sm:block">Próximo</span>
     </PaginationLink>
   )
 }

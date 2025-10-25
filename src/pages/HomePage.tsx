@@ -56,7 +56,7 @@ function HomePage() {
           <div className="flex items-center justify-center w-full max-w-[28rem] mx-auto">
             <h1 className="text-white text-5xl md:text-4xl text-center mb-6 md:mb-4 font-mulish max-w-4xl mx-auto px-4">
               Conecte-se à{' '}
-              <span className="font-bold italic md:not-italic md:font-normal">
+              <span className="font-bold italic">
                 inovação
               </span>{' '}
               em Caxias do Sul
