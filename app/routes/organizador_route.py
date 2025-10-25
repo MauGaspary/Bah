@@ -12,6 +12,11 @@ router = APIRouter()
 
 @router.get("/", response_model=List[OrganizadorResponse])
 def listar_organizadores(db: Session = Depends(get_db)):
-    """Lista todos os organizadores disponíveis."""
     controller = OrganizadorController(db)
     return controller.list_all()
+
+
+@router.get("/{organizador_id}", response_model=OrganizadorResponse)
+def get_organizador_by_id(organizador_id: str, db: Session = Depends(get_db)):
+    controller = OrganizadorController(db)
+    return controller.get_by_id(organizador_id)
