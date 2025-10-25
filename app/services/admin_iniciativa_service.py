@@ -60,7 +60,7 @@ class AdminIniciativaService:
     def delete_iniciativa(self, iniciativa_id: str, deletado_por: str) -> None:
         exists = self.repository.soft_delete(iniciativa_id, deletado_por)
         if not exists:
-            raise ValueError("Iniciativa não encontrada.")
+            raise ValueError("Iniciativa não encontrada")
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaSchema:
         """Busca uma iniciativa ativa (não deletada) pelo ID e retorna o schema admin."""
