@@ -238,7 +238,6 @@ class AdminIniciativaRepository:
         ):
             ids_to_delete = list(set(data["descricoes_extras_delete_ids"]))
             if ids_to_delete:
-                
                 existing = (
                     self.db.query(DescricoesExtras.id)
                     .filter(
@@ -251,8 +250,6 @@ class AdminIniciativaRepository:
 
                 if not existing_ids:
                     raise ResourceNotFound("Descrição extra não encontrada")
-
-                
                 (
                     self.db.query(DescricoesExtras)
                     .filter(
@@ -261,8 +258,6 @@ class AdminIniciativaRepository:
                     )
                     .delete(synchronize_session=False)
                 )
-
-                
                 if obj.descricoes_extras:
                     obj.descricoes_extras = [
                         e for e in obj.descricoes_extras if e.id not in existing_ids
@@ -294,5 +289,4 @@ class AdminIniciativaRepository:
 
         self.db.add(obj)
         self.db.commit()
-        
         return self.get_by_id_active(iniciativa_id)
