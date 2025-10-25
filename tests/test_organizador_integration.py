@@ -435,9 +435,9 @@ class TestGetOrganizadorByIdErrorHandling:
     @pytest.mark.parametrize(
         "invalid_id",
         [
-            "00000000-0000-0000-0000-000000000000", 
-            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",  
-            "123e4567-e89b-12d3-a456-426614174000",  
+            "00000000-0000-0000-0000-000000000000",
+            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "123e4567-e89b-12d3-a456-426614174000",
         ],
     )
     def test_get_organizador_by_id_valid_uuid_not_found(self, client, invalid_id):
@@ -452,5 +452,3 @@ class TestGetOrganizadorByIdErrorHandling:
         assert response.status_code == 404
         data = response.json()
         assert "detail" in data
-
-
