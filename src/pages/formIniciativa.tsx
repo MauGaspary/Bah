@@ -174,11 +174,10 @@ const ScheduleItem: React.FC<{
           <Button
             type="button"
             onClick={() => onRemove(index)}
-            className="px-2 py-1 transition cursor-pointer flex items-center justify-center"
+            className="px-2 py-1 transition cursor-pointer flex items-center justify-center rounded-[8px] min-w-9 h-9"
             aria-label={`Remover horário ${index + 1}`}
             variant="ghost"
             size="sm"
-            style={{ borderRadius: '8px', minWidth: '36px', height: '36px' }}
           >
             <Trash2Icon className="w-4 h-4 text-red-500" />
           </Button>
@@ -406,7 +405,9 @@ export default function FormIniciativa() {
               {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
             </h1>
             <p className="text-body-regular font-sf-pro text-label-secondary">
-              {isEditing ? 'Edite sua iniciativa' : 'Crie aqui sua nova iniciativa'}
+              {isEditing
+                ? 'Edite sua iniciativa'
+                : 'Crie aqui sua nova iniciativa'}
             </p>
           </div>
           <Button
@@ -420,7 +421,11 @@ export default function FormIniciativa() {
           </Button>
         </header>
 
-        <Form<InitiativeFormData> form={form} onSubmit={onSubmit} className="w-full">
+        <Form<InitiativeFormData>
+          form={form}
+          onSubmit={onSubmit}
+          className="w-full"
+        >
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -560,7 +565,7 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="descricao">
                       {({ field }) => (
                         <FormItem className="md:col-span-2 flex flex-col">
@@ -641,16 +646,11 @@ export default function FormIniciativa() {
                     <Button
                       type="button"
                       onClick={() =>
-                        descricaoFields.length < MAX_DESCRICOES && appendDescricao('')
+                        descricaoFields.length < MAX_DESCRICOES &&
+                        appendDescricao('')
                       }
                       disabled={descricaoFields.length >= MAX_DESCRICOES}
-                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer"
-                      style={{
-                        minWidth: '130px',
-                        height: '30px',
-                        borderRadius: '10px',
-                        padding: 0,
-                      }}
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
                       aria-label="Adicionar descrição extra"
                     >
                       +
@@ -659,10 +659,14 @@ export default function FormIniciativa() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div ref={descricoesListRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+                <div
+                  ref={descricoesListRef}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300"
+                >
                   {descricaoFields.length === 0 && (
                     <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
-                      Nenhuma descrição extra adicionada — clique em + para adicionar.
+                      Nenhuma descrição extra adicionada — clique em + para
+                      adicionar.
                     </div>
                   )}
 
@@ -676,13 +680,12 @@ export default function FormIniciativa() {
                           <Button
                             type="button"
                             onClick={() => removeDescricao(index)}
-                            className="text-white px-3 py-1 transition cursor-pointer"
+                            className="px-2 py-1 transition cursor-pointer flex items-center justify-center rounded-[8px] min-w-9 h-9"
                             aria-label={`Remover descrição extra ${index + 1}`}
-                            variant="destructive"
+                            variant="ghost"
                             size="sm"
-                            style={{ borderRadius: '10px' }}
                           >
-                            Remover
+                            <Trash2Icon className="w-4 h-4 text-red-500" />
                           </Button>
                         </div>
 
@@ -696,7 +699,9 @@ export default function FormIniciativa() {
                                   className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
                                 />
                               </FormControl>
-                              <FormMessage name={`descricoes_extras.${index}`} />
+                              <FormMessage
+                                name={`descricoes_extras.${index}`}
+                              />
                             </FormItem>
                           )}
                         </FormField>
@@ -735,13 +740,7 @@ export default function FormIniciativa() {
                           tipo: '',
                         })
                       }
-                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer"
-                      style={{
-                        minWidth: '130px',
-                        height: '30px',
-                        borderRadius: '10px',
-                        padding: 0,
-                      }}
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
                       aria-label="Adicionar horário"
                     >
                       +
