@@ -22,6 +22,8 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
     id: str
     nome: str
     sobrenome: str
@@ -31,4 +33,21 @@ class UserResponse(BaseModel):
     editado_em: Optional[datetime] = None
     editado_por: Optional[str] = None
 
+
+class UsuarioDelete(BaseModel):
+    nome: str
+    sobrenome: str
+    senha: str
+    email: str
+
+
+class UsuarioResponse(BaseModel):
     model_config = {"from_attributes": True}
+
+    id: str
+    nome: str
+    sobrenome: str
+    email: str
+    senha: str
+    criado_em: Optional[datetime]
+    criado_por: Optional[str]

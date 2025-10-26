@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
-from app.schemas.user_schema import UserCreate
+from app.schemas.usuario_schema import UserCreate
 from app.utils.password_hasher import PasswordHasher
 
 
@@ -33,3 +33,18 @@ class UsuarioRepository:
         self.session.refresh(usuario)
 
         return usuario
+
+    def get_by_id(self, user_id: str) -> Optional[Usuario]:
+        stmt = select(Usuario).where(Usuario.id == user_id)
+        return self.session.execute(stmt).scalars().first()
+
+    def delete(self, user_id: str) -> bool:
+        try:
+            deleted = self.session.query(Usuario).filter(Usuario.id == user_id).delete()
+            if deleted:
+                self.session.commit()
+                return True
+            return False
+        except Exception:
+            self.session.rollback()
+            raise

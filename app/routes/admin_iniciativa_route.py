@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/iniciativas/",
+    "/",
     response_model=IniciativaSchema,
     status_code=status.HTTP_201_CREATED,
 )
@@ -36,7 +36,7 @@ def create_iniciativa(
     return controller.get_iniciativa_by_id_admin(created.id)
 
 
-@router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaSchema)
+@router.get("/{iniciativa_id}", response_model=IniciativaSchema)
 def get_iniciativa_by_id(
     iniciativa_id: str,
     db: Session = Depends(get_db),
@@ -47,7 +47,7 @@ def get_iniciativa_by_id(
     return controller.get_iniciativa_by_id_admin(iniciativa_id)
 
 
-@router.get("/iniciativas", response_model=IniciativaListResponseSchema)
+@router.get("/", response_model=IniciativaListResponseSchema)
 def listar_iniciativas(
     q: Optional[str] = Query(None, description="Busca por titulo, descricao ou tags"),
     created_from: Optional[datetime] = Query(
@@ -75,7 +75,7 @@ def listar_iniciativas(
     )
 
 
-@router.delete("/iniciativas/{iniciativa_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{iniciativa_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_iniciativa(
     iniciativa_id: str,
     db: Session = Depends(get_db),
@@ -91,7 +91,7 @@ def delete_iniciativa(
 
 
 @router.patch(
-    "/iniciativas/{iniciativa_id}",
+    "/{iniciativa_id}",
     response_model=IniciativaSchema,
     status_code=status.HTTP_200_OK,
 )
