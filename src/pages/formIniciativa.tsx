@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, Star } from 'lucide-react'
-import { useState } from 'react'
+import { Camera, Star, Trash2Icon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -70,6 +70,9 @@ const initiativeSchema = z.object({
   descricao: z
     .string()
     .min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
+  descricoes_extras: z
+    .array(z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres.'))
+    .optional(),
   isAtivo: z.boolean(),
   tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
   schedules: z.array(scheduleSchema),
@@ -82,6 +85,7 @@ export default function FormIniciativa() {
   const [isEditing] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const MAX_DESCRICOES = 5
 
   const form = useForm<InitiativeFormData>({
     resolver: zodResolver(initiativeSchema),
@@ -92,6 +96,7 @@ export default function FormIniciativa() {
       link2: '',
       organizador: '',
       descricao: '',
+      descricoes_extras: [],
       isAtivo: false,
       tags: [],
       schedules: [],
@@ -110,6 +115,23 @@ export default function FormIniciativa() {
     append: appendSchedule,
     remove: removeSchedule,
   } = useFieldArray({ control, name: 'schedules' })
+
+  const {
+    fields: descricaoFields,
+    append: appendDescricao,
+    remove: removeDescricao,
+  } = useFieldArray({ control, name: 'descricoes_extras' })
+
+  const descricoesListRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = descricoesListRef.current
+    if (!el) return
+    const maxScrollTop = Math.max(0, el.scrollHeight - el.clientHeight)
+    if (el.scrollTop > maxScrollTop) {
+      el.scrollTop = maxScrollTop
+    }
+  }, [descricaoFields.length])
 
   const {
     data: organizadores,
@@ -168,7 +190,7 @@ export default function FormIniciativa() {
         tipo: schedule.tipo as HorarioTipo,
       })),
       tag_ids: data.tags,
-      descricoes_extras: [], //implementar depois
+      descricoes_extras: data.descricoes_extras ?? [],
     }
 
     createMutation.mutate(iniciativaData)
@@ -177,7 +199,7 @@ export default function FormIniciativa() {
   return (
     <div className="flex h-screen w-full">
       <SidebarAdm />
-      <main className="flex-1 p-6 bg-gray-50 overflow-y-auto w-full">
+      <main className="flex-1 p-6 bg-gray-50 overflow-y-auto w-full relative">
         <Toaster position="top-right" reverseOrder={false} />
 
         <header className="mb-6 flex justify-between items-center">
@@ -186,7 +208,9 @@ export default function FormIniciativa() {
               {isEditing ? 'Editar Iniciativa' : 'Criar Iniciativa'}
             </h1>
             <p className="text-body-regular font-sf-pro text-label-secondary">
-              {isEditing ? 'Edite sua iniciativa' : 'Crie aqui sua nova iniciativa'}
+              {isEditing
+                ? 'Edite sua iniciativa'
+                : 'Crie aqui sua nova iniciativa'}
             </p>
           </div>
         </header>
@@ -424,6 +448,92 @@ export default function FormIniciativa() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
+                    Descrições extras
+                  </CardTitle>
+                  <div className="flex flex-col items-center">
+                    <p className="text-footnote font-sf-pro text-label-primary mb-1">
+                      Clique para adicionar
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        descricaoFields.length < MAX_DESCRICOES &&
+                        appendDescricao('')
+                      }
+                      disabled={descricaoFields.length >= MAX_DESCRICOES}
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
+                      aria-label="Adicionar descrição extra"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div
+                  ref={descricoesListRef}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[520px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300"
+                >
+                  {descricaoFields.length === 0 && (
+                    <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
+                      Nenhuma descrição extra adicionada — clique em + para
+                      adicionar.
+                    </div>
+                  )}
+
+                  {descricaoFields.map((field, index) => (
+                    <Card key={field.id} className="bg-gray-50 border-gray-100">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="text-callout-semibold font-sf-pro-text text-label-primary">
+                            Descrição extra {index + 1}
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() => removeDescricao(index)}
+                            className="px-2 py-1 transition cursor-pointer flex items-center justify-center rounded-[8px] min-w-9 h-9"
+                            aria-label={`Remover descrição extra ${index + 1}`}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            <Trash2Icon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+
+                        <FormField name={`descricoes_extras.${index}`}>
+                          {({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  placeholder="Digite a descrição"
+                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                              </FormControl>
+                              <FormMessage
+                                name={`descricoes_extras.${index}`}
+                              />
+                            </FormItem>
+                          )}
+                        </FormField>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {descricaoFields.length >= MAX_DESCRICOES && (
+                  <p className="text-xs text-label-secondary mt-3">
+                    Limite de {MAX_DESCRICOES} descrições atingido.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="w-full max-w-none mt-8">
+            <Card className="bg-white border-gray-100 shadow-sm w-full">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
                     Horários
                   </CardTitle>
 
@@ -441,13 +551,7 @@ export default function FormIniciativa() {
                           tipo: HorarioTipo.PRESENCIAL,
                         })
                       }
-                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer"
-                      style={{
-                        minWidth: '130px',
-                        height: '30px',
-                        borderRadius: '10px',
-                        padding: 0,
-                      }}
+                      className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
                       aria-label="Adicionar horário"
                     >
                       +
@@ -515,7 +619,7 @@ export default function FormIniciativa() {
           </section>
 
           {/* Botão de Submit */}
-          <div className="w-full mt-6 flex justify-start">
+          <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
               disabled={isSubmitting || createMutation.isPending}

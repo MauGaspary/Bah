@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, Trash2Icon } from 'lucide-react'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -59,13 +59,13 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ index, onRemove }) => {
           <Button
             type="button"
             onClick={() => onRemove(index)}
-            className="text-white px-3 py-1 transition cursor-pointer"
+            className="px-2 py-1 transition cursor-pointer flex items-center justify-center rounded-[8px] min-w-9 h-9"
             aria-label={`Remover horário ${index + 1}`}
-            variant="destructive"
+            variant="ghost"
             size="sm"
             style={{ borderRadius: '10px' }}
           >
-            Remover
+            <Trash2Icon className="w-4 h-4 text-red-500" />
           </Button>
         </div>
 
