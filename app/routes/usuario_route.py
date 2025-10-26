@@ -13,7 +13,7 @@ security = HTTPBearer()
 router = APIRouter()
 
 
-@router.delete("/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_usuario(
     usuario_id: str,
     db: Session = Depends(get_db),
