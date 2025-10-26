@@ -1,6 +1,6 @@
 import enum
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     CheckConstraint,
@@ -34,7 +34,7 @@ class IniciativaHorario(Base):
     data_evento = Column(Date, nullable=False, index=True)
     hora_inicio = Column(Time, nullable=False)
     hora_fim = Column(Time, nullable=False)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     tipo = Column(Enum(HorarioTipo), nullable=False)
 
     __table_args__ = (

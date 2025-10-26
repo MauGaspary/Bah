@@ -1,14 +1,20 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
+from app.config.model import get_embedding_model
 from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
 from app.dependencies.auth import get_current_user
-from app.schemas.admin_iniciativa_schemas import IniciativaListResponseSchema
+from app.schemas.admin_iniciativa_schemas import (
+    IniciativaListResponseSchema,
+    IniciativaPatchSchema,
+    IniciativaSchema,
+)
 from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
 
 router = APIRouter()
@@ -16,27 +22,30 @@ router = APIRouter()
 
 @router.post(
     "/iniciativas/",
-    response_model=IniciativaResponse,
+    response_model=IniciativaSchema,
     status_code=status.HTTP_201_CREATED,
 )
 def create_iniciativa(
     iniciativa: IniciativaCreate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
+    model: Optional[object] = Depends(get_embedding_model),
 ):
     """Cria uma nova iniciativa."""
-    controller = IniciativaController(db)
-    return controller.create_iniciativa(iniciativa, current_user)
+    controller = IniciativaController(db, cast(Optional[SentenceTransformer], model))
+    created = controller.create_iniciativa(iniciativa, current_user)
+    admin_controller = AdminIniciativaController(db)
+    return admin_controller.get_iniciativa_by_id(created.id)
 
 
-@router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaResponse)
+@router.get("/iniciativas/{iniciativa_id}", response_model=IniciativaSchema)
 def get_iniciativa_by_id(
     iniciativa_id: str,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
     """Busca uma iniciativa pelo ID."""
-    controller = IniciativaController(db)
+    controller = AdminIniciativaController(db)
     return controller.get_iniciativa_by_id(iniciativa_id)
 
 
@@ -65,4 +74,45 @@ def listar_iniciativas(
     controller = AdminIniciativaController(db)
     return controller.listar_iniciativas(
         q, created_from, created_to, order_by, order_dir, page, size
+    )
+
+
+@router.delete("/iniciativas/{iniciativa_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_iniciativa(
+    iniciativa_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Soft delete de uma iniciativa (marca deletado_em e deletado_por)
+    - Idempotente: múltiplas chamadas retornam 204
+    - Retorna 404 se a iniciativa não existir
+    """
+    controller = AdminIniciativaController(db)
+    controller.delete_iniciativa(iniciativa_id, current_user)
+
+
+@router.patch(
+    "/iniciativas/{iniciativa_id}",
+    response_model=IniciativaSchema,
+    status_code=status.HTTP_200_OK,
+)
+def patch_iniciativa(
+    iniciativa_id: str,
+    payload: IniciativaPatchSchema,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+    model: Optional[object] = Depends(get_embedding_model),
+):
+    """Atualiza parcialmente uma iniciativa existente.
+    - 404 se não existir/soft-deletada
+    - 422 se violar regras de validação
+    - 200 com objeto completo atualizado
+    """
+    controller = AdminIniciativaController(db)
+    return controller.patch_iniciativa(
+        iniciativa_id=iniciativa_id,
+        payload=payload,
+        editado_por=current_user,
+        model=model,
     )

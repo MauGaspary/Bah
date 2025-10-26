@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DemoCreate(BaseModel):
@@ -9,9 +9,9 @@ class DemoCreate(BaseModel):
 
 
 class DemoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     username: str
     email: str
     created_at: datetime
-
-    model_config = {"from_attributes": True}

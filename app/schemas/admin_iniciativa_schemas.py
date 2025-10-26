@@ -1,29 +1,36 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
 
 
+class descricoesExtrasSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    descricao: str
+
+
 class TagSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     nome: str
     descricao: Optional[str]
 
-    class Config:
-        from_attributes = True
-
 
 class OrganizadorSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     nome: str
 
-    class Config:
-        from_attributes = True
-
 
 class IniciativaHorarioSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     data_evento: date
     hora_inicio: time
@@ -31,15 +38,13 @@ class IniciativaHorarioSchema(BaseModel):
     tipo: HorarioTipo
     criado_em: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class IniciativaSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     titulo: str
     descricao: str
-    descricao_vetor: str
     link: str
     destaque: bool
     local: Optional[str]
@@ -55,9 +60,7 @@ class IniciativaSchema(BaseModel):
     organizador: Optional[OrganizadorSchema]
     horarios: List[IniciativaHorarioSchema]
     tags: List[TagSchema]
-
-    class Config:
-        from_attributes = True
+    descricoes_extras: List[descricoesExtrasSchema]
 
 
 class IniciativaFiltersSchema(BaseModel):
@@ -71,9 +74,51 @@ class IniciativaFiltersSchema(BaseModel):
 
 
 class IniciativaListResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     items: List[IniciativaSchema]
     total: int
     filters: IniciativaFiltersSchema
 
-    class Config:
-        from_attributes = True
+
+class IniciativaHorarioPatch(BaseModel):
+    data_evento: Optional[date] = None
+    hora_inicio: Optional[time] = None
+    hora_fim: Optional[time] = None
+    tipo: Optional[HorarioTipo] = None
+
+    @field_validator("hora_fim")
+    @classmethod
+    def _fim_depois_de_inicio(cls, v, info):
+        inicio = info.data.get("hora_inicio")
+        if v and inicio and v <= inicio:
+            raise ValueError("hora_fim deve ser maior que hora_inicio")
+        return v
+
+    @field_validator("data_evento")
+    @classmethod
+    def _nao_retroativa(cls, v):
+        if v and v < date.today():
+            raise ValueError("data_evento não pode ser retroativa")
+        return v
+
+
+class DescricaoExtraUpdateSchema(BaseModel):
+    id: str
+    descricao: str
+
+
+class IniciativaPatchSchema(BaseModel):
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    link: Optional[str] = None
+    destaque: Optional[bool] = None
+    local: Optional[str] = None
+    imagem_url: Optional[str] = None
+    organizador_id: Optional[str] = None
+
+    tags_ids: Optional[List[str]] = None
+    horarios: Optional[List[IniciativaHorarioPatch]] = None
+    descricoes_extras_update: Optional[List[DescricaoExtraUpdateSchema]] = None
+    descricoes_extras_delete_ids: Optional[List[str]] = None
+    descricoes_extras_add: Optional[List[str]] = None

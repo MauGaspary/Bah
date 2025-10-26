@@ -1,26 +1,30 @@
 from datetime import date, time
-from typing import Dict, List, Mapping, Sequence
+from typing import Dict, List, Mapping, Optional, Sequence
 
 from fastapi import HTTPException
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.models.iniciativa_horario_model import HorarioTipo
 from app.models.usuario_model import Usuario
 from app.repositories.iniciativa_repository import IniciativaRepository
+from app.schemas.admin_iniciativa_schemas import IniciativaFiltersSchema
 from app.schemas.iniciativa_schema import (
     CalendarioHorarioTipo,
     CalendarioIniciativaItem,
     CalendarioMensalResponse,
     DiaCalendario,
     IniciativaCreate,
+    IniciativaListResponse,
     IniciativaResponse,
     TagSchema,
 )
 
 
 class IniciativaService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, model: Optional[SentenceTransformer] = None):
         self.repository = IniciativaRepository(db)
+        self.model = model
 
     def _convert_horario_tipo(self, tipo: HorarioTipo) -> CalendarioHorarioTipo:
         """Converte o enum do model para o enum do schema de calendário"""
@@ -41,36 +45,29 @@ class IniciativaService:
                 .first()
             )
             if not usuario_existe:
-                raise HTTPException(
-                    status_code=422, detail="Usuário criador não encontrado"
-                )
+                raise ValueError("Usuário criador não encontrado")
 
         if iniciativa_data.organizador_id:
             if not self.repository.organizador_exists(iniciativa_data.organizador_id):
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Organizador não encontrado com ID: {iniciativa_data.organizador_id}",
+                raise ValueError(
+                    f"Organizador não encontrado com ID: {iniciativa_data.organizador_id}"
                 )
         else:
-            raise HTTPException(status_code=422, detail="organizador_id é obrigatório")
+            raise ValueError("organizador_id é obrigatório")
 
         if iniciativa_data.tag_ids:
             existing_tags = self.repository.tags_exist(iniciativa_data.tag_ids)
             missing_tags = set(iniciativa_data.tag_ids) - set(existing_tags)
             if missing_tags:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Tags não encontradas: {', '.join(missing_tags)}",
-                )
+                raise ValueError(f"Tags não encontradas: {', '.join(missing_tags)}")
 
         if iniciativa_data.organizador_id:
             duplicate = self.repository.check_duplicate_iniciativa(
                 iniciativa_data.titulo, iniciativa_data.organizador_id
             )
             if duplicate:
-                raise HTTPException(
-                    status_code=422,
-                    detail="Já existe uma iniciativa com este título para este organizador",
+                raise ValueError(
+                    "Já existe uma iniciativa com este título para este organizador"
                 )
 
         if iniciativa_data.organizador_id:
@@ -82,19 +79,41 @@ class IniciativaService:
                 pass
 
         try:
-            iniciativa = self.repository.create(iniciativa_data, criado_por)
+            print("model", self.model)
+            if self.model is None:
+                raise RuntimeError("Modelo de embedding não disponível")
+            embedding = self.model.encode(  # type: ignore
+                iniciativa_data.descricao.lower(),
+                convert_to_numpy=True,
+                normalize_embeddings=True,
+            )
+
+            embeddings_descricoes_extras = []
+            for description_for_search in iniciativa_data.descricoes_extras or []:
+                embedding_extra = self.model.encode(
+                    description_for_search.lower(),
+                    convert_to_numpy=True,
+                    normalize_embeddings=True,
+                )
+                embeddings_descricoes_extras.append(embedding_extra)
+
+            iniciativa = self.repository.create(
+                iniciativa_data,
+                criado_por,
+                descricao_vetor=embedding,
+                descricoes_extras_vetores=embeddings_descricoes_extras,
+            )
+
             return IniciativaResponse.model_validate(iniciativa)
+
         except Exception as e:
             print(f"Erro na criação: {type(e).__name__}: {str(e)}")
 
             if "check constraint" in str(e).lower() or "constraint" in str(e).lower():
-                raise HTTPException(
-                    status_code=422,
-                    detail="Dados inválidos: verifique se a hora de fim é maior que a hora de início",
+                raise ValueError(
+                    "Dados inválidos: verifique se a hora de fim é maior que a hora de início"
                 ) from e
-            raise HTTPException(
-                status_code=500, detail=f"Erro interno do servidor: {str(e)}"
-            ) from e
+            raise RuntimeError(f"Erro interno do servidor: {str(e)}") from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
         iniciativa = self.repository.get_by_id(iniciativa_id)
@@ -191,3 +210,25 @@ class IniciativaService:
         return CalendarioMensalResponse(
             mes=f"{ref.year:04d}-{ref.month:02d}", dias=dias
         )
+
+    def search_iniciativas(
+        self, query: str, page: int, size: int
+    ) -> IniciativaListResponse:
+        if self.model is None:
+            raise ValueError("Modelo de embedding não disponível")
+
+        embedding = self.model.encode(
+            query.lower(), convert_to_numpy=True, normalize_embeddings=True
+        )
+        try:
+            iniciativas, total = self.repository.search_by_embedding(
+                embedding, page, size
+            )
+
+            filters = IniciativaFiltersSchema(q=query, page=page, size=size)
+            return IniciativaListResponse(
+                items=iniciativas, total=total, filters=filters
+            )
+        except Exception as e:
+            print(f"Erro na busca: {type(e).__name__}: {str(e)}")
+            raise ValueError(f"Erro interno do servidor na service: {str(e)}") from e

@@ -1,9 +1,11 @@
 from datetime import date
 from typing import Dict, List, Optional
 
-from sqlalchemy import and_, func, or_, select
+import numpy as np
+from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
@@ -16,12 +18,18 @@ class IniciativaRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, iniciativa_data: IniciativaCreate, criado_por: str) -> Iniciativa:
-        # TODO: Implementar geração de embeddings para descricao_vetor
+    def create(
+        self,
+        iniciativa_data: IniciativaCreate,
+        criado_por: str,
+        descricao_vetor: List[float],
+        descricoes_extras_vetores: List[List[float]],
+    ) -> Iniciativa:
+
         db_iniciativa = Iniciativa(
             titulo=iniciativa_data.titulo,
             descricao=iniciativa_data.descricao,
-            descricao_vetor=iniciativa_data.descricao,  # TODO: Usar embeddings reais
+            descricao_vetor=descricao_vetor,
             organizador_id=iniciativa_data.organizador_id,
             link=iniciativa_data.link,
             local=iniciativa_data.local,
@@ -42,6 +50,17 @@ class IniciativaRepository:
                 tipo=horario_data.tipo,
             )
             self.db.add(db_horario)
+
+        if iniciativa_data.descricoes_extras:
+            for texto, embedding_extra in zip(
+                iniciativa_data.descricoes_extras, descricoes_extras_vetores
+            ):
+                db_extra = DescricoesExtras(
+                    iniciativa_id=db_iniciativa.id,
+                    descricao=texto,
+                    descricao_vetor=embedding_extra,
+                )
+                self.db.add(db_extra)
 
         if iniciativa_data.tag_ids:
             for tag_id in iniciativa_data.tag_ids:
@@ -260,3 +279,71 @@ class IniciativaRepository:
             """
             self.db.execute(create_index_query)
             self.db.commit()
+
+    def search_by_embedding(self, embedding: List[float], page: int, size: int):
+        offset = (page - 1) * size
+
+        if isinstance(embedding, np.ndarray):
+            embedding = embedding.tolist()
+
+        embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
+
+        query = text(
+            """
+            WITH q AS (
+                SELECT (:embedding)::vector AS emb
+            ),
+            all_sims AS (
+                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM iniciativas i
+                UNION ALL
+                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM descricoes_extras de
+            ),
+            best AS (
+                SELECT id, MAX(sim) AS best_sim
+                FROM all_sims
+                GROUP BY id
+            )
+            SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
+            FROM best
+            JOIN iniciativas i ON i.id = best.id
+            ORDER BY best.best_sim DESC
+            LIMIT :limit OFFSET :offset
+        """
+        )
+
+        rows = (
+            self.db.execute(
+                query,
+                {
+                    "embedding": embedding_str,
+                    "limit": size,
+                    "offset": offset,
+                },
+            )
+            .mappings()
+            .all()
+        )
+
+        total = rows[0]["total_count"] if rows else 0
+        if not rows:
+            return [], 0
+
+        # imprime similaridade (somente logs)
+        for r in rows:
+            sim = r["best_sim"] or 0.0
+            print(f"[SIM] ID={r['id']} | sim={sim:.4f} | título={r.get('titulo','')}")
+
+        # agora buscamos as entidades e preservamos a ordem do ranking
+        ids = [r["id"] for r in rows]
+        iniciativas = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.id.in_(ids))
+            .options(selectinload(Iniciativa.horarios))
+            .all()
+        )
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids]
+
+        return ordered, total

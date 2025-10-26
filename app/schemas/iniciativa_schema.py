@@ -2,9 +2,10 @@ from datetime import date, datetime, time
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 from app.models.iniciativa_horario_model import HorarioTipo
+from app.schemas.admin_iniciativa_schemas import IniciativaFiltersSchema
 
 
 class IniciativaHorarioCreate(BaseModel):
@@ -36,9 +37,14 @@ class IniciativaCreate(BaseModel):
         min_length=1, description="Lista de horários da iniciativa"
     )
     tag_ids: Optional[List[str]] = Field(None, description="Lista de IDs das tags")
+    descricoes_extras: Optional[List[str]] = Field(
+        default=None, description="Lista de descrições extras"
+    )
 
 
 class IniciativaHorarioResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     data_evento: date
     hora_inicio: time
@@ -46,10 +52,10 @@ class IniciativaHorarioResponse(BaseModel):
     tipo: HorarioTipo
     criado_em: Optional[datetime] = None
 
-    model_config = {"from_attributes": True}
-
 
 class IniciativaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     titulo: str
     descricao: str
@@ -102,3 +108,11 @@ class DiaCalendario(BaseModel):
 class CalendarioMensalResponse(BaseModel):
     mes: str
     dias: List[DiaCalendario]
+
+
+class IniciativaListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    items: List[IniciativaResponse]
+    total: int
+    filters: IniciativaFiltersSchema
