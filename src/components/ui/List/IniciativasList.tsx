@@ -1,3 +1,4 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 
 import ConfirmModal from '../ConfirmModal'
@@ -7,6 +8,7 @@ import type {
   IniciativasListProps,
   Iniciativa,
 } from '@/interfaces/IIniciativas'
+
 import {
   Pagination,
   PaginationContent,
@@ -15,42 +17,46 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+
 import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 function IniciativasList({ searchQuery }: IniciativasListProps) {
-  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [iniciativaToDelete, setIniciativaToDelete] =
     useState<Iniciativa | null>(null)
 
+  const queryClient = useQueryClient()
   const itemsPerPage = 5
+
+  // Query para buscar iniciativas
+  const {
+    data: iniciativasData,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['iniciativas', searchQuery, currentPage, itemsPerPage],
+    queryFn: () => fetchIniciativas(searchQuery, currentPage, itemsPerPage),
+  })
+
+  const iniciativas = iniciativasData?.items || []
+  const total = iniciativasData?.total || 0
   const totalPages = Math.max(1, Math.ceil(total / itemsPerPage))
 
-  useEffect(() => {
-    async function loadIniciativas() {
-      try {
-        setLoading(true)
-        const data = await fetchIniciativas(
-          searchQuery,
-          currentPage,
-          itemsPerPage
-        )
-        console.log(data)
-        setIniciativas(data.items)
-        setTotal(data.total)
-      } catch {
-        setError('Erro ao carregar iniciativas')
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadIniciativas()
-  }, [searchQuery, currentPage])
+  const deleteMutation = useMutation({
+    mutationFn: deleteIniciativa,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      closeDeleteConfirm()
+    },
+    onError: () => {
+      console.error('Erro ao excluir iniciativa')
+    },
+    onSettled: () => {
+      setDeletingId(null)
+    },
+  })
 
   useEffect(() => {
     // Reset to first page when search changes
@@ -72,18 +78,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
 
     const { id } = iniciativaToDelete
     setDeletingId(id)
-
-    try {
-      await deleteIniciativa(id)
-      // Remove a iniciativa da lista local
-      setIniciativas(prev => prev.filter(item => item.id !== id))
-      setTotal(prev => prev - 1)
-      closeDeleteConfirm()
-    } catch {
-      setError('Erro ao excluir iniciativa')
-    } finally {
-      setDeletingId(null)
-    }
+    deleteMutation.mutate(id)
   }
 
   return (
@@ -107,12 +102,12 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
 
         {!loading && error && (
           <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
-            <p className="text-error">{error}</p>
+            <p className="text-error">Erro ao carregar iniciativas</p>
           </div>
         )}
 
-        <div className="space-y-3">
-          {iniciativas.map((item, index) => (
+        <div className="pb-2 space-y-2 flex-1">
+          {iniciativas.map((item: Iniciativa, index: number) => (
             <ListItem
               key={item.id}
               title={item.titulo}
