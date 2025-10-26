@@ -190,7 +190,7 @@ export default function FormIniciativa() {
         tipo: schedule.tipo as HorarioTipo,
       })),
       tag_ids: data.tags,
-      descricoes_extras: [], //implementar depois
+      descricoes_extras: data.descricoes_extras ?? [],
     }
 
     createMutation.mutate(iniciativaData)
@@ -199,7 +199,7 @@ export default function FormIniciativa() {
   return (
     <div className="flex h-screen w-full">
       <SidebarAdm />
-      <main className="flex-1 p-6 bg-gray-50 overflow-y-auto w-full">
+      <main className="flex-1 p-6 bg-gray-50 overflow-y-auto w-full relative">
         <Toaster position="top-right" reverseOrder={false} />
 
         <header className="mb-6 flex justify-between items-center">
@@ -619,7 +619,7 @@ export default function FormIniciativa() {
           </section>
 
           {/* Botão de Submit */}
-          <div className="w-full mt-6 flex justify-start">
+          <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
               disabled={isSubmitting || createMutation.isPending}
