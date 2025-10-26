@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_iniciativa_repository import AdminIniciativaRepository
@@ -74,7 +75,7 @@ class AdminIniciativaService:
         iniciativa_id: str,
         payload: IniciativaPatchSchema,
         editado_por: Optional[str] = None,
-        model: Optional[object] = None,
+        model: Optional[SentenceTransformer] = None,
     ) -> IniciativaSchema:
         """
         Aplica alterações parciais na iniciativa e retorna o objeto completo atualizado.

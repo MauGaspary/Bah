@@ -1,4 +1,4 @@
-from typing import Optional
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -7,10 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.config.database import get_db
 from app.config.model import get_embedding_model
-from app.controllers.admin_iniciativa_controller import AdminIniciativaController
 from app.controllers.iniciativa_controller import IniciativaController
-from app.dependencies.auth import get_current_user
 from app.schemas.iniciativa_schema import (
+    CalendarioMensalResponse,
     IniciativaCreate,
     IniciativaListResponse,
     IniciativaResponse,
@@ -63,6 +62,27 @@ def create_iniciativa(
     model = request.app.state.embedding_model
     controller = IniciativaController(db, model)
     return controller.create_iniciativa(iniciativa, criado_por)
+
+
+@router.get("/calendario", response_model=CalendarioMensalResponse)
+def get_calendario_mensal(
+    data: date = Query(..., description="Data de referência para o mês (YYYY-MM-DD)"),
+    db: Session = Depends(get_db),
+):
+    """
+    Retorna o calendário de iniciativas para o mês especificado.
+
+    Parâmetros:
+    - data: Data de referência (qualquer dia do mês desejado)
+
+    Retorna:
+    - Lista de dias do mês com iniciativas agrupadas por dia
+    - Iniciativas ordenadas por horário e título
+    - Dias sem iniciativas retornam lista vazia
+    """
+
+    controller = IniciativaController(db)
+    return controller.get_calendario_mensal(data)
 
 
 @router.get("/{iniciativa_id}", response_model=IniciativaResponse)

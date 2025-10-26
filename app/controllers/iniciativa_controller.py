@@ -1,10 +1,15 @@
+from datetime import date
 from typing import Optional
 
 from fastapi import HTTPException
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
-from app.schemas.iniciativa_schema import IniciativaCreate, IniciativaResponse
+from app.schemas.iniciativa_schema import (
+    CalendarioMensalResponse,
+    IniciativaCreate,
+    IniciativaResponse,
+)
 from app.services.iniciativa_service import IniciativaService
 
 
@@ -25,12 +30,10 @@ class IniciativaController:
             raise HTTPException(500, str(e)) from e
 
     def get_iniciativa_by_id(self, iniciativa_id: str) -> IniciativaResponse:
-        try:
-            return self.service.get_iniciativa_by_id(iniciativa_id)
-        except HTTPException:
-            raise
-        except ValueError as e:
-            raise HTTPException(status_code=404, detail=str(e)) from e
+        return self.service.get_iniciativa_by_id(iniciativa_id)
+
+    def get_calendario_mensal(self, data: date) -> CalendarioMensalResponse:
+        return self.service.get_calendario_mensal(data)
 
     def search_iniciativas(self, query: str, page: int, size: int):
         try:
