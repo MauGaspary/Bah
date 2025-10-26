@@ -26,6 +26,10 @@ function App() {
 
             <Route path="/admin" element={<LoginAdminPage />} />
             <Route path="/admin/criarIniciativa" element={<FormIniciativa />} />
+            <Route
+              path="/admin/iniciativas/:id/editar"
+              element={<FormIniciativa />}
+            />
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/iniciativas" element={<AdminIniciativas />} />
           </Routes>

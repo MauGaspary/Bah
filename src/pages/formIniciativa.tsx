@@ -4,10 +4,14 @@ import { Camera, Star, Trash2Icon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import toast, { Toaster } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import type { IniciativaCreate } from '@/interfaces/IIniciativas'
+import type {
+  IniciativaCreate,
+  IniciativaPatch,
+  IniciativaAdmin,
+} from '@/interfaces/IIniciativas'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,7 +38,11 @@ import SidebarAdm from '@/components/ui/sidebar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { HorarioTipo } from '@/enums/HorarioTipo'
-import { createIniciativa } from '@/service/iniciativas'
+import {
+  createIniciativa,
+  fetchIniciativaById,
+  patchIniciativa,
+} from '@/service/iniciativas'
 import { fetchOrganizadores } from '@/service/organizadores'
 import { fetchTags } from '@/service/tags'
 
@@ -82,10 +90,13 @@ const initiativeSchema = z.object({
 type InitiativeFormData = z.infer<typeof initiativeSchema>
 
 export default function FormIniciativa() {
-  const [isEditing] = useState(false)
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditing = Boolean(id)
   const queryClient = useQueryClient()
   const MAX_DESCRICOES = 5
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const objectUrlRef = useRef<string | null>(null)
 
   const form = useForm<InitiativeFormData>({
     resolver: zodResolver(initiativeSchema),
@@ -150,6 +161,12 @@ export default function FormIniciativa() {
     queryKey: ['tags'],
     queryFn: fetchTags,
   })
+
+  const { data: iniciativaAdmin } = useQuery({
+    queryKey: ['iniciativa', id],
+    queryFn: () => fetchIniciativaById(id as string),
+    enabled: isEditing,
+  })
   const createMutation = useMutation({
     mutationFn: createIniciativa,
     onSuccess: () => {
@@ -162,17 +179,155 @@ export default function FormIniciativa() {
       toast.error('Erro ao criar iniciativa')
     },
   })
+  const patchMutation = useMutation({
+    mutationFn: ({
+      iniciativaId,
+      payload,
+    }: {
+      iniciativaId: string
+      payload: IniciativaPatch
+    }) => patchIniciativa(iniciativaId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      toast.success('Iniciativa atualizada com sucesso!')
+      navigate('/admin/iniciativas')
+    },
+    onError: (error: Error) => {
+      console.error('Erro ao atualizar iniciativa:', error)
+      toast.error('Erro ao atualizar iniciativa')
+    },
+  })
+
+  useEffect(() => {
+    if (isEditing && iniciativaAdmin) {
+      const admin: IniciativaAdmin = iniciativaAdmin
+      const toHHMM = (t?: string) => (t ? t.slice(0, 5) : '')
+      form.reset({
+        titulo: admin.titulo || '',
+        local: admin.local || '',
+        link1: admin.link || '',
+        link2: '',
+        organizador: admin.organizador_id || admin.organizador?.id || '',
+        descricao: admin.descricao || '',
+        descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
+        isAtivo: Boolean(admin.destaque),
+        tags: admin.tags?.map(t => t.id) || [],
+        schedules:
+          admin.horarios?.map(h => ({
+            dia: h.data_evento,
+            inicio: toHHMM(h.hora_inicio),
+            fim: toHHMM(h.hora_fim),
+            tipo: h.tipo,
+          })) || [],
+        foto: admin.imagem_url,
+      })
+      if (admin.imagem_url) {
+        setImagePreview(admin.imagem_url)
+      }
+    }
+  }, [isEditing, iniciativaAdmin, form])
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current)
+        objectUrlRef.current = null
+      }
+    }
+  }, [])
 
   const onSubmit = (data: InitiativeFormData) => {
-    if (isEditing) {
-      // implementar patch depois
-      toast.success('Iniciativa atualizada com sucesso!')
+    if (isEditing && id && iniciativaAdmin) {
+      const formatTimeToISO = (time: string): string => {
+        return `${time}:00`
+      }
+
+      const original = iniciativaAdmin.descricoes_extras || []
+      const updated = data.descricoes_extras || []
+      const minLen = Math.min(original.length, updated.length)
+      const descricoes_extras_update = Array.from({ length: minLen }).map(
+        (_, i) => ({ id: original[i].id, descricao: updated[i] })
+      )
+      const descricoes_extras_delete_ids = original.slice(minLen).map(d => d.id)
+      const descricoes_extras_add = updated.slice(minLen)
+
+      // const imagemUrlEdit =
+      //   typeof data.foto === 'string' && (data.foto as string).trim().length > 0
+      //     ? (data.foto as string)
+      //     : imagePreview && imagePreview.trim().length > 0
+      //       ? imagePreview
+      //       : ''
+
+      // if (!imagemUrlEdit) {
+      //   toast.error('Selecione uma imagem válida antes de salvar')
+      //   return
+      // }
+
+      const newHorarios = data.schedules.map(s => ({
+        data_evento: s.dia,
+        hora_inicio: formatTimeToISO(s.inicio),
+        hora_fim: formatTimeToISO(s.fim),
+        tipo: s.tipo,
+      }))
+
+      const serialize = (h: {
+        data_evento: string
+        hora_inicio: string
+        hora_fim: string
+        tipo: unknown
+      }) => `${h.data_evento}|${h.hora_inicio}|${h.hora_fim}|${String(h.tipo)}`
+
+      const originalSerialized = (iniciativaAdmin.horarios || []).map(h =>
+        serialize({
+          data_evento: h.data_evento,
+          hora_inicio: h.hora_inicio,
+          hora_fim: h.hora_fim,
+          tipo: h.tipo,
+        })
+      )
+      const updatedSerialized = newHorarios.map(serialize)
+      const horariosChanged =
+        originalSerialized.length !== updatedSerialized.length ||
+        originalSerialized.some((val, idx) => val !== updatedSerialized[idx])
+
+      const payload: IniciativaPatch = {
+        titulo: data.titulo,
+        descricao: data.descricao,
+        organizador_id: data.organizador,
+        link: data.link1 || '',
+        local: data.local,
+        destaque: data.isAtivo,
+        tags_ids: data.tags,
+        descricoes_extras_update,
+        descricoes_extras_delete_ids,
+        descricoes_extras_add,
+        imagem_url:
+          'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
+      }
+
+      if (horariosChanged) {
+        payload.horarios = newHorarios
+      }
+
+      patchMutation.mutate({ iniciativaId: id, payload })
       return
     }
 
     const formatTimeToISO = (time: string): string => {
       return `${time}:00`
     }
+
+    // const imagemUrlCreate =
+    //   typeof data.foto === 'string' && (data.foto as string).trim().length > 0
+    //     ? (data.foto as string)
+    //     : imagePreview && imagePreview.trim().length > 0
+    //       ? imagePreview
+    //       : ''
+
+    // if (!imagemUrlCreate) {
+    //   toast.error('Selecione uma imagem válida antes de salvar')
+    //   return
+    // }
 
     const iniciativaData: IniciativaCreate = {
       titulo: data.titulo,
@@ -181,7 +336,7 @@ export default function FormIniciativa() {
       link: data.link1 || '',
       local: data.local,
       imagem_url:
-        'https://mh1.com.br/wp-content/uploads/2024/10/luffy_capa.jpg', // ajustar imagens
+        'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
       destaque: data.isAtivo,
       horarios: data.schedules.map(schedule => ({
         data_evento: schedule.dia,
@@ -594,19 +749,62 @@ export default function FormIniciativa() {
                       <FormControl>
                         <Label
                           htmlFor="foto-upload"
-                          className="flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec]"
+                          className="relative flex flex-col items-center justify-center w-full h-65 bg-[#eef0f3] rounded-2xl cursor-pointer hover:bg-[#e6e9ec] overflow-hidden"
                         >
-                          <div className="flex flex-col items-center justify-center text-gray-500">
-                            <Camera className="w-5 h-5 mb-2" />
-                            <p className="mb-1 text-sm">
-                              Clique para adicionar uma foto
-                            </p>
-                          </div>
+                          {imagePreview ? (
+                            <>
+                              <img
+                                src={imagePreview}
+                                alt="Pré-visualização da imagem"
+                                className="w-full h-full object-contain max-h-full"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow"
+                                onClick={e => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  if (objectUrlRef.current) {
+                                    URL.revokeObjectURL(objectUrlRef.current)
+                                    objectUrlRef.current = null
+                                  }
+                                  setImagePreview(null)
+                                  field.onChange(undefined)
+                                }}
+                                aria-label="Remover imagem"
+                              >
+                                <Trash2Icon className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center text-gray-500">
+                              <Camera className="w-5 h-5 mb-2" />
+                              <p className="mb-1 text-sm">
+                                Clique para adicionar uma foto
+                              </p>
+                            </div>
+                          )}
                           <Input
                             id="foto-upload"
                             type="file"
+                            accept="image/*"
                             className="hidden"
-                            {...field}
+                            name={field.name}
+                            ref={field.ref}
+                            onChange={e => {
+                              const file = e.target.files?.[0]
+                              field.onChange(file)
+                              if (file) {
+                                if (objectUrlRef.current) {
+                                  URL.revokeObjectURL(objectUrlRef.current)
+                                }
+                                const url = URL.createObjectURL(file)
+                                objectUrlRef.current = url
+                                setImagePreview(url)
+                              }
+                            }}
                           />
                         </Label>
                       </FormControl>
@@ -622,7 +820,11 @@ export default function FormIniciativa() {
           <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
-              disabled={isSubmitting || createMutation.isPending}
+              disabled={
+                isSubmitting ||
+                createMutation.isPending ||
+                patchMutation.isPending
+              }
               variant="purple"
               size="lg"
               className="mt-6 text-white cursor-pointer"
