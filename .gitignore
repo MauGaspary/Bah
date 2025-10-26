@@ -1,57 +1,119 @@
-# Python
-venv/
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.so
-
-# Environment
+# ENVIRONMENT FILES
 .env
+.env.prod
 .env.local
 .env.*.local
+*.env
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-test.db
-bah.db
+# PYTHON
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Coverage
-.coverage
-coverage.*
-htmlcov/
+# VIRTUAL ENVIRONMENTS
+venv/
+ENV/
+env/
+.venv
+env.bak/
+venv.bak/
+pipenv/
+Pipfile.lock
 
-# Cache
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+*.sublime-project
+*.sublime-workspace
 
-# Logs
+# DOCKER
+.dockerignore
+docker-compose.override.yml
+
+# DATABASES
+*.db
+*.sqlite3
+*.sqlite
+postgres_data/
+postgres_data_dev/
+postgres_data_prod/
+pgdata/
+
+# PYTEST & COVERAGE
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.hypothesis/
+.tox/
+coverage.xml
+*.coveragerc
+
+# LOGS
 *.log
 logs/
+log/
 
-# Docker
-.dockerignore
+# MYPY
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Temporary files
-*.tmp
-*.temp
+# JUPYTER NOTEBOOK
+.ipynb_checkpoints
+*.ipynb
+
+# ALEMBIC
+alembic/versions/*.pyc
+
+# MACHINE LEARNING MODELS
+models/
+*.pkl
+*.joblib
+*.h5
+*.pb
+*.onnx
+
+# HUGGING FACE CACHE
+.cache/
+cache/
+hf_cache/
+
+# AWS
+*.pem
+*.ppk
+aws-credentials.txt
+
+# GITLAB
+.gitlab-ci-local/
+
+# SECRETS
+secrets/
+*.key
+*.crt
+*.pem
