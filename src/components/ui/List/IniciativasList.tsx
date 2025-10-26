@@ -23,7 +23,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [iniciativaToDelete, setIniciativaToDelete] =
     useState<Iniciativa | null>(null)
@@ -105,9 +105,11 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
           <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
-        {!loading && error && <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
-          <p className="text-error">{error}</p>
-        </div>}
+        {!loading && error && (
+          <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
+            <p className="text-error">{error}</p>
+          </div>
+        )}
 
         <div className="space-y-3">
           {iniciativas.map((item, index) => (
