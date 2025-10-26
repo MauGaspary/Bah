@@ -1,5 +1,6 @@
 from typing import Optional
 
+from app.dependencies.auth import get_current_user
 from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ router = APIRouter()
 def delete_usuario(
     usuario_id: str,
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
 ):
     """
     Deleta um usuário pelo ID.
