@@ -4,10 +4,12 @@ import { AuthProvider } from './contexts/AuthContext'
 import AdminIniciativas from './pages/AdminIniciativas'
 import AdminUsuarios from './pages/AdminUsers'
 import DashboardPage from './pages/DashboardPage'
-import HomePage from './pages/HomePage'
-import LoginAdminPage from './pages/LoginAdminPage'
 import FormIniciativa from './pages/formIniciativa'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import HomePage from './pages/HomePage'
+import IniciativaPage from './pages/IniciativaPage'
+import ResultsPage from './pages/ResultsPage'
+import LoginAdminPage from './pages/LoginAdminPage'
 
 const queryClient = new QueryClient()
 
@@ -19,6 +21,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/iniciativa/:id" element={<IniciativaPage />} />
+            <Route path="/results" element={<ResultsPage />} />
 
             <Route path="/admin" element={<LoginAdminPage />} />
             <Route path="/admin/criarIniciativa" element={<FormIniciativa />} />

@@ -1,15 +1,13 @@
-import { Search, ChevronDown } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import SearchDropdown from '@/components/ui/Searchbar/SearchDropdown'
+import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
-
 import Header from '@/components/ui/Header/Header'
 import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { buildCalendarEvents } from '@/data/iniciativas'
-import { Input } from '@/components/ui/Searchbar/Searchbar'
+import { ChevronDown } from 'lucide-react'
 
 function HomePage() {
-  const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
   const tags = [
     { name: 'Aceleração', value: 'aceleracao' },
@@ -55,11 +53,8 @@ function HomePage() {
           />
           <div className="flex items-center justify-center w-full max-w-[28rem] mx-auto">
             <h1 className="text-white text-5xl md:text-4xl text-center mb-6 md:mb-4 font-mulish max-w-4xl mx-auto px-4">
-              Conecte-se à{' '}
-              <span className="font-bold italic">
-                inovação
-              </span>{' '}
-              em Caxias do Sul
+              Conecte-se à <span className="font-bold italic">inovação</span> em
+              Caxias do Sul
             </h1>
           </div>
 
@@ -68,18 +63,7 @@ function HomePage() {
             sua jornada
           </p>
           <div className="flex justify-center max-w-3xl mx-auto mb-8 md:mb-4 px-4">
-            <form className="flex items-center w-full max-w-2xl bg-white rounded-full overflow-hidden h-12 shadow-lg">
-              <Input
-                type="text"
-                placeholder="Conheça as iniciativas"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="flex-1 px-6 py-3 text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-semibold"
-              />
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 cursor-pointer bg-bah-purple">
-                <Search className="h-4 w-4 text-white" />
-              </div>
-            </form>
+            <SearchDropdown />
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
@@ -99,7 +83,10 @@ function HomePage() {
             type="button"
             aria-label="Ir para o calendário"
             onClick={() => {
-              const targetId = window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+              const targetId =
+                window.innerWidth < 768
+                  ? 'calendar-section-mobile'
+                  : 'calendar-section'
               const el = document.getElementById(targetId)
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -129,12 +116,16 @@ function HomePage() {
 
       {/* Sobre nós */}
       <section id="about-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Sobre nós</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center">
+          Sobre nós
+        </h2>
       </section>
 
       {/* Nossos Valores */}
       <section id="values-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Nossos Valores</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center">
+          Nossos Valores
+        </h2>
       </section>
 
       {/* Contato */}

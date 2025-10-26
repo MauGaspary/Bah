@@ -3,6 +3,17 @@ import { HorarioTipo } from '@/enums/HorarioTipo'
 export interface IniciativasListProps {
   searchQuery: string
 }
+  
+export interface IniciativasResponse{
+    items: Iniciativa[];
+    total: number;
+}
+
+export interface SearchParams {
+    q?: string;
+    page?: number;
+    size?: number;
+}
 
 export interface IniciativaHorarioCreate {
   data_evento: string // ISO date string (YYYY-MM-DD)
@@ -53,12 +64,6 @@ export interface IniciativaFilters {
   q?: string
   page: number
   size: number
-}
-
-export interface IniciativasResponse {
-  items: IniciativaResponse[]
-  total: number
-  filters: IniciativaFilters
 }
 
 // Type aliases para compatibilidade com código existente
