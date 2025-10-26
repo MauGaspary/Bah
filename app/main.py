@@ -13,6 +13,8 @@ from app.routes.demo_route import router as demo_router
 from app.routes.iniciativa_route import router as iniciativa_router
 from app.routes.organizador_route import router as organizador_router
 from app.routes.usuario_route import router as usuario_router
+from app.routes.tag_route import router as tag_router
+from app.routes.user_routes import router as user_router
 from app.utils.exception_handlers import domain_exception_handler, value_error_handler
 from app.utils.exceptions import DomainException
 
@@ -63,6 +65,8 @@ def create_app(settings=None):
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
     app.include_router(iniciativa_router, prefix="/iniciativas", tags=["iniciativas"])
     app.include_router(usuario_router, prefix="/usuarios", tags=["usuarios"])
+    app.include_router(tag_router, prefix="/tags", tags=["tags"])
+    app.include_router(user_router, prefix="/users", tags=["users"])
 
     app.add_exception_handler(DomainException, domain_exception_handler)
     app.add_exception_handler(ValueError, value_error_handler)

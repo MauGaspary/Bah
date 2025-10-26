@@ -1,12 +1,12 @@
 from typing import Optional
 
-from app.dependencies.auth import get_current_user
 from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
 from app.controllers.usuario_controller import UsuarioController
+from app.dependencies.auth import get_current_user
 from app.schemas.usuario_schema import UsuarioDelete, UsuarioResponse
 
 security = HTTPBearer()

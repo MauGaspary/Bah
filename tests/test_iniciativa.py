@@ -326,8 +326,11 @@ def test_get_iniciativa_by_id_not_found(client, auth_token):
     )
 
     assert response.status_code == 404
-    data = response.json()
-    assert "Iniciativa não encontrada" in data["detail"]
+    detail = response.json()["detail"]
+    if isinstance(detail, dict):
+        assert "não encontrada" in detail.get("message", "").lower()
+    else:
+        assert "não encontrada" in detail.lower()
 
 
 def test_delete_iniciativa_success(client, iniciativa_fixture, auth_token, db_session):

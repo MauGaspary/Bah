@@ -4,6 +4,7 @@ import numpy as np
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
 from app.models.iniciativa_tag_model import IniciativaTag
@@ -22,6 +23,7 @@ class IniciativaRepository:
         iniciativa_data: IniciativaCreate,
         criado_por: str,
         descricao_vetor: List[float],
+        descricoes_extras_vetores: List[List[float]],
     ) -> Iniciativa:
 
         db_iniciativa = Iniciativa(
@@ -48,6 +50,17 @@ class IniciativaRepository:
                 tipo=horario_data.tipo,
             )
             self.db.add(db_horario)
+
+        if iniciativa_data.descricoes_extras:
+            for texto, embedding_extra in zip(
+                iniciativa_data.descricoes_extras, descricoes_extras_vetores
+            ):
+                db_extra = DescricoesExtras(
+                    iniciativa_id=db_iniciativa.id,
+                    descricao=texto,
+                    descricao_vetor=embedding_extra,
+                )
+                self.db.add(db_extra)
 
         if iniciativa_data.tag_ids:
             for tag_id in iniciativa_data.tag_ids:
@@ -154,35 +167,60 @@ class IniciativaRepository:
 
         query = text(
             """
-            SELECT i.*, count(*) OVER() AS total_count
-            FROM iniciativas i
-            ORDER BY i.descricao_vetor <-> :embedding
+            WITH q AS (
+                SELECT (:embedding)::vector AS emb
+            ),
+            all_sims AS (
+                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM iniciativas i
+                UNION ALL
+                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                FROM descricoes_extras de
+            ),
+            best AS (
+                SELECT id, MAX(sim) AS best_sim
+                FROM all_sims
+                GROUP BY id
+            )
+            SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
+            FROM best
+            JOIN iniciativas i ON i.id = best.id
+            ORDER BY best.best_sim DESC
             LIMIT :limit OFFSET :offset
         """
         )
 
-        result = (
+        rows = (
             self.db.execute(
-                query, {"embedding": embedding_str, "limit": size, "offset": offset}
+                query,
+                {
+                    "embedding": embedding_str,
+                    "limit": size,
+                    "offset": offset,
+                },
             )
             .mappings()
             .all()
         )
 
-        if result:
-            total = result[0]["total_count"]
-        else:
-            total = 0
+        total = rows[0]["total_count"] if rows else 0
+        if not rows:
+            return [], 0
 
-        ids = [row["id"] for row in result]
+        # imprime similaridade (somente logs)
+        for r in rows:
+            sim = r["best_sim"] or 0.0
+            print(f"[SIM] ID={r['id']} | sim={sim:.4f} | título={r.get('titulo','')}")
+
+        # agora buscamos as entidades e preservamos a ordem do ranking
+        ids = [r["id"] for r in rows]
         iniciativas = (
             self.db.query(Iniciativa)
             .filter(Iniciativa.id.in_(ids))
             .options(selectinload(Iniciativa.horarios))
             .all()
         )
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids]
 
-        iniciativas_dict = {i.id: i for i in iniciativas}
-        iniciativas = [iniciativas_dict[_id] for _id in ids]
-
-        return iniciativas, total
+        return ordered, total
