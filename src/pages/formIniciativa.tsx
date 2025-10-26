@@ -1,15 +1,17 @@
-import React, { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import toast, { Toaster } from 'react-hot-toast'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Camera, Star, Trash2Icon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useForm, useFieldArray } from 'react-hook-form'
+import toast, { Toaster } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
+
+import type { IniciativaCreate } from '@/interfaces/IIniciativas'
+
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormField,
@@ -18,117 +20,39 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import ScheduleItem from '@/components/ui/ScheduleItem'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import SidebarAdm from '@/components/ui/sidebar'
-import * as iniciativasService from '@/service/iniciativas'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { HorarioTipo } from '@/enums/HorarioTipo'
+import { createIniciativa } from '@/service/iniciativas'
+import { fetchOrganizadores } from '@/service/organizadores'
+import { fetchTags } from '@/service/tags'
 
-type Option = { value: string; label: string }
-
-const HOUR_OPTIONS: Option[] = [
-  { value: '', label: 'Selecione o horário' },
-  { value: '08:00', label: '08:00' },
-  { value: '09:00', label: '09:00' },
-  { value: '10:00', label: '10:00' },
-  { value: '11:00', label: '11:00' },
-  { value: '12:00', label: '12:00' },
-  { value: '13:00', label: '13:00' },
-  { value: '14:00', label: '14:00' },
-  { value: '15:00', label: '15:00' },
-  { value: '16:00', label: '16:00' },
-  { value: '17:00', label: '17:00' },
-]
-
-const DAY_OPTIONS: Option[] = [
-  { value: '', label: 'Selecione o dia' },
-  { value: 'segunda', label: 'Segunda-feira' },
-  { value: 'terca', label: 'Terça-feira' },
-  { value: 'quarta', label: 'Quarta-feira' },
-  { value: 'quinta', label: 'Quinta-feira' },
-  { value: 'sexta', label: 'Sexta-feira' },
-  { value: 'sabado', label: 'Sábado' },
-  { value: 'domingo', label: 'Domingo' },
-]
-
-interface TimeSelectProps {
-  dayValue: string
-  startValue: string
-  endValue: string
-  onDayChange: (v: string) => void
-  onStartChange: (v: string) => void
-  onEndChange: (v: string) => void
-}
-
-const TimeSelect: React.FC<TimeSelectProps> = ({
-  dayValue,
-  startValue,
-  endValue,
-  onDayChange,
-  onStartChange,
-  onEndChange,
-}) => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div>
-        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-          Dia
-        </Label>
-        <select
-          value={dayValue ?? ''}
-          onChange={e => onDayChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
-        >
-          {DAY_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-          Horário Início
-        </Label>
-        <select
-          value={startValue ?? ''}
-          onChange={e => onStartChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
-        >
-          {HOUR_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <Label className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-          Horário Fim
-        </Label>
-        <select
-          value={endValue ?? ''}
-          onChange={e => onEndChange(e.target.value)}
-          className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
-        >
-          {HOUR_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  )
-}
-
+// Schema de validação para horários
 const scheduleSchema = z.object({
   id: z.string().optional(),
-  dia: z.string().min(1, 'O dia é obrigatório.'),
+  dia: z
+    .string()
+    .min(1, 'A data é obrigatória.')
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de data inválido (YYYY-MM-DD)'),
   inicio: z.string().min(1, 'O horário de início é obrigatório.'),
   fim: z.string().min(1, 'O horário de fim é obrigatório.'),
-  tipo: z.string().min(1, 'O tipo de horário é obrigatório.'),
+  tipo: z.nativeEnum(HorarioTipo, {
+    errorMap: () => ({ message: 'Tipo de horário inválido.' }),
+  }),
 })
 
+// Schema de validação para o formulário principal
 const initiativeSchema = z.object({
   titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
   local: z.string().min(3, 'O local deve ter pelo menos 3 caracteres.'),
@@ -152,109 +76,15 @@ const initiativeSchema = z.object({
   isAtivo: z.boolean(),
   tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
   schedules: z.array(scheduleSchema),
-  newTag: z.string().optional(),
   foto: z.any().optional(),
 })
 
 type InitiativeFormData = z.infer<typeof initiativeSchema>
 
-const ScheduleItem: React.FC<{
-  index: number
-  onRemove: (index: number) => void
-  errors?: any
-}> = ({ index, onRemove, errors }) => {
-  return (
-    <Card className="bg-gray-50 border-gray-100 mb-6">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <div className="text-callout-semibold font-sf-pro-text text-label-primary">
-            Horário {index + 1}
-          </div>
-
-          <Button
-            type="button"
-            onClick={() => onRemove(index)}
-            className="px-2 py-1 transition cursor-pointer flex items-center justify-center rounded-[8px] min-w-9 h-9"
-            aria-label={`Remover horário ${index + 1}`}
-            variant="ghost"
-            size="sm"
-          >
-            <Trash2Icon className="w-4 h-4 text-red-500" />
-          </Button>
-        </div>
-
-        <FormField name={`schedules.${index}.dia`}>
-          {({ field: dayField }) => (
-            <FormField name={`schedules.${index}.inicio`}>
-              {({ field: inicioField }) => (
-                <FormField name={`schedules.${index}.fim`}>
-                  {({ field: fimField }) => (
-                    <>
-                      <TimeSelect
-                        dayValue={dayField.value}
-                        startValue={inicioField.value}
-                        endValue={fimField.value}
-                        onDayChange={dayField.onChange}
-                        onStartChange={inicioField.onChange}
-                        onEndChange={fimField.onChange}
-                      />
-
-                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {errors?.[index]?.dia && (
-                          <p className="text-red-500 text-xs">
-                            {errors[index].dia.message}
-                          </p>
-                        )}
-                        {errors?.[index]?.inicio && (
-                          <p className="text-red-500 text-xs">
-                            {errors[index].inicio.message}
-                          </p>
-                        )}
-                        {errors?.[index]?.fim && (
-                          <p className="text-red-500 text-xs">
-                            {errors[index].fim.message}
-                          </p>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </FormField>
-              )}
-            </FormField>
-          )}
-        </FormField>
-
-        <div className="mt-2">
-          <FormField name={`schedules.${index}.tipo`}>
-            {({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-                  Tipo
-                </FormLabel>
-                <FormControl>
-                  <select
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    className="w-full py-3 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer"
-                  >
-                    <option value="">Selecione o tipo</option>
-                    <option value="presencial">Presencial</option>
-                    <option value="online">Online</option>
-                    <option value="hibrido">Híbrido</option>
-                  </select>
-                </FormControl>
-                <FormMessage name={`schedules.${index}.tipo`} />
-              </FormItem>
-            )}
-          </FormField>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 export default function FormIniciativa() {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing] = useState(false)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const MAX_DESCRICOES = 5
 
   const form = useForm<InitiativeFormData>({
@@ -270,27 +100,16 @@ export default function FormIniciativa() {
       isAtivo: false,
       tags: [],
       schedules: [],
-      newTag: '',
       foto: undefined,
     },
   })
 
   const {
-    register,
     control,
-    reset,
-    getValues,
-    setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form
 
-  const organizadorValue = watch('organizador')
-  const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-  } = useFieldArray({ control, name: 'tags' })
   const {
     fields: scheduleFields,
     append: appendSchedule,
@@ -314,84 +133,68 @@ export default function FormIniciativa() {
     }
   }, [descricaoFields.length])
 
-  const handleNewTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      const newTagValue = getValues('newTag')?.trim()
-      if (newTagValue && !getValues('tags').includes(newTagValue)) {
-        appendTag(newTagValue)
-        setValue('newTag', '')
-      }
-    }
-  }
+  const {
+    data: organizadores,
+    isLoading: organizadoresLoading,
+    isError: organizadoresError,
+  } = useQuery({
+    queryKey: ['organizadores'],
+    queryFn: fetchOrganizadores,
+  })
 
-  const onSubmit = async (data: InitiativeFormData) => {
-    const payload = {
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+    isError: tagsError,
+  } = useQuery({
+    queryKey: ['tags'],
+    queryFn: fetchTags,
+  })
+  const createMutation = useMutation({
+    mutationFn: createIniciativa,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      toast.success('Iniciativa criada com sucesso!')
+      navigate('/admin/iniciativas')
+    },
+    onError: (error: Error) => {
+      console.error('Erro ao criar iniciativa:', error)
+      toast.error('Erro ao criar iniciativa')
+    },
+  })
+
+  const onSubmit = (data: InitiativeFormData) => {
+    if (isEditing) {
+      // implementar patch depois
+      toast.success('Iniciativa atualizada com sucesso!')
+      return
+    }
+
+    const formatTimeToISO = (time: string): string => {
+      return `${time}:00`
+    }
+
+    const iniciativaData: IniciativaCreate = {
       titulo: data.titulo,
       descricao: data.descricao,
-      organizador_id: data.organizador || '',
-      link: data.link1 || data.link2 || '',
+      organizador_id: data.organizador,
+      link: data.link1 || '',
       local: data.local,
-      imagem_url: '',
+      imagem_url:
+        'https://mh1.com.br/wp-content/uploads/2024/10/luffy_capa.jpg', // ajustar imagens
       destaque: data.isAtivo,
-      horarios: [],
-      tag_ids: [],
-      descricoes_extras: data.descricoes_extras ?? [],
+      horarios: data.schedules.map(schedule => ({
+        data_evento: schedule.dia,
+        hora_inicio: formatTimeToISO(schedule.inicio),
+        hora_fim: formatTimeToISO(schedule.fim),
+        tipo: schedule.tipo as HorarioTipo,
+      })),
+      tag_ids: data.tags,
+      descricoes_extras: [], //implementar depois
     }
-    try {
-      await iniciativasService.createIniciativa(payload)
-      toast.success(
-        isEditing
-          ? 'Iniciativa atualizada com sucesso!'
-          : 'Iniciativa criada com sucesso!'
-      )
-    } catch (e) {
-      toast.error('Falha ao salvar a iniciativa')
-    }
-  }
 
-  useEffect(() => {
-    if (isEditing) {
-      const dadosDoBackend: InitiativeFormData = {
-        titulo: 'Iniciativa de Exemplo',
-        local: 'Online',
-        link1: 'https://site.com',
-        link2: '',
-        organizador: 'Equipe BAH',
-        descricao: 'Descrição de exemplo para o modo de edição.',
-        descricoes_extras: ['Descrição extra 1'],
-        isAtivo: false,
-        tags: ['React', 'TypeScript'],
-        schedules: [
-          {
-            id: '1',
-            dia: 'segunda',
-            inicio: '09:00',
-            fim: '11:00',
-            tipo: 'online',
-          },
-        ],
-        newTag: '',
-        foto: undefined,
-      }
-      reset(dadosDoBackend)
-    } else {
-      reset({
-        titulo: '',
-        local: '',
-        link1: '',
-        link2: '',
-        organizador: '',
-        descricao: '',
-        descricoes_extras: [],
-        isAtivo: false,
-        tags: [],
-        schedules: [],
-        newTag: '',
-        foto: undefined,
-      })
-    }
-  }, [isEditing, reset])
+    createMutation.mutate(iniciativaData)
+  }
 
   return (
     <div className="flex h-screen w-full">
@@ -410,22 +213,10 @@ export default function FormIniciativa() {
                 : 'Crie aqui sua nova iniciativa'}
             </p>
           </div>
-          <Button
-            type="button"
-            onClick={() => setIsEditing(!isEditing)}
-            variant="secondary"
-            size="sm"
-            className="min-w-fit cursor-pointer"
-          >
-            {isEditing ? 'Cancelar Edição' : 'Editar'}
-          </Button>
         </header>
 
-        <Form<InitiativeFormData>
-          form={form}
-          onSubmit={onSubmit}
-          className="w-full"
-        >
+        <Form form={form} onSubmit={onSubmit} className="w-full">
+          {/* Seção: Detalhes da Iniciativa */}
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -451,6 +242,7 @@ export default function FormIniciativa() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
+                  {/* Primeira linha: Título, Local, Link 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="titulo">
                       {({ field }) => (
@@ -507,6 +299,7 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
+                  {/* Segunda linha: Link 2, Organizador */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="link2">
                       {({ field }) => (
@@ -525,6 +318,7 @@ export default function FormIniciativa() {
                         </FormItem>
                       )}
                     </FormField>
+
                     <FormField name="organizador">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
@@ -532,32 +326,36 @@ export default function FormIniciativa() {
                             Organizador
                           </FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <select
-                                {...field}
-                                className={`w-full py-3 pl-3 pr-10 border-2 border-gray-200 rounded-[0.8rem] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bah-purple focus:border-transparent cursor-pointer appearance-none ${!organizadorValue ? 'text-gray-400' : 'text-black'}`}
-                              >
-                                <option value="" disabled>
-                                  Selecione
-                                </option>
-                                <option value="Equipe BAH">Equipe BAH</option>
-                              </select>
-                              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                <svg
-                                  className="w-4 h-4 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 9l-7 7-7-7"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={
+                                organizadoresLoading || organizadoresError
+                              }
+                            >
+                              <SelectTrigger className="h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
+                                <SelectValue
+                                  placeholder={
+                                    organizadoresLoading
+                                      ? 'Carregando...'
+                                      : organizadoresError
+                                        ? 'Erro ao carregar'
+                                        : 'Selecione'
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="border-bah-purple">
+                                {organizadores?.map(org => (
+                                  <SelectItem
+                                    key={org.id}
+                                    value={org.id}
+                                    className="focus:bg-bah-purple focus:text-white"
+                                  >
+                                    {org.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage name="organizador" />
                         </FormItem>
@@ -565,6 +363,7 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
+                  {/* Terceira linha: Descrição e Tags */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="descricao">
                       {({ field }) => (
@@ -585,7 +384,7 @@ export default function FormIniciativa() {
                     </FormField>
 
                     <FormField name="tags">
-                      {() => (
+                      {({ field }) => (
                         <FormItem className="md:col-span-1 flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Tags
@@ -593,33 +392,44 @@ export default function FormIniciativa() {
                           <FormControl>
                             <div className="w-full border-2 border-gray-200 rounded-[1rem] h-[10rem] p-3 flex flex-col">
                               <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                                <div className="flex flex-wrap gap-2">
-                                  {tagFields.map((field, index) => (
-                                    <span
-                                      key={field.id}
-                                      className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-full"
-                                    >
-                                      {getValues(`tags.${index}`)}
-                                      <Button
-                                        type="button"
-                                        onClick={() => removeTag(index)}
-                                        className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none w-5 h-5 p-0 min-w-5 flex items-center justify-center cursor-pointer"
-                                        aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
-                                        variant="ghost"
-                                        size="sm"
-                                      >
-                                        ✕
-                                      </Button>
-                                    </span>
-                                  ))}
-                                </div>
+                                {tagsLoading ? (
+                                  <div className="text-sm text-gray-500">
+                                    Carregando...
+                                  </div>
+                                ) : tagsError ? (
+                                  <div className="text-sm text-red-500">
+                                    Erro ao carregar tags
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {tags?.map(t => {
+                                      const checked = (
+                                        field.value || []
+                                      ).includes(t.id)
+                                      return (
+                                        <Checkbox
+                                          key={t.id}
+                                          checked={checked}
+                                          onChange={e => {
+                                            const isChecked = e.target.checked
+                                            const current: string[] =
+                                              field.value || []
+                                            field.onChange(
+                                              isChecked
+                                                ? [...current, t.id]
+                                                : current.filter(
+                                                    id => id !== t.id
+                                                  )
+                                            )
+                                          }}
+                                          disabled={isSubmitting}
+                                          label={t.nome}
+                                        />
+                                      )
+                                    })}
+                                  </div>
+                                )}
                               </div>
-                              <Input
-                                {...register('newTag')}
-                                onKeyDown={handleNewTagKeyDown}
-                                placeholder="Adicionar tag..."
-                                className="w-full pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400 flex-shrink-0"
-                              />
                             </div>
                           </FormControl>
                           <FormMessage name="tags" />
@@ -632,6 +442,7 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
+          {/* Seção: Horários */}
           <section className="w-full max-w-none mt-8">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -737,7 +548,7 @@ export default function FormIniciativa() {
                           dia: '',
                           inicio: '',
                           fim: '',
-                          tipo: '',
+                          tipo: HorarioTipo.PRESENCIAL,
                         })
                       }
                       className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
@@ -761,7 +572,6 @@ export default function FormIniciativa() {
                       key={field.id}
                       index={index}
                       onRemove={removeSchedule}
-                      errors={errors.schedules}
                     />
                   ))}
                 </div>
@@ -769,6 +579,7 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
+          {/* Seção: Foto */}
           <section className="w-full max-w-none mt-6">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -807,19 +618,22 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          <div className="w-full mt-6 flex justify-end">
+          {/* Botão de Submit */}
+          <div className="w-full mt-6 flex justify-start">
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || createMutation.isPending}
               variant="purple"
               size="lg"
               className="mt-6 text-white cursor-pointer"
             >
-              {isSubmitting
-                ? 'Salvando...'
-                : isEditing
-                  ? 'Atualizar Iniciativa'
-                  : 'Salvar Iniciativa'}
+              {createMutation.isPending
+                ? 'Criando...'
+                : isSubmitting
+                  ? 'Salvando...'
+                  : isEditing
+                    ? 'Atualizar Iniciativa'
+                    : 'Salvar Iniciativa'}
             </Button>
           </div>
         </Form>

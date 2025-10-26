@@ -1,5 +1,9 @@
 import api from './api'
-import type { IniciativasResponse } from '@/interfaces/IIniciativas'
+import type {
+  IniciativasResponse,
+  IniciativaCreate,
+  Iniciativa,
+} from '@/interfaces/IIniciativas'
 
 export async function fetchIniciativas(
   searchQuery?: string,
@@ -17,30 +21,13 @@ export async function fetchIniciativas(
   return response.data
 }
 
-export async function deleteIniciativa(iniciativaId: number): Promise<void> {
+export async function deleteIniciativa(iniciativaId: string): Promise<void> {
   await api.delete(`/admin/iniciativas/${iniciativaId}`)
 }
 
-export type CreateIniciativaPayload = {
-  titulo: string
-  descricao: string
-  organizador_id: string
-  link: string
-  local: string
-  imagem_url: string
-  destaque: boolean
-  horarios: Array<{
-    data_evento: string
-    hora_inicio: string
-    hora_fim: string
-    tipo: string
-  }>
-  tag_ids: string[]
-  descricoes_extras?: string[]
-}
-
 export async function createIniciativa(
-  payload: CreateIniciativaPayload
-): Promise<void> {
-  await api.post('/admin/iniciativas', payload)
+  iniciativaData: IniciativaCreate
+): Promise<Iniciativa> {
+  const response = await api.post<Iniciativa>('/admin/iniciativas/', iniciativaData)
+  return response.data
 }
