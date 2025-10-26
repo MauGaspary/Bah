@@ -8,7 +8,7 @@ from tests.helpers import request, request_auth
 @pytest.mark.integration
 class TestUserCreationIntegration:
 
-    def test_create_user_success(self, client):
+    def test_create_user_success(self, client, auth_token):
         user_data = {
             "nome": "Teste",
             "sobrenome": "Usuario",
@@ -16,9 +16,11 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data)
+        response = request_auth(
+            client, "POST", "/admin/usuarios/", token=auth_token, json=user_data
+        )
 
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         created_user = response.json()
         assert created_user["nome"] == user_data["nome"]
@@ -29,7 +31,7 @@ class TestUserCreationIntegration:
         assert "password" not in created_user
         assert "senha_hash" not in created_user
 
-    def test_create_user_invalid_email(self, client):
+    def test_create_user_invalid_email(self, client, auth_token):
         user_data = {
             "nome": "Teste",
             "sobrenome": "Usuario",
@@ -37,13 +39,15 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data)
+        response = request_auth(
+            client, "POST", "/admin/usuarios/", token=auth_token, json=user_data
+        )
 
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "email" in str(error_detail).lower()
 
-    def test_create_user_duplicate_email(self, client):
+    def test_create_user_duplicate_email(self, client, auth_token):
         user_data1 = {
             "nome": "Teste1",
             "sobrenome": "Usuario1",
@@ -58,22 +62,28 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response1 = request(client, "POST", "/users/", json=user_data1)
-        assert response1.status_code == 200
+        response1 = request_auth(
+            client, "POST", "/admin/usuarios/", token=auth_token, json=user_data1
+        )
+        assert response1.status_code == 201
 
-        response2 = request(client, "POST", "/users/", json=user_data2)
+        response2 = request_auth(
+            client, "POST", "/admin/usuarios/", token=auth_token, json=user_data2
+        )
 
         assert response2.status_code == 400
         assert "Email já está em uso" in response2.json()["detail"]
 
-    def test_create_user_missing_fields(self, client):
+    def test_create_user_missing_fields(self, client, auth_token):
         user_data_no_nome = {
             "sobrenome": "Usuario",
             "email": "teste@gmail.com",
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data_no_nome)
+        response = request_auth(
+            client, "POST", "/admin/usuarios/", token=auth_token, json=user_data_no_nome
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "nome" in str(error_detail).lower()
@@ -84,7 +94,13 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data_no_sobrenome)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_no_sobrenome,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "sobrenome" in str(error_detail).lower()
@@ -95,7 +111,13 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data_no_email)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_no_email,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "email" in str(error_detail).lower()
@@ -106,12 +128,18 @@ class TestUserCreationIntegration:
             "email": "teste@gmail.com",
         }
 
-        response = request(client, "POST", "/users/", json=user_data_no_password)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_no_password,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "password" in str(error_detail).lower()
 
-    def test_create_user_empty_fields(self, client):
+    def test_create_user_empty_fields(self, client, auth_token):
         user_data_empty_nome = {
             "nome": "",
             "sobrenome": "Usuario",
@@ -119,7 +147,13 @@ class TestUserCreationIntegration:
             "password": "senha123",
         }
 
-        response = request(client, "POST", "/users/", json=user_data_empty_nome)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_empty_nome,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "nome" in str(error_detail).lower()
@@ -130,7 +164,13 @@ class TestUserCreationIntegration:
             "email": "teste@gmail.com",
             "password": "senha123",
         }
-        response = request(client, "POST", "/users/", json=user_data_empty_sobrenome)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_empty_sobrenome,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "sobrenome" in str(error_detail).lower()
@@ -141,7 +181,13 @@ class TestUserCreationIntegration:
             "email": "",
             "password": "senha123",
         }
-        response = request(client, "POST", "/users/", json=user_data_empty_email)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_empty_email,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "email" in str(error_detail).lower()
@@ -152,7 +198,13 @@ class TestUserCreationIntegration:
             "email": "teste@gmail.com",
             "password": "",
         }
-        response = request(client, "POST", "/users/", json=user_data_empty_password)
+        response = request_auth(
+            client,
+            "POST",
+            "/admin/usuarios/",
+            token=auth_token,
+            json=user_data_empty_password,
+        )
         assert response.status_code == 422
         error_detail = response.json()["detail"]
         assert "password" in str(error_detail).lower()

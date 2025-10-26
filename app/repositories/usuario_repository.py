@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.usuario_model import Usuario
-from app.schemas.user_schema import UserCreate
+from app.schemas.usuario_schema import UserCreate
 from app.utils.password_hasher import PasswordHasher
 
 

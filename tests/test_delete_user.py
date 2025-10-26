@@ -3,9 +3,9 @@ import pytest
 from app.services.usuario_service import UsuarioService
 
 
-def test_delete_existing_user(db_session):
+def test_delete_existing_user(db_session, usuario_fixture):
     service = UsuarioService(db_session)
-    result = service.delete_usuario("1")
+    result = service.delete_usuario(usuario_fixture["id"])
     assert result is True
 
 

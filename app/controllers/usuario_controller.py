@@ -1,13 +1,16 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.usuario_schema import *
+from app.schemas.usuario_schema import UserCreate, UserResponse, UsuarioResponse
 from app.services.usuario_service import UsuarioService
 
 
 class UsuarioController:
     def __init__(self, db: Session):
         self.service = UsuarioService(db)
+
+    def create_user(self, user: UserCreate) -> UserResponse:
+        return self.service.create_user(user)
 
     def delete_usuario(self, usuario_id: str) -> bool:
         try:
