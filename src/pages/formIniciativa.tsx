@@ -1,18 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Camera, Star } from 'lucide-react'
-import { useState, type KeyboardEvent } from 'react'
+import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { HorarioTipo } from '@/enums/HorarioTipo'
 import type { IniciativaCreate } from '@/interfaces/IIniciativas'
-import { createIniciativa } from '@/service/iniciativas'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormField,
@@ -34,6 +33,10 @@ import {
 import SidebarAdm from '@/components/ui/sidebar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { HorarioTipo } from '@/enums/HorarioTipo'
+import { createIniciativa } from '@/service/iniciativas'
+import { fetchOrganizadores } from '@/service/organizadores'
+import { fetchTags } from '@/service/tags'
 
 // Schema de validação para horários
 const scheduleSchema = z.object({
@@ -70,7 +73,6 @@ const initiativeSchema = z.object({
   isAtivo: z.boolean(),
   tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
   schedules: z.array(scheduleSchema),
-  newTag: z.string().optional(),
   foto: z.any().optional(),
 })
 
@@ -93,31 +95,39 @@ export default function FormIniciativa() {
       isAtivo: false,
       tags: [],
       schedules: [],
-      newTag: '',
       foto: undefined,
     },
   })
 
   const {
-    register,
     control,
-    getValues,
-    setValue,
     watch,
     formState: { isSubmitting },
   } = form
 
-  const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-  } = useFieldArray({ control, name: 'tags' })
   const {
     fields: scheduleFields,
     append: appendSchedule,
     remove: removeSchedule,
   } = useFieldArray({ control, name: 'schedules' })
 
+  const {
+    data: organizadores,
+    isLoading: organizadoresLoading,
+    isError: organizadoresError,
+  } = useQuery({
+    queryKey: ['organizadores'],
+    queryFn: fetchOrganizadores,
+  })
+
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+    isError: tagsError,
+  } = useQuery({
+    queryKey: ['tags'],
+    queryFn: fetchTags,
+  })
   const createMutation = useMutation({
     mutationFn: createIniciativa,
     onSuccess: () => {
@@ -131,46 +141,34 @@ export default function FormIniciativa() {
     },
   })
 
-  const handleNewTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      const newTagValue = getValues('newTag')?.trim()
-      if (newTagValue && !getValues('tags').includes(newTagValue)) {
-        appendTag(newTagValue)
-        setValue('newTag', '')
-      }
-    }
-  }
-
   const onSubmit = (data: InitiativeFormData) => {
     if (isEditing) {
-      // TODO: Implementar edição quando necessário
+      // implementar patch depois
       toast.success('Iniciativa atualizada com sucesso!')
       return
     }
 
-    // Função para converter hora para formato ISO
     const formatTimeToISO = (time: string): string => {
-      return `${time}:00` // Adiciona segundos se não tiver
+      return `${time}:00`
     }
 
-    // Transformar dados do formulário para o formato da API
     const iniciativaData: IniciativaCreate = {
       titulo: data.titulo,
       descricao: data.descricao,
-      organizador_id: "8c9ea99a-cedb-4521-8f54-acb6ab22d5c6",
+      organizador_id: data.organizador,
       link: data.link1 || '',
       local: data.local,
-      imagem_url: 'https://mh1.com.br/wp-content/uploads/2024/10/luffy_capa.jpg', // TODO: Implementar upload de imagem
+      imagem_url:
+        'https://mh1.com.br/wp-content/uploads/2024/10/luffy_capa.jpg', // ajustar imagens
       destaque: data.isAtivo,
       horarios: data.schedules.map(schedule => ({
-        data_evento: schedule.dia, // Já está no formato YYYY-MM-DD
+        data_evento: schedule.dia,
         hora_inicio: formatTimeToISO(schedule.inicio),
         hora_fim: formatTimeToISO(schedule.fim),
         tipo: schedule.tipo as HorarioTipo,
       })),
-      tag_ids: ['dda9c4dd-2764-4c56-b499-c8a2c394c81e'],
-      descricoes_extras: [], // TODO: Implementar se necessário
+      tag_ids: data.tags,
+      descricoes_extras: [], //implementar depois
     }
 
     createMutation.mutate(iniciativaData)
@@ -307,17 +305,31 @@ export default function FormIniciativa() {
                             <Select
                               value={field.value}
                               onValueChange={field.onChange}
+                              disabled={
+                                organizadoresLoading || organizadoresError
+                              }
                             >
                               <SelectTrigger className="h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
-                                <SelectValue placeholder="Selecione" />
+                                <SelectValue
+                                  placeholder={
+                                    organizadoresLoading
+                                      ? 'Carregando...'
+                                      : organizadoresError
+                                        ? 'Erro ao carregar'
+                                        : 'Selecione'
+                                  }
+                                />
                               </SelectTrigger>
                               <SelectContent className="border-bah-purple">
-                                <SelectItem
-                                  value="Equipe BAH"
-                                  className="focus:bg-bah-purple focus:text-white"
-                                >
-                                  Equipe BAH
-                                </SelectItem>
+                                {organizadores?.map(org => (
+                                  <SelectItem
+                                    key={org.id}
+                                    value={org.id}
+                                    className="focus:bg-bah-purple focus:text-white"
+                                  >
+                                    {org.nome}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -348,7 +360,7 @@ export default function FormIniciativa() {
                     </FormField>
 
                     <FormField name="tags">
-                      {() => (
+                      {({ field }) => (
                         <FormItem className="md:col-span-1 flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Tags
@@ -356,33 +368,44 @@ export default function FormIniciativa() {
                           <FormControl>
                             <div className="w-full border-2 border-gray-200 rounded-[1rem] h-[10rem] p-3 flex flex-col">
                               <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                                <div className="flex flex-wrap gap-2">
-                                  {tagFields.map((field, index) => (
-                                    <span
-                                      key={field.id}
-                                      className="inline-flex items-center gap-1 bg-lime-200 text-lime-800 text-sm font-medium pl-3 pr-1 py-1 rounded-lg"
-                                    >
-                                      {getValues(`tags.${index}`)}
-                                      <Button
-                                        type="button"
-                                        onClick={() => removeTag(index)}
-                                        className="text-lime-400 hover:text-lime-600 hover:ring-0 focus:ring-0 focus:outline-none w-5 h-5 p-0 min-w-5 flex items-center justify-center cursor-pointer"
-                                        aria-label={`Remover tag ${getValues(`tags.${index}`)}`}
-                                        variant="ghost"
-                                        size="sm"
-                                      >
-                                        ✕
-                                      </Button>
-                                    </span>
-                                  ))}
-                                </div>
+                                {tagsLoading ? (
+                                  <div className="text-sm text-gray-500">
+                                    Carregando...
+                                  </div>
+                                ) : tagsError ? (
+                                  <div className="text-sm text-red-500">
+                                    Erro ao carregar tags
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {tags?.map(t => {
+                                      const checked = (
+                                        field.value || []
+                                      ).includes(t.id)
+                                      return (
+                                        <Checkbox
+                                          key={t.id}
+                                          checked={checked}
+                                          onChange={e => {
+                                            const isChecked = e.target.checked
+                                            const current: string[] =
+                                              field.value || []
+                                            field.onChange(
+                                              isChecked
+                                                ? [...current, t.id]
+                                                : current.filter(
+                                                    id => id !== t.id
+                                                  )
+                                            )
+                                          }}
+                                          disabled={isSubmitting}
+                                          label={t.nome}
+                                        />
+                                      )
+                                    })}
+                                  </div>
+                                )}
                               </div>
-                              <Input
-                                {...register('newTag')}
-                                onKeyDown={handleNewTagKeyDown}
-                                placeholder="Adicionar tag..."
-                                className="w-full pt-2 border-t border-gray-200 text-sm focus:outline-none bg-transparent placeholder:text-gray-400 flex-shrink-0"
-                              />
                             </div>
                           </FormControl>
                           <FormMessage name="tags" />

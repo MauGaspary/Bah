@@ -28,6 +28,6 @@ export async function deleteIniciativa(iniciativaId: number): Promise<void> {
 export async function createIniciativa(
   iniciativaData: IniciativaCreate
 ): Promise<Iniciativa> {
-  const response = await api.post<Iniciativa>('/iniciativas', iniciativaData)
+  const response = await api.post<Iniciativa>('/admin/iniciativas/', iniciativaData)
   return response.data
 }
