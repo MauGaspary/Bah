@@ -56,15 +56,13 @@ def create_app(settings=None):
     else:
         app.state.embedding_model = None
 
-    app.include_router(demo_router, prefix="/demo", tags=["demo"])
-    app.include_router(admin_iniciativa_router, prefix="/admin", tags=["admin"])
-    app.include_router(
-        organizador_router, prefix="/organizadores", tags=["organizadores"]
-    )
-    app.include_router(auth_router, prefix="/auth", tags=["auth"])
-    app.include_router(iniciativa_router, prefix="/iniciativas", tags=["iniciativas"])
-    app.include_router(usuario_router, prefix="/admin/usuarios", tags=["usuarios"])
-    app.include_router(tag_router, prefix="/tags", tags=["tags"])
+    app.include_router(demo_router,             prefix="/demo", tags=["demo"])
+    app.include_router(admin_iniciativa_router, prefix="/admin/iniciativas", tags=["admin_iniciativas"])
+    app.include_router(organizador_router,      prefix="/organizadores", tags=["organizadores"])
+    app.include_router(auth_router,             prefix="/auth", tags=["auth"])
+    app.include_router(iniciativa_router,       prefix="/iniciativas", tags=["iniciativas"])
+    app.include_router(usuario_router,          prefix="/admin/usuarios", tags=["admin_usuarios"])
+    app.include_router(tag_router,              prefix="/tags", tags=["tags"])
 
     app.add_exception_handler(DomainException, domain_exception_handler)
     app.add_exception_handler(ValueError, value_error_handler)
