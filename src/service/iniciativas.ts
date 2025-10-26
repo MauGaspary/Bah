@@ -21,7 +21,7 @@ export async function fetchIniciativas(
   return response.data
 }
 
-export async function deleteIniciativa(iniciativaId: number): Promise<void> {
+export async function deleteIniciativa(iniciativaId: string): Promise<void> {
   await api.delete(`/admin/iniciativas/${iniciativaId}`)
 }
 
