@@ -251,12 +251,15 @@ class IniciativaRepository:
             obj.tags = tags
 
         if "horarios" in data and data["horarios"] is not None:
-            for h in list(obj.horarios):
-                self.db.delete(h)
+            self.db.query(IniciativaHorario).filter(
+                IniciativaHorario.iniciativa_id == obj.id
+            ).delete(synchronize_session=False)
             self.db.flush()
+
             for h in data["horarios"]:
-                obj.horarios.append(
+                self.db.add(
                     IniciativaHorario(
+                        iniciativa_id=obj.id,
                         data_evento=h.get("data_evento"),
                         hora_inicio=h.get("hora_inicio"),
                         hora_fim=h.get("hora_fim"),
