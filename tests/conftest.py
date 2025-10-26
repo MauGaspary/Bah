@@ -239,6 +239,84 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
 
 
 @pytest.fixture
+def iniciativa_factory(db_session):
+    """Factory para criar iniciativas com valores personalizados"""
+    import uuid
+    from datetime import date, time
+
+    from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
+    from app.models.iniciativa_model import Iniciativa
+    from app.models.iniciativa_tag_model import IniciativaTag
+
+    def _criar_iniciativa(
+        titulo="Iniciativa Factory",
+        descricao="Descrição factory",
+        organizador_id=None,
+        usuario_id=None,
+        link="https://example.com",
+        imagem_url="https://example.com/image.jpg",
+        destaque=False,
+        local=None,
+        horarios=None,
+        tag_ids=None,
+        **kwargs,
+    ):
+        if horarios is None:
+            horarios = [
+                {
+                    "data_evento": date(2025, 12, 15),
+                    "hora_inicio": time(10, 0),
+                    "hora_fim": time(16, 0),
+                    "tipo": HorarioTipo.PRESENCIAL,
+                }
+            ]
+
+        iniciativa = Iniciativa(
+            titulo=titulo,
+            descricao=descricao,
+            descricao_vetor=[0.0] * 768,
+            organizador_id=organizador_id,
+            link=link,
+            imagem_url=imagem_url,
+            destaque=destaque,
+            local=local,
+            criado_por=usuario_id,
+            **kwargs,
+        )
+        db_session.add(iniciativa)
+        db_session.flush()
+
+        horarios_criados = []
+        for horario_data in horarios:
+            horario = IniciativaHorario(iniciativa_id=iniciativa.id, **horario_data)
+            db_session.add(horario)
+            horarios_criados.append(horario)
+
+        tags_criadas = []
+        if tag_ids:
+            for tag_id in tag_ids:
+                iniciativa_tag = IniciativaTag(
+                    iniciativa_id=iniciativa.id, tag_id=tag_id
+                )
+                db_session.add(iniciativa_tag)
+                tags_criadas.append(iniciativa_tag)
+
+        db_session.flush()
+
+        return {
+            "id": iniciativa.id,
+            "titulo": iniciativa.titulo,
+            "organizador_id": iniciativa.organizador_id,
+            "destaque": iniciativa.destaque,
+            "local": iniciativa.local,
+            "horarios": horarios_criados,
+            "tags": tags_criadas,
+        }
+
+    return _criar_iniciativa
+
+
+@pytest.fixture
 def auth_token(usuario_fixture):
     """Fixture que gera um token JWT válido para testes"""
     from app.services.jwt_service import sign

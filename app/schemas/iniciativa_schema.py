@@ -1,4 +1,5 @@
 from datetime import date, datetime, time
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
@@ -68,6 +69,45 @@ class IniciativaResponse(BaseModel):
     criado_por: Optional[str] = None
     editado_em: Optional[datetime] = None
     editado_por: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class CalendarioHorarioTipo(str, Enum):
+    PRESENCIAL = "PRESENCIAL"
+    ONLINE = "ONLINE"
+    HIBRIDO = "HIBRIDO"
+
+
+class TagSchema(BaseModel):
+    id: str
+    nome: str
+    descricao: Optional[str] = None
+
+
+class CalendarioIniciativaItem(BaseModel):
+    iniciativa_id: str
+    horario_id: str
+    titulo: str
+    descricao: str
+    hora_inicio: time
+    hora_fim: time
+    tipo: CalendarioHorarioTipo
+    link: str
+    local: Optional[str] = None
+    imagem_url: str
+    destaque: bool
+    tags: List[TagSchema] = []
+
+
+class DiaCalendario(BaseModel):
+    data: date
+    iniciativas: List[CalendarioIniciativaItem]
+
+
+class CalendarioMensalResponse(BaseModel):
+    mes: str
+    dias: List[DiaCalendario]
 
 
 class IniciativaListResponse(BaseModel):
