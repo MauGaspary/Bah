@@ -22,7 +22,7 @@ import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 function IniciativasList({ searchQuery }: IniciativasListProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [iniciativaToDelete, setIniciativaToDelete] =
     useState<Iniciativa | null>(null)
@@ -86,7 +86,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
       <div className="rounded-card bg-white shadow-md overflow-hidden flex flex-col">
         <div className="bg-bah-purple px-6 py-6">
           <div className="flex justify-between items-end">
-            <h1 className="text-medium-title font-mulish text-white self-center">
+            <h1 className="text-title3-regular font-mulish text-white self-center">
               Iniciativas Cadastradas
             </h1>
             <p className="text-body-regular font-mulish text-white">
@@ -97,7 +97,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
 
         <div className="flex px-6 py-2 bg-background-secondary justify-between">
           <h1 className="text-body-regular font-mulish">Iniciativa</h1>
-          <h1 className="text-body-regular font-mulish mr-53.5">Ações</h1>
+          <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
         {!loading && error && (
@@ -122,7 +122,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
         </div>
       </div>
       <div className="py-4 fixed bottom-0 right-0 left-[15%]">
-        <div className="px-6">
+        <div className="py-8">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
