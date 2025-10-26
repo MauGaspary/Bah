@@ -80,7 +80,8 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
 
     let sectionId = mapIdToSection[item.id]
     if (item.id === 'calendario' && typeof window !== 'undefined') {
-      sectionId = window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+      sectionId =
+        window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
     }
 
     if (sectionId) {
@@ -124,6 +125,12 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
       searchIconDesktop: 'var(--color-bah-purple)',
       buttonHover: 'var(--color-bah-green)',
       mobileMenuBg: 'var(--color-bah-purple)',
+    }
+  }
+
+  const handleHeaderSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/results?q=${encodeURIComponent(searchQuery)}`)
     }
   }
 
@@ -188,7 +195,13 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
 
           {isScrolled && (
             <div className="flex-1 max-w-sm mx-4 md:mx-20 lg:mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-4 md:ml-4 lg:ml-0 max-[500px]:max-w-[250px] max-[500px]:ml-6">
+              <form
+                onSubmit={e => {
+                  e.preventDefault()
+                  handleHeaderSearch()
+                }}
+                className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-4 md:ml-4 lg:ml-0 max-[500px]:max-w-[250px] max-[500px]:ml-6"
+              >
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
@@ -196,7 +209,9 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   onChange={e => setSearchQuery(e.target.value)}
                   className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0 max-[500px]:placeholder:text-xs truncate placeholder:truncate"
                 />
-                <div
+                <button
+                  type="submit"
+                  onClick={handleHeaderSearch}
                   className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer transition-all duration-300"
                   style={{
                     backgroundColor:
@@ -212,9 +227,10 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   }}
                   onMouseEnter={() => setIsSearchIconHovered(true)}
                   onMouseLeave={() => setIsSearchIconHovered(false)}
+                  aria-label="Buscar"
                 >
                   <SearchIcon />
-                </div>
+                </button>
               </form>
             </div>
           )}

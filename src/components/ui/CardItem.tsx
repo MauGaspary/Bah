@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 
-import type { Horario } from '@/interfaces/IIniciativas'
+import type { IniciativaHorarioResponse } from '@/interfaces/IIniciativas'
 
 import { Badge } from '@/components/badge'
 
@@ -9,7 +9,7 @@ type CardItemProps = {
   imageUrl: string
   title: string
   description: string
-  horarios: Horario[]
+  horarios: IniciativaHorarioResponse[]
 }
 
 const formatTime = (timeString: string): string => {

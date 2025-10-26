@@ -9,15 +9,6 @@ export interface IniciativasResponse{
     total: number;
 }
 
-export interface Horario {
-    id?: string;
-    hora_inicio: string;
-    hora_fim: string;
-    data: string;
-    dia: string;
-    modalidade: string;
-}
-
 export interface SearchParams {
     q?: string;
     page?: number;
@@ -73,12 +64,6 @@ export interface IniciativaFilters {
   q?: string
   page: number
   size: number
-}
-
-export interface IniciativasResponse {
-  items: IniciativaResponse[]
-  total: number
-  filters: IniciativaFilters
 }
 
 // Type aliases para compatibilidade com código existente
