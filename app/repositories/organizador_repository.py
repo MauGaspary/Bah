@@ -19,3 +19,18 @@ class OrganizadorRepository:
             .filter(Organizador.id == organizador_id)
             .first()
         )
+
+    def create(self, organizador: Organizador) -> Organizador:
+        self.session.add(organizador)
+        self.session.commit()
+        self.session.refresh(organizador)
+        return organizador
+
+    def update(self, organizador: Organizador) -> Organizador:
+        self.session.commit()
+        self.session.refresh(organizador)
+        return organizador
+
+    def delete(self, organizador: Organizador) -> None:
+        self.session.delete(organizador)
+        self.session.commit()
