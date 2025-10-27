@@ -494,7 +494,9 @@ export default function FormIniciativa() {
                                 organizadoresLoading || organizadoresError
                               }
                             >
-                              <SelectTrigger className="h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
+                              <SelectTrigger
+                                className={`h-11 border px-4 border-gray-300 py-3 text-sm focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg ${field.value ? 'text-black' : 'text-gray-400'}`}
+                              >
                                 <SelectValue
                                   placeholder={
                                     organizadoresLoading
