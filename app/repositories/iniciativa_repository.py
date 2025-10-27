@@ -561,9 +561,12 @@ class IniciativaRepository:
             all_sims AS (
                 SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
                 FROM iniciativas i
+                WHERE i.deletado_em IS NULL
                 UNION ALL
                 SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
                 FROM descricoes_extras de
+                JOIN iniciativas i ON i.id = de.iniciativa_id
+                WHERE i.deletado_em IS NULL
             ),
             best AS (
                 SELECT id, MAX(sim) AS best_sim
@@ -573,6 +576,7 @@ class IniciativaRepository:
             SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
             FROM best
             JOIN iniciativas i ON i.id = best.id
+            WHERE i.deletado_em IS NULL
             ORDER BY best.best_sim DESC
             LIMIT :limit OFFSET :offset
         """
