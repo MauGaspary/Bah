@@ -1,5 +1,3 @@
-# Remover o workflow que estava bloqueando tudo!
-
 stages:
   - quality
   - build
@@ -8,21 +6,18 @@ stages:
 variables:
   NODE_VERSION: '22'
 
-# Cache de node_modules
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - node_modules/
     - .npm/
 
-# ============================================
 # STAGE: QUALITY
-# ============================================
 lint:
   stage: quality
   image: node:22
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - corepack enable
     - npm ci
@@ -37,7 +32,7 @@ prettier:
   stage: quality
   image: node:22
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - corepack enable
     - npm ci
@@ -52,7 +47,7 @@ typecheck:
   stage: quality
   image: node:22
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - corepack enable
     - npm ci
@@ -63,14 +58,12 @@ typecheck:
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "dev"'
 
-# ============================================
 # STAGE: BUILD
-# ============================================
 build_check:
   stage: build
   image: node:22
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - corepack enable
     - npm ci
@@ -87,51 +80,47 @@ build_check:
     - if: '$CI_COMMIT_BRANCH == "dev"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-# ============================================
-# STAGE: DEPLOY - PREVIEW (MRs)
-# ============================================
+# STAGE: DEPLOY - PREVIEW
 deploy_preview:
   stage: deploy
   image: node:22-alpine
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - npm install -g vercel@latest
   script:
     - echo "🚀 Deploy Preview na Vercel"
     - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
     - vercel build --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
-    - DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID)
+    - vercel deploy --prebuilt --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID > deployment-url.txt
     - echo "✅ Deploy de preview concluído!"
-    - echo "🔗 Preview URL: $DEPLOY_URL"
+    - cat deployment-url.txt
   environment:
     name: preview/$CI_COMMIT_REF_SLUG
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   when: on_success
 
-# ============================================
-# STAGE: DEPLOY - PRODUCTION (main)
-# ============================================
+# STAGE: DEPLOY - PRODUCTION
 deploy_production:
   stage: deploy
   image: node:22-alpine
   tags:
-    - deploy # ← IMPORTANTE!
+    - deploy
   before_script:
     - npm install -g vercel@latest
   script:
     - echo "🚀 Deploy Production na Vercel"
-    - echo "Project ID: $VERCEL_PROJECT_ID"
-    - echo "Org ID: $VERCEL_ORG_ID"
+    - echo "Project ID:" $VERCEL_PROJECT_ID
+    - echo "Org ID:" $VERCEL_ORG_ID
     - vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
     - vercel build --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
-    - DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID)
+    - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID > deployment-url.txt
     - echo "✅ Deploy concluído!"
-    - echo "🔗 URL: $DEPLOY_URL"
+    - cat deployment-url.txt
   environment:
     name: production
-    url: https://bah-frontend.vercel.app # ← COLOCAR SUA URL AQUI
+    url: https://bah-frontend.vercel.app
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   when: on_success
