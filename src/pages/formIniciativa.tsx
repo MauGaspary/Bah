@@ -191,6 +191,7 @@ export default function FormIniciativa() {
   useEffect(() => {
     if (isEditing && iniciativaAdmin) {
       const admin: IniciativaAdmin = iniciativaAdmin
+      console.log('admin', admin)
       const toHHMM = (t?: string) => (t ? t.slice(0, 5) : '')
       const organizadorValue =
         admin.organizador_id || admin.organizador?.id || ''
@@ -198,7 +199,7 @@ export default function FormIniciativa() {
         titulo: admin.titulo || '',
         local: admin.local || '',
         link: admin.link || '',
-        organizador: organizadorValue,
+        organizador: admin.organizador_id || admin.organizador?.id,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
         isAtivo: Boolean(admin.destaque),
