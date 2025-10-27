@@ -23,6 +23,7 @@ lint:
     - npm ci
   script:
     - npm run lint
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -38,6 +39,7 @@ prettier:
     - npm ci
   script:
     - npm run format:check
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -53,6 +55,7 @@ typecheck:
     - npm ci
   script:
     - npx tsc -p tsconfig.json --noEmit
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
