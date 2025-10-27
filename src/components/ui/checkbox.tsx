@@ -10,7 +10,7 @@ function Checkbox({ className, label, ...props }: CheckboxProps) {
       <input
         type="checkbox"
         className={cn(
-          'w-4 h-4 text-bah-purple border-gray-300 rounded cursor-pointer',
+          'w-4 h-4 text-bah-purple border-gray-300 rounded cursor-pointer focus:ring-bah-purple accent-bah-purple',
           className
         )}
         {...props}

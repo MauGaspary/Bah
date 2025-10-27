@@ -554,7 +554,7 @@ export default function FormIniciativa() {
                           </FormLabel>
                           <FormControl>
                             <div className="w-full border-2 border-gray-200 rounded-[1rem] h-[10rem] p-3 flex flex-col">
-                              <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                              <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
                                 {tagsLoading ? (
                                   <div className="text-sm text-gray-500">
                                     Carregando...
