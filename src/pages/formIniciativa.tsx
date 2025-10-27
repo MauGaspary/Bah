@@ -78,9 +78,7 @@ const initiativeSchema = z.object({
   descricao: z
     .string()
     .min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
-  descricoes_extras: z
-    .array(z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres.'))
-    .optional(),
+  descricoes_extras: z.array(z.string()).optional(),
   isAtivo: z.boolean(),
   tags: z.array(z.string()).min(1, 'Adicione pelo menos uma tag.'),
   schedules: z.array(scheduleSchema),
@@ -201,14 +199,14 @@ export default function FormIniciativa() {
   useEffect(() => {
     if (isEditing && iniciativaAdmin) {
       const admin: IniciativaAdmin = iniciativaAdmin
-      console.log('admin', admin)
       const toHHMM = (t?: string) => (t ? t.slice(0, 5) : '')
+      const organizadorValue =
+        admin.organizador_id || admin.organizador?.id || ''
       form.reset({
         titulo: admin.titulo || '',
         local: admin.local || '',
         link1: admin.link || '',
-        link2: '',
-        organizador: admin.organizador_id || admin.organizador?.id,
+        organizador: organizadorValue,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
         isAtivo: Boolean(admin.destaque),
@@ -222,6 +220,13 @@ export default function FormIniciativa() {
           })) || [],
         foto: admin.imagem_url,
       })
+
+      // Força a atualização do campo organizador especificamente
+      setTimeout(() => {
+        form.setValue('organizador', organizadorValue, { shouldValidate: true })
+        console.log('Organizador setado via setValue:', organizadorValue)
+      }, 100)
+
       if (admin.imagem_url) {
         setImagePreview(admin.imagem_url)
       }
