@@ -6,6 +6,7 @@ import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { buildCalendarEvents } from '@/data/iniciativas'
 import { ChevronDown } from 'lucide-react'
+import LogoImg from '@/assets/logo.png'
 
 function HomePage() {
   const location = useLocation()
@@ -47,7 +48,7 @@ function HomePage() {
       >
         <section className="container mx-auto px-4 py-8 md:py-20">
           <img
-            src="../src/assets/logo.png"
+            src={LogoImg}
             alt="logo"
             className="w-32 md:w-40 h-24 md:h-30 mb-3 mx-auto hidden md:block"
           />
