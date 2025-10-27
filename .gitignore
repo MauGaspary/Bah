@@ -7,9 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies lock files (opcional - você pode commitar package-lock.json)
 package-lock.json
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
 *.local
@@ -31,12 +35,28 @@ docker-compose.override.yml
 docker-compose.log
 .docker/
 
-# Environment files
+# Environment files - LOCAL ONLY
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env*.local
 
-# Scripts executáveis devem ser commitados
-# !scripts/
+# Vercel
+.vercel
+.vercel.json
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+.cache
+.parcel-cache
+.next
+.nuxt
+.turbo
+
+# OS
+Thumbs.db
 .vercel

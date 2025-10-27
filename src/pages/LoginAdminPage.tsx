@@ -11,6 +11,7 @@ import { Form, FormField, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
+import LogoImg from '@/assets/logo.png'
 
 function LoginAdminPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -192,11 +193,7 @@ function LoginAdminPage() {
       <div className="w-1/2 bg-bah-purple flex items-center justify-center">
         <div className="text-center">
           <div className="mb-6">
-            <img
-              src="/src/assets/logo.png"
-              alt="BAH Logo"
-              className="w-72 h-auto mx-auto"
-            />
+            <img src={LogoImg} alt="BAH Logo" className="w-72 h-auto mx-auto" />
           </div>
         </div>
       </div>
