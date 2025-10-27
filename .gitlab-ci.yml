@@ -2,21 +2,40 @@ stages:
   - validate
   - quality
   - test
+  - build
+  - deploy
 
-before_script:
-  - python --version
-  - pip install pipenv
-  - pipenv install --dev
+# VARIÁVEIS GLOBAIS
+variables:
+  DOCKER_DRIVER: overlay2
+  COMPOSE_FILE_PROD: docker-compose.prod.yml
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
+# CACHE GLOBAL (otimiza instalação de dependências)
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cache/pip
+    - .venv/
+
+# TEMPLATE PARA JOBS PYTHON
+.python_job:
+  image: python:3.12-slim
+  before_script:
+    - python --version
+    - pip install pipenv
+    - pipenv install --dev
+
+# STAGE: VALIDATE
 validate_branch:
   stage: validate
   image: alpine:latest
   script:
     - |
       if [[ "$CI_COMMIT_REF_NAME" =~ ^(main|dev|feature/.*|hotfix/.*|release/.*)$ ]]; then
-        echo "Nome da branch válido: $CI_COMMIT_REF_NAME"
+        echo "✅ Nome da branch válido: $CI_COMMIT_REF_NAME"
       else
-        echo "Nome da branch inválido: $CI_COMMIT_REF_NAME"
+        echo "❌ Nome da branch inválido: $CI_COMMIT_REF_NAME"
         echo "Use: feature/*, hotfix/*, release/*, main, dev"
         exit 1
       fi
@@ -24,29 +43,201 @@ validate_branch:
     - main
     - dev
 
+# STAGE: QUALITY
 lint:
+  extends: .python_job
   stage: quality
-  image: python:3.12-slim
   script:
+    - echo "🔍 Verificando formatação e linting..."
     - pipenv run format:all
     - pipenv run lint:all
     - pipenv run pylint:all
+    - echo "✅ Quality checks passed!"
   only:
     - merge_requests
     - main
     - dev
+  allow_failure: false
 
+# STAGE: TEST
 test:
+  extends: .python_job
   stage: test
-  image: python:3.12-slim
   script:
+    - echo "🧪 Rodando testes com coverage..."
     - pipenv run test:cov
+    - echo "✅ Testes concluídos!"
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.xml
+      - htmlcov/
     expire_in: 1 week
   only:
     - merge_requests
     - main
     - dev
+  allow_failure: false
+
+# STAGE: BUILD
+# Verifica se as imagens Docker buildham corretamente
+build_check:
+  stage: build
+  tags:
+    - deploy
+  script:
+    - echo "🔨 Verificando build das imagens Docker..."
+    - docker --version
+    - docker-compose --version
+
+    # Build de desenvolvimento (para validar)
+    - echo "📦 Building development image..."
+    - docker-compose build --no-cache
+
+    # Build de produção (para validar)
+    - echo "📦 Building production image..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} build --no-cache
+
+    - echo "✅ Todas as imagens buildaram com sucesso!"
+  only:
+    - merge_requests
+    - main
+  allow_failure: false
+
+# STAGE: DEPLOY
+# Deploy automático em produção (apenas na branch main)
+deploy_production:
+  stage: deploy
+  tags:
+    - deploy
+  script:
+    - echo "🚀 ============================================"
+    - echo "🚀 INICIANDO DEPLOY EM PRODUÇÃO"
+    - echo "🚀 ============================================"
+    - echo "📌 Commit: $CI_COMMIT_SHORT_SHA"
+    - echo "📌 Branch: $CI_COMMIT_REF_NAME"
+    - echo "📌 Autor: $CI_COMMIT_AUTHOR"
+    - echo ""
+
+    # Criar arquivo .env.prod com variáveis do GitLab CI
+    - echo "📝 Criando arquivo .env.prod..."
+    - |
+      cat > .env.prod <<EOF
+      # Database Configuration
+      POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER=${POSTGRES_USER}
+      POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # JWT Configuration
+      JWT_SECRET=${JWT_SECRET}
+      JWT_TTL=${JWT_TTL}
+      JWT_ISS=${JWT_ISS}
+
+      # Application Configuration
+      CORS_ORIGINS=${CORS_ORIGINS}
+      ENVIRONMENT=production
+
+      # CI/CD Info
+      CI_COMMIT_SHA=${CI_COMMIT_SHORT_SHA}
+      CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
+      EOF
+    - echo "✅ Arquivo .env.prod criado"
+    - echo ""
+
+    # Parar containers antigos
+    - echo "📦 Parando containers antigos..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod down || true
+    - echo ""
+
+    # Limpar recursos não utilizados
+    - echo "🧹 Limpando recursos não utilizados (imagens antigas)..."
+    - docker system prune -af --filter "until=24h" || true
+    - echo ""
+
+    # Build das novas imagens
+    - echo "🔨 Fazendo build das imagens de produção..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod build --no-cache
+    - echo "✅ Build concluído"
+    - echo ""
+
+    # Subir containers
+    - echo "🚢 Subindo containers em produção..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod up -d
+    - echo ""
+
+    # Aguardar aplicação inicializar
+    - echo "⏳ Aguardando aplicação inicializar (30s)..."
+    - sleep 30
+    - echo ""
+
+    # Verificar status dos containers
+    - echo "🔍 Verificando status dos containers..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} ps
+    - echo ""
+
+    # Verificar health da aplicação
+    - echo "🏥 Verificando health check da aplicação..."
+    - |
+      for i in {1..5}; do
+        if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+          echo "✅ Aplicação está respondendo!"
+          break
+        else
+          echo "⏳ Tentativa $i/5 - Aguardando aplicação..."
+          sleep 10
+        fi
+      done
+    - echo ""
+    # Mostrar logs recentes
+    - echo "📋 Logs recentes da aplicação:"
+    - docker-compose -f ${COMPOSE_FILE_PROD} logs --tail=50 app
+    - echo ""
+
+    # Mostrar informações do sistema
+    - echo "💾 Uso de disco:"
+    - df -h | grep -E "Filesystem|/$"
+    - echo ""
+    - echo "🐳 Imagens Docker:"
+    - docker images | head -n 10
+    - echo ""
+
+    # Limpar arquivo .env.prod temporário
+    - echo "🔥 Limpando arquivo .env.prod temporário..."
+    - rm -f .env.prod
+    - echo ""
+
+    - echo "✨ ============================================"
+    - echo "✨ DEPLOY CONCLUÍDO COM SUCESSO!"
+    - echo "✨ ============================================"
+    - echo "🌐 URL: http://${EC2_PUBLIC_DNS}:8000"
+    - echo "📚 Docs: http://${EC2_PUBLIC_DNS}:8000/docs"
+
+  only:
+    - main
+  environment:
+    name: production
+    url: http://$EC2_PUBLIC_DNS:8000
+  when: manual # Requer aprovação manual (remova esta linha para deploy automático)
+
+# DEPLOY OPCIONAL: Rollback
+# Em caso de problemas, você pode fazer rollback manual
+rollback_production:
+  stage: deploy
+  tags:
+    - deploy
+  script:
+    - echo "🔄 Iniciando rollback..."
+    - docker-compose -f ${COMPOSE_FILE_PROD} down
+    - docker-compose -f ${COMPOSE_FILE_PROD} pull
+    - docker-compose -f ${COMPOSE_FILE_PROD} up -d
+    - echo "✅ Rollback concluído!"
+  only:
+    - main
+  when: manual
+  environment:
+    name: production
+    action: rollback
