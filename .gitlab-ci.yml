@@ -1,48 +1,83 @@
-workflow:
-  rules:
-    - when: never
-
-image: node:22
-
-cache:
-  paths:
-    - node_modules/
-
-default:
-  before_script:
-    - corepack enable
-    - npm ci
+# Remover o workflow que estava bloqueando tudo!
 
 stages:
   - quality
   - build
   - deploy
 
+variables:
+  NODE_VERSION: '22'
+
+# Cache de node_modules
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .npm/
+
+# ============================================
+# STAGE: QUALITY
+# ============================================
 lint:
   stage: quality
-  script: ['npm run lint']
+  image: node:22
+  tags:
+    - deploy # ← IMPORTANTE!
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - npm run lint
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
 prettier:
   stage: quality
-  script: ['npm run format:check']
+  image: node:22
+  tags:
+    - deploy # ← IMPORTANTE!
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - npm run format:check
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
 typecheck:
   stage: quality
-  script: ['npx tsc -p tsconfig.json --noEmit']
+  image: node:22
+  tags:
+    - deploy # ← IMPORTANTE!
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - npx tsc -p tsconfig.json --noEmit
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
-build:
+# ============================================
+# STAGE: BUILD
+# ============================================
+build_check:
   stage: build
+  image: node:22
+  tags:
+    - deploy # ← IMPORTANTE!
+  before_script:
+    - corepack enable
+    - npm ci
   script:
+    - echo "🔨 Verificando build..."
     - npm run build
+    - echo "✅ Build passou!"
   artifacts:
     paths:
       - dist/
@@ -50,31 +85,53 @@ build:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "dev"'
-
-deploy_preview:
-  stage: deploy
-  image: node:22
-  before_script:
-    - npm install -g vercel@latest
-    - corepack enable
-    - npm ci
-  script:
-    - vercel --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --confirm
-  environment:
-    name: preview
-  rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-deploy_production:
+# ============================================
+# STAGE: DEPLOY - PREVIEW (MRs)
+# ============================================
+deploy_preview:
   stage: deploy
-  image: node:22
+  image: node:22-alpine
+  tags:
+    - deploy # ← IMPORTANTE!
   before_script:
     - npm install -g vercel@latest
-    - corepack enable
-    - npm ci
   script:
-    - vercel --prod --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --confirm
+    - echo "🚀 Deploy Preview na Vercel"
+    - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - vercel build --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID)
+    - echo "✅ Deploy de preview concluído!"
+    - echo "🔗 Preview URL: $DEPLOY_URL"
+  environment:
+    name: preview/$CI_COMMIT_REF_SLUG
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  when: on_success
+
+# ============================================
+# STAGE: DEPLOY - PRODUCTION (main)
+# ============================================
+deploy_production:
+  stage: deploy
+  image: node:22-alpine
+  tags:
+    - deploy # ← IMPORTANTE!
+  before_script:
+    - npm install -g vercel@latest
+  script:
+    - echo "🚀 Deploy Production na Vercel"
+    - echo "Project ID: $VERCEL_PROJECT_ID"
+    - echo "Org ID: $VERCEL_ORG_ID"
+    - vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - vercel build --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID)
+    - echo "✅ Deploy concluído!"
+    - echo "🔗 URL: $DEPLOY_URL"
   environment:
     name: production
+    url: https://bah-frontend.vercel.app # ← COLOCAR SUA URL AQUI
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+  when: on_success
