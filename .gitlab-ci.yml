@@ -2,31 +2,42 @@ stages:
   - validate
   - quality
   - test
+  - build
+  - deploy
 
-before_script:
-  - python --version
-  - pip install pipenv
-  - pipenv install --dev
+variables:
+  DOCKER_DRIVER: overlay2
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cache/pip
+    - .venv/
+
+.python_job:
+  image: python:3.12-slim
+  tags:
+    - deploy
+  before_script:
+    - python --version
+    - pip install pipenv
+    - pipenv install --dev
 
 validate_branch:
   stage: validate
   image: alpine:latest
+  tags:
+    - deploy
   script:
-    - |
-      if [[ "$CI_COMMIT_REF_NAME" =~ ^(main|dev|feature/.*|hotfix/.*|release/.*)$ ]]; then
-        echo "Nome da branch válido: $CI_COMMIT_REF_NAME"
-      else
-        echo "Nome da branch inválido: $CI_COMMIT_REF_NAME"
-        echo "Use: feature/*, hotfix/*, release/*, main, dev"
-        exit 1
-      fi
+    - echo "Validando branch $CI_COMMIT_REF_NAME"
   except:
     - main
     - dev
 
 lint:
+  extends: .python_job
   stage: quality
-  image: python:3.12-slim
   script:
     - pipenv run format:all
     - pipenv run lint:all
@@ -37,16 +48,44 @@ lint:
     - dev
 
 test:
+  extends: .python_job
   stage: test
-  image: python:3.12-slim
   script:
     - pipenv run test:cov
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     reports:
       cobertura: coverage.xml
+    paths:
+      - coverage.xml
+      - htmlcov/
     expire_in: 1 week
   only:
     - merge_requests
     - main
     - dev
+
+build_check:
+  stage: build
+  tags:
+    - deploy
+  script:
+    - docker-compose build
+    - docker-compose -f docker-compose.prod.yml build
+  only:
+    - merge_requests
+    - main
+
+deploy_production:
+  stage: deploy
+  tags:
+    - deploy
+  script:
+    - chmod +x deploy.sh
+    - ./deploy.sh
+  only:
+    - main
+  environment:
+    name: production
+    url: http://$EC2_PUBLIC_DNS:8000
+  when: manual
