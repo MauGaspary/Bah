@@ -387,14 +387,14 @@ export default function FormIniciativa() {
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Star
-                      className={`w-5 h-5 ${watch('isAtivo') ? 'text-black fill-black' : 'text-gray-400 fill-gray-400'}`}
+                      className={`w-5 h-5 ${watch('isAtivo') ? 'text-bah-purple fill-bah-purple' : 'text-gray-400 fill-gray-400'}`}
                     />
                     <FormField name="isAtivo">
                       {({ field }) => (
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg cursor-pointer"
+                          className="data-[state=checked]:bg-bah-green data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg cursor-pointer"
                         />
                       )}
                     </FormField>
