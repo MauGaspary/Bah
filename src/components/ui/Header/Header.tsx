@@ -7,6 +7,7 @@ import BahBgWhite from '@/assets/bah-bg-white.png'
 import BahBgPurple from '@/assets/bah-bg-purple.png'
 
 import { optionsItems } from './NavigationsItens'
+import type { NavigationItem } from './NavigationsItens'
 
 interface HeaderProps {
   variant?: 'default' | 'secondary' | 'custom'
@@ -70,8 +71,40 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
     return () => observer.disconnect()
   }, [])
 
-  const handleNavigation = (path: string) => {
-    navigate(path)
+  const handleNavigation = (item: NavigationItem) => {
+    const mapIdToSection: Record<string, string> = {
+      calendario: 'calendar-section',
+      jornada: 'journey-section',
+      'sobre nos': 'about-section',
+      'nossos-valores': 'values-section',
+      contato: 'contact-section',
+    }
+
+    let sectionId = mapIdToSection[item.id]
+    if (item.id === 'calendario' && typeof window !== 'undefined') {
+      sectionId =
+        window.innerWidth < 768 ? 'calendar-section-mobile' : 'calendar-section'
+    }
+
+    if (sectionId) {
+      const scrollToSection = () => {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }
+
+      if (window.location.pathname !== '/') {
+        navigate('/', { state: { scrollTo: sectionId } })
+      } else {
+        scrollToSection()
+      }
+
+      setIsMobileMenuOpen(false)
+      return
+    }
+
+    navigate(item.path)
     setIsMobileMenuOpen(false)
   }
 
@@ -97,6 +130,12 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
     }
   }
 
+  const handleHeaderSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/results?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
+
   const SearchIcon = () => (
     <svg className="h-4 w-4 " fill="none" stroke="white" viewBox="0 0 24 24">
       <path
@@ -119,7 +158,27 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
         }}
       >
         <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center relative w-20 h-16 ">
+          <div
+            className="flex items-center relative w-20 h-16 cursor-pointer"
+            onClick={() => {
+              const sectionId = 'home-section'
+              const scrollToSection = () => {
+                const el = document.getElementById(sectionId)
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }
+
+              if (window.location.pathname !== '/') {
+                navigate('/', { state: { scrollTo: sectionId } })
+              } else {
+                scrollToSection()
+              }
+              setIsMobileMenuOpen(false)
+            }}
+            aria-label="Ir para início"
+            role="button"
+          >
             <img
               src={BahBgWhite}
               alt="Logo"
@@ -138,7 +197,13 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
 
           {isScrolled && (
             <div className="flex-1 max-w-sm mx-4 md:mx-20 lg:mx-8 animate-in slide-in-from-top-2 duration-300">
-              <form className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-4 md:ml-4 lg:ml-0 max-[500px]:max-w-[250px] max-[500px]:ml-6">
+              <form
+                onSubmit={e => {
+                  e.preventDefault()
+                  handleHeaderSearch()
+                }}
+                className="flex items-center w-45 md:w-full bg-white rounded-full overflow-hidden h-11 md:h-auto ml-4 md:ml-4 lg:ml-0 max-[500px]:max-w-[250px] max-[500px]:ml-6"
+              >
                 <Input
                   type="text"
                   placeholder="Conheça as iniciativas"
@@ -146,7 +211,9 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   onChange={e => setSearchQuery(e.target.value)}
                   className="flex-1 px-2 md:px-6 py-3 text-xs md:text-sm text-black bg-transparent !border-0 !outline-none !ring-0 !shadow-none focus:!border-0 focus:!outline-none focus:!ring-0 focus:!shadow-none placeholder:text-black placeholder:font-weight-bold ml-2 md:ml-0 max-[500px]:placeholder:text-xs truncate placeholder:truncate"
                 />
-                <div
+                <button
+                  type="submit"
+                  onClick={handleHeaderSearch}
                   className="w-6 h-6 rounded-full flex items-center justify-center mx-2 cursor-pointer transition-all duration-300"
                   style={{
                     backgroundColor:
@@ -162,9 +229,10 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   }}
                   onMouseEnter={() => setIsSearchIconHovered(true)}
                   onMouseLeave={() => setIsSearchIconHovered(false)}
+                  aria-label="Buscar"
                 >
                   <SearchIcon />
-                </div>
+                </button>
               </form>
             </div>
           )}
@@ -174,7 +242,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
               {optionsItems.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => handleNavigation(item.path)}
+                  onClick={() => handleNavigation(item)}
                   className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
                 >
                   {item.label}
@@ -215,7 +283,7 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
                   {optionsItems.map(item => (
                     <li key={item.id}>
                       <button
-                        onClick={() => handleNavigation(item.path)}
+                        onClick={() => handleNavigation(item)}
                         className="w-full text-left px-4 py-4 text-white hover:bg-white/10 hover:text-bah-green rounded-lg transition-all duration-200 text-lg font-medium font-mulish"
                       >
                         {item.label}

@@ -1,8 +1,11 @@
 import UsuariosList from '@/components/ui/List/UsuariosList'
 import AdminSearchbar from '@/components/ui/AdminSearchbar/AdminSearchbar'
 import SidebarAdm from '@/components/ui/sidebar'
+import { useState } from 'react'
 
 function AdminUsuarios() {
+  const [searchTerm, setSearchTerm] = useState("")
+
   return (
     <div>
       <div className="min-h-screen flex bg-background-secondary">
@@ -24,6 +27,7 @@ function AdminUsuarios() {
             <AdminSearchbar
               placeholder="Buscar usuários por nome, email, região..."
               buttonLabel="Novo usuário"
+              onSearchChange={setSearchTerm}
               onButtonClick={() => console.log('Novo usuário')}
               onSearchChange={(searchValue: string) => {
                 // Implementar busca no futuro
@@ -31,7 +35,7 @@ function AdminUsuarios() {
               }}
             />
 
-            <div className="mt-16">
+            <div className="mt-8">
               <UsuariosList />
             </div>
           </div>
