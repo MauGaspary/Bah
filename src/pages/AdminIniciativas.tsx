@@ -34,7 +34,7 @@ function AdminIniciativas() {
                 onButtonClick={() => navigate('/admin/criarIniciativa')}
               />
 
-              <div className="mt-8 max-h-[500px] pb-16 2xl:max-h-none 2xl:mb-0 overflow-y-auto custom-scrollbar">
+              <div className="mt-8 max-h-[570px] pb-16 3xl:max-h-none 2xl:mb-0 overflow-y-auto custom-scrollbar">
                 <IniciativasList searchQuery={searchTerm} />
               </div>
             </div>
