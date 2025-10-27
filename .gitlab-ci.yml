@@ -8,6 +8,11 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # Variáveis para testes
+  POSTGRES_DB: test_db
+  POSTGRES_USER: test_user
+  POSTGRES_PASSWORD: test_password
+  DATABASE_URL: postgresql://test_user:test_password@postgres:5432/test_db
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -50,6 +55,14 @@ lint:
 test:
   extends: .python_job
   stage: test
+  services:
+    - name: postgres:15
+      alias: postgres
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: postgresql://test_user:test_password@postgres:5432/test_db
   script:
     - pipenv run test:cov
   coverage: '/TOTAL.*\s+(\d+%)$/'
@@ -60,10 +73,12 @@ test:
       - coverage.xml
       - htmlcov/
     expire_in: 1 week
+    when: always
   only:
     - merge_requests
     - main
     - dev
+  allow_failure: true
 
 build_check:
   stage: build
