@@ -201,13 +201,14 @@ export default function FormIniciativa() {
   useEffect(() => {
     if (isEditing && iniciativaAdmin) {
       const admin: IniciativaAdmin = iniciativaAdmin
+      console.log('admin', admin)
       const toHHMM = (t?: string) => (t ? t.slice(0, 5) : '')
       form.reset({
         titulo: admin.titulo || '',
         local: admin.local || '',
         link1: admin.link || '',
         link2: '',
-        organizador: admin.organizador_id || admin.organizador?.id || '',
+        organizador: admin.organizador_id || admin.organizador?.id,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
         isAtivo: Boolean(admin.destaque),
@@ -499,7 +500,7 @@ export default function FormIniciativa() {
                                   }
                                 />
                               </SelectTrigger>
-                              <SelectContent className="border-bah-purple">
+                              <SelectContent className="border-bah-purple bg-white">
                                 {organizadores?.map(org => (
                                   <SelectItem
                                     key={org.id}
