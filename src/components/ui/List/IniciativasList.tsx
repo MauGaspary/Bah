@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import ConfirmModal from '../ConfirmModal'
 import ListItem from './ListItem'
@@ -21,6 +22,7 @@ import {
 import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 function IniciativasList({ searchQuery }: IniciativasListProps) {
+  const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -115,7 +117,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
               imageUrl={item.imagem_url}
               isLast={index === iniciativas.length - 1}
               isDeleting={deletingId === item.id}
-              onEdit={() => console.warn('Editar iniciativa', item.id)}
+              onEdit={() => navigate(`/admin/iniciativas/${item.id}/editar`)}
               onDelete={() => openDeleteConfirm(item)}
             />
           ))}

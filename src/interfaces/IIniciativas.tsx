@@ -3,16 +3,16 @@ import { HorarioTipo } from '@/enums/HorarioTipo'
 export interface IniciativasListProps {
   searchQuery: string
 }
-  
-export interface IniciativasResponse{
-    items: Iniciativa[];
-    total: number;
+
+export interface IniciativasResponse {
+  items: Iniciativa[]
+  total: number
 }
 
 export interface SearchParams {
-    q?: string;
-    page?: number;
-    size?: number;
+  q?: string
+  page?: number
+  size?: number
 }
 
 export interface IniciativaHorarioCreate {
@@ -69,3 +69,42 @@ export interface IniciativaFilters {
 // Type aliases para compatibilidade com código existente
 export type Iniciativa = IniciativaResponse
 export type IniciativaHorario = IniciativaHorarioResponse
+
+// Admin shapes (backend returns IniciativaSchema with extras like tags and descricoes)
+export interface IniciativaAdminTag {
+  id: string
+  nome: string
+}
+
+export interface IniciativaAdminDescricaoExtra {
+  id: string
+  descricao: string
+}
+
+export interface IniciativaAdmin extends IniciativaResponse {
+  tags: IniciativaAdminTag[]
+  descricoes_extras: IniciativaAdminDescricaoExtra[]
+  organizador?: { id: string; nome: string }
+}
+
+export interface IniciativaHorarioPatch {
+  data_evento?: string
+  hora_inicio?: string
+  hora_fim?: string
+  tipo?: HorarioTipo
+}
+
+export interface IniciativaPatch {
+  titulo?: string
+  descricao?: string
+  link?: string
+  destaque?: boolean
+  local?: string
+  imagem_url?: string
+  organizador_id?: string
+  tags_ids?: string[]
+  horarios?: IniciativaHorarioPatch[]
+  descricoes_extras_update?: { id: string; descricao: string }[]
+  descricoes_extras_delete_ids?: string[]
+  descricoes_extras_add?: string[]
+}
