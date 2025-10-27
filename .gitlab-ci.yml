@@ -85,17 +85,3 @@ deploy_production:
     name: production
     url: http://$EC2_PUBLIC_DNS:8000
   when: manual
-
-rollback_production:
-  stage: deploy
-  tags:
-    - deploy
-  script:
-    - docker-compose -f docker-compose.prod.yml down
-    - docker-compose -f docker-compose.prod.yml up -d
-  only:
-    - main
-  when: manual
-  environment:
-    name: production
-    action: rollback
