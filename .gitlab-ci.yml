@@ -7,7 +7,6 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay2
-  COMPOSE_FILE_PROD: docker-compose.prod.yml
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 cache:
@@ -27,13 +26,7 @@ validate_branch:
   stage: validate
   image: alpine:latest
   script:
-    - |
-      if [[ "$CI_COMMIT_REF_NAME" =~ ^(main|dev|feature/.*|hotfix/.*|release/.*)$ ]]; then
-        echo "✅ Branch válido: $CI_COMMIT_REF_NAME"
-      else
-        echo "❌ Branch inválido: $CI_COMMIT_REF_NAME"
-        exit 1
-      fi
+    - echo "Validando branch $CI_COMMIT_REF_NAME"
   except:
     - main
     - dev
@@ -42,7 +35,6 @@ lint:
   extends: .python_job
   stage: quality
   script:
-    - echo "🔍 Verificando formatação..."
     - pipenv run format:all
     - pipenv run lint:all
     - pipenv run pylint:all
@@ -55,7 +47,6 @@ test:
   extends: .python_job
   stage: test
   script:
-    - echo "🧪 Rodando testes..."
     - pipenv run test:cov
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
@@ -75,9 +66,8 @@ build_check:
   tags:
     - deploy
   script:
-    - echo "🔨 Building images..."
-    - docker-compose build --no-cache
-    - docker-compose -f ${COMPOSE_FILE_PROD} build --no-cache
+    - docker-compose build
+    - docker-compose -f docker-compose.prod.yml build
   only:
     - merge_requests
     - main
@@ -87,34 +77,8 @@ deploy_production:
   tags:
     - deploy
   script:
-    - echo "🚀 Iniciando deploy"
-    - echo "POSTGRES_DB=${POSTGRES_DB}" > .env.prod
-    - echo "POSTGRES_USER=${POSTGRES_USER}" >> .env.prod
-    - echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> .env.prod
-    - echo "JWT_SECRET=${JWT_SECRET}" >> .env.prod
-    - echo "JWT_TTL=${JWT_TTL}" >> .env.prod
-    - echo "JWT_ISS=${JWT_ISS}" >> .env.prod
-    - echo "CORS_ORIGINS=${CORS_ORIGINS}" >> .env.prod
-    - echo "ENVIRONMENT=production" >> .env.prod
-    - echo "✅ .env.prod criado"
-    - echo "📦 Parando containers antigos..."
-    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod down || true
-    - echo "🧹 Limpando recursos..."
-    - docker system prune -af --filter "until=24h" || true
-    - echo "🔨 Building images..."
-    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod build --no-cache
-    - echo "🚢 Subindo containers..."
-    - docker-compose -f ${COMPOSE_FILE_PROD} --env-file .env.prod up -d
-    - echo "⏳ Aguardando 30s..."
-    - sleep 30
-    - echo "🔍 Status dos containers:"
-    - docker-compose -f ${COMPOSE_FILE_PROD} ps
-    - echo "📋 Logs da aplicação:"
-    - docker-compose -f ${COMPOSE_FILE_PROD} logs --tail=50 app
-    - echo "🔥 Limpando .env.prod"
-    - rm -f .env.prod
-    - echo "✨ Deploy concluído!"
-    - echo "🌐 URL: http://${EC2_PUBLIC_DNS}:8000/docs"
+    - chmod +x deploy.sh
+    - ./deploy.sh
   only:
     - main
   environment:
@@ -127,9 +91,8 @@ rollback_production:
   tags:
     - deploy
   script:
-    - echo "🔄 Rollback..."
-    - docker-compose -f ${COMPOSE_FILE_PROD} down
-    - docker-compose -f ${COMPOSE_FILE_PROD} up -d
+    - docker-compose -f docker-compose.prod.yml down
+    - docker-compose -f docker-compose.prod.yml up -d
   only:
     - main
   when: manual
