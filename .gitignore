@@ -39,3 +39,4 @@ docker-compose.log
 
 # Scripts executáveis devem ser commitados
 # !scripts/
+.vercel
