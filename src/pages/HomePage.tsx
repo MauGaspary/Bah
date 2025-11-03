@@ -6,6 +6,8 @@ import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { buildCalendarEvents } from '@/data/iniciativas'
 import { ChevronDown } from 'lucide-react'
+import SobreNos from '../components/ui/SobreNos'
+import NossosValores from '../components/ui/NossosValores'
 
 function HomePage() {
   const location = useLocation()
@@ -115,16 +117,14 @@ function HomePage() {
       </section>
 
       {/* Sobre nós */}
-      <section id="about-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Sobre nós
-        </h2>
+      <section id="about-section" className="container mx-auto px-4 pt-16 md:pb-16">
+        <SobreNos />
       </section>
 
       {/* Nossos Valores */}
-      <section id="values-section" className="container mx-auto px-4 py-16">
+      <section id="values-section" className="container mx-auto px-4 pb-16 md:pt-16">
         <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Nossos Valores
+          <NossosValores />
         </h2>
       </section>
 
