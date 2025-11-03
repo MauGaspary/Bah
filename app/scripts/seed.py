@@ -377,7 +377,7 @@ def seed_iniciativas():
         ]
 
         for iniciativa_data in iniciativas_data:
-            descricao_vetor = [0.0] * 768
+            descricao_vetor = [0.0] * int(os.getenv("MODEL_DIMENSIONS", "1024"))
 
             iniciativa = Iniciativa(
                 titulo=iniciativa_data["titulo"],

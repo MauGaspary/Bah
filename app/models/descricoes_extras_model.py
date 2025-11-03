@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 from app.models.base import Base
 
-MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "768"))
+MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "1024"))
 
 try:
     from pgvector.sqlalchemy import Vector
