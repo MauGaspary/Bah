@@ -92,7 +92,7 @@ export default function FormIniciativa() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const queryClient = useQueryClient()
-  const MAX_DESCRICOES = 5
+  const MAX_DESCRICOES = 100
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const objectUrlRef = useRef<string | null>(null)
 
