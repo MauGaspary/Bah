@@ -29,6 +29,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL:-36000}
       JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
     volumes:
       - .:/app
     command: alembic upgrade head
@@ -48,6 +49,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL:-36000}
       JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
     volumes:
       - .:/app
     command: python -m app.scripts.seed
@@ -71,6 +73,7 @@ services:
       JWT_ISS: ${JWT_ISS:-bah_backend}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
       ENVIRONMENT: development
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -98,6 +101,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL:-36000}
       JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -119,6 +123,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL:-36000}
       JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
