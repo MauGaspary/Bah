@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
 import LogoImg from '@/assets/logo.png'
+import BahDecorative from '@/assets/bah-decorative-element.png'
 
 function LoginAdminPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -79,7 +80,7 @@ function LoginAdminPage() {
              max-[1400px]:w-[140px] max-[1024px]:w-[100px]"
       >
         <img
-          src="/src/assets/Bah Projeto Group 9.png"
+          src={BahDecorative}
           alt="Decorative Element"
           className="w-full h-auto"
         />
