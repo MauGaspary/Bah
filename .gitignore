@@ -41,6 +41,8 @@ docker-compose.log
 .env.test.local
 .env.production.local
 .env*.local
+.env
+.env.*
 
 # Vercel
 .vercel
