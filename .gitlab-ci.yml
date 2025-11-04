@@ -97,6 +97,7 @@ deploy_production:
     - echo "Project ID:" $VERCEL_PROJECT_ID
     - echo "Org ID:" $VERCEL_ORG_ID
     - vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - cp .vercel/.env.production.local .env.production
     - vercel build --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
     - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID > deployment-url.txt
     - echo "✅ Deploy concluído!"
