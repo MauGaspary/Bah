@@ -1,7 +1,6 @@
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Input } from '../Searchbar/Searchbar'
 import BahBgWhite from '@/assets/bah-bg-white.png'
 import BahBgPurple from '@/assets/bah-bg-purple.png'
@@ -26,6 +25,13 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchIconHovered, setIsSearchIconHovered] = useState(false)
+
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const queryFromUrl = searchParams.get('q')
+    setSearchQuery(queryFromUrl || '')
+  }, [searchParams])
 
   const navigate = useNavigate()
 
