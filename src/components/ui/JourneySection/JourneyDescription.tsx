@@ -16,14 +16,14 @@ type JourneyDescriptionProps = {
 
 function JourneyDescription({ active, borderColor }: JourneyDescriptionProps) {
   return (
-    <div className="flex flex-col gap-4 w-full ">
+    <div className="flex flex-col gap-12 w-full ">
       <Card className={`${borderColor} border-2 bg- w-2/3 bg-zinc-300`}>
         <CardContent>
           <p className="text-sm text-muted-foreground">{active.description}</p>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-2/3 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-2/3 ">
         <Card className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-zinc-300`}>
           <CardHeader>
             <CardTitle>Suas ações nesta fase:</CardTitle>
