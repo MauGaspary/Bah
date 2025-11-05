@@ -7,8 +7,20 @@ import {
   PaginationPrevious,
 } from '../pagination'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
+import ConfirmModal from '../ConfirmModal'
+
+import type {
+  User,
+  UsersListProps,
+} from '@/interfaces/IUsers'
+
+import { fetchUsers, deleteUser } from '@/service/users'
+import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+{/*
 
 const mockUsuarios = Array.from({ length: 22 }).map((_, i) => ({
   id: i + 1,
@@ -17,14 +29,32 @@ const mockUsuarios = Array.from({ length: 22 }).map((_, i) => ({
   imageUrl: 'https://placehold.co/150x150.png?text=',
 }))
 
-function UsuariosList() {
+*/}
+
+function UsuariosList({searchQuery}: UsersListProps) {
+  const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+
+  const queryClient = useQueryClient()
   const itemsPerPage = 5
 
-  const totalPages = Math.ceil(mockUsuarios.length / itemsPerPage)
+  const {
+    data: usuariosData,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['usuarios', searchQuery, currentPage, itemsPerPage],
+    queryFn: () => fetchUsers(searchQuery, currentPage, itemsPerPage),
+  })
+
+  const total = usuariosData?.total || 0
+  const totalPages = Math.max(1, Math.ceil(total / itemsPerPage))
 
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentItems = mockUsuarios.slice(
+  const currentItems = usuariosData?.items.slice(
       startIndex,
       startIndex + itemsPerPage
   )

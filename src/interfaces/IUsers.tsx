@@ -1,8 +1,12 @@
-export interface UserInterfaceCreate {
+export interface UserCreate {
   id: string
   nome: string
   sobrenome: string
   email: string
+}
+
+export interface UsersListProps {
+  searchQuery: string
 }
 
 export interface UsersResponse {
@@ -22,3 +26,9 @@ export interface UserResponse {
 }
 
 export type User = UserResponse
+
+export interface UserPatch {
+  nome?: string
+  sobrenome?: string
+  email?: string
+}
