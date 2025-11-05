@@ -1,10 +1,11 @@
 import SearchDropdown from '@/components/ui/Searchbar/SearchDropdown'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from '@/components/ui/Header/Header'
 import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
+import type { CalendarEvent } from '@/components/ui/CalendarSection/CalendarSection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
-import { buildCalendarEvents } from '@/data/iniciativas'
+import { fetchCalendarioMensal } from '@/service/calendario'
 import { ChevronDown } from 'lucide-react'
 
 function HomePage() {
@@ -30,7 +31,40 @@ function HomePage() {
       }
     }
   }, [location.state])
-  const eventsAll = useMemo(() => buildCalendarEvents(), [])
+  const [eventsAll, setEventsAll] = useState<CalendarEvent[]>([])
+
+  useEffect(() => {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    fetchCalendarioMensal(todayIso)
+      .then(resp => {
+        const inferCategory = (names: string[]): CalendarEvent['category'] => {
+          const n = names.map(s => s.toLowerCase())
+          if (n.some(s => s.includes('hack'))) return 'hackathon'
+          if (n.some(s => s.includes('work'))) return 'workshop'
+          if (n.some(s => s.includes('feira'))) return 'feira'
+          if (n.some(s => s.includes('meet'))) return 'meetup'
+          if (n.some(s => s.includes('network'))) return 'networking'
+          return 'meetup'
+        }
+
+        const mapped: CalendarEvent[] = resp.dias.flatMap(dia =>
+          dia.iniciativas.map(item => ({
+            id: item.horario_id,
+            title: item.titulo,
+            description: item.descricao,
+            date: dia.data,
+            category: inferCategory(item.tags.map(t => t.nome)),
+            location: item.local,
+            imageUrl: undefined,
+            featured: item.destaque,
+          }))
+        )
+        setEventsAll(mapped)
+      })
+      .catch(() => {
+        setEventsAll([])
+      })
+  }, [])
   const eventsNext15Days = useMemo(() => {
     const todayIso = new Date().toISOString().slice(0, 10)
     const end = new Date()
