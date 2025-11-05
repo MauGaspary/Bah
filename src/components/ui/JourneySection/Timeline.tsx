@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 import { Button, buttonVariants } from '../button'
-import { Card, CardContent, CardHeader, CardTitle } from '../card'
+
+import JourneyDescription from './JourneyDescription'
 
 import type { VariantProps } from 'class-variance-authority'
 
@@ -67,8 +68,45 @@ const stages: Array<{
   },
 ]
 
+const dotColors: Record<string, string> = {
+  success: 'bg-bah-green',
+  error: 'bg-error',
+  primary: 'bg-bah-blue',
+  salmon: 'bg-bah-red',
+  darkBlue: 'bg-bah-dark-blue',
+}
+
 function Timeline() {
   const [active, setActive] = useState(stages[0])
+  const [dotPositions, setDotPositions] = useState<number[]>([])
+  const timelineContainerRef = useRef<HTMLDivElement>(null)
+  const buttonRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const updateDotPositions = () => {
+      if (!timelineContainerRef.current) return
+
+      const timelineContainerRect = timelineContainerRef.current.getBoundingClientRect()
+      
+      const positions = buttonRefs.current.map((buttonRef) => {
+        if (!buttonRef) return 0
+        const buttonRect = buttonRef.getBoundingClientRect()
+        // Calculate the center of the button relative to the timeline container
+        const buttonCenterX = buttonRect.left + buttonRect.width / 2
+        const relativePosition = ((buttonCenterX - timelineContainerRect.left) / timelineContainerRect.width) * 100
+        return relativePosition
+      })
+      setDotPositions(positions)
+    }
+
+    // Use a small delay to ensure DOM is fully rendered
+    const timeoutId = setTimeout(updateDotPositions, 0)
+    window.addEventListener('resize', updateDotPositions)
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', updateDotPositions)
+    }
+  }, [])
 
   const getBorderColor = (variant: StageVariant) => {
     const variantMap: Record<string, string> = {
@@ -89,6 +127,9 @@ function Timeline() {
         {stages.map((stage, index) => (
           <div
             key={stage.id}
+            ref={(el) => {
+              buttonRefs.current[index] = el
+            }}
             className={`relative flex flex-col items-center ${index % 2 === 0 ? 'mb-16' : ''}`}
           >
             <Button
@@ -106,65 +147,25 @@ function Timeline() {
         ))}
       </div>
 
-      <div className="relative w-full flex items-center">
+      <div ref={timelineContainerRef} className="relative w-full flex items-center">
         <div className="absolute left-0 w-6 h-6 bg-bah-purple rounded-full -translate-x-1/2 z-10"></div>
         <div className="w-full h-1 bg-bah-purple"></div>
         <div className="absolute right-0 w-6 h-6 bg-bah-purple rounded-full translate-x-1/2 z-10"></div>
+        {dotPositions.length > 0 &&
+          stages.map((stage, index) => (
+            <div
+              key={stage.id}
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-20"
+              style={{ left: `${dotPositions[index]}%` }}
+            >
+              <div
+                className={`w-4 h-4 ${dotColors[stage.variant] || 'bg-bah-blue'} rounded-full`}
+              ></div>
+            </div>
+          ))}
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
-        <Card className={`${borderColor} border-2 bg- w-2/3`}>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {active.description || 'Nenhuma descrição disponível.'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-2/3">
-          <Card className={`${borderColor} border-2 max-h-64 overflow-y-auto`}>
-            <CardHeader>
-              <CardTitle>Suas ações nesta fase:</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                {active.actions &&
-                active.actions.length > 0 &&
-                active.actions[0] ? (
-                  active.actions.map((action, index) => (
-                    <li key={index} className="list-disc list-inside">
-                      {action}
-                    </li>
-                  ))
-                ) : (
-                  <li>Nenhuma ação disponível.</li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className={`${borderColor} border-2 max-h-64 overflow-y-auto`}>
-            <CardHeader>
-              <CardTitle>Desafios comuns:</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                {active.challenges &&
-                active.challenges.length > 0 &&
-                active.challenges[0] ? (
-                  active.challenges.map((challenge, index) => (
-                    <li key={index} className="list-disc list-inside">
-                      {challenge}
-                    </li>
-                  ))
-                ) : (
-                  <li>Nenhum desafio disponível.</li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <JourneyDescription active={active} borderColor={borderColor} />
     </div>
   )
 }
