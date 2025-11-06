@@ -69,7 +69,7 @@ const initiativeSchema = z.object({
     .url('O link 1 deve ser uma URL válida.')
     .optional()
     .or(z.literal('')),
-  // link2 removido
+ 
   organizador: z.string().min(1, 'O organizador é obrigatório.'),
   descricao: z
     .string()
@@ -98,7 +98,7 @@ export default function FormIniciativa() {
       titulo: '',
       local: '',
       link1: '',
-      // link2 removido
+     
       organizador: '',
       descricao: '',
       descricoes_extras: [],
