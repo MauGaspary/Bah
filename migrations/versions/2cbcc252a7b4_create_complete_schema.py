@@ -12,7 +12,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "1024"))
+MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "768"))
 
 # revision identifiers, used by Alembic.
 revision: str = "2cbcc252a7b4"
@@ -33,7 +33,7 @@ def upgrade() -> None:
     if result:
         # Extensão disponível - criar e usar VECTOR
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
-    
+
     op.create_table(
         "demos",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -153,13 +153,13 @@ def upgrade() -> None:
     op.create_index(
         op.f("ix_iniciativas_titulo"), "iniciativas", ["titulo"], unique=False
     )
-    
+
     # Converter descricao_vetor para VECTOR se a extensão estiver disponível
     if result:
         op.execute(
             f"ALTER TABLE iniciativas ALTER COLUMN descricao_vetor TYPE VECTOR({MODEL_DIMENSION}) USING descricao_vetor::VECTOR({MODEL_DIMENSION})"
         )
-    
+
     op.create_table(
         "iniciativa_horarios",
         sa.Column("id", sa.String(), nullable=False),
