@@ -6,11 +6,14 @@ Create Date: 2025-09-17 23:23:53.492794
 
 """
 
+import os
 from typing import Sequence, Union
 
 import pgvector.sqlalchemy
 import sqlalchemy as sa
 from alembic import op
+
+MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "1024"))
 
 # revision identifiers, used by Alembic.
 revision: str = "f31120b21f1a"
@@ -32,7 +35,7 @@ def upgrade() -> None:
         # Extensão disponível - criar e usar VECTOR
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
         op.execute(
-            "ALTER TABLE iniciativas ALTER COLUMN descricao_vetor TYPE VECTOR(768) USING descricao_vetor::VECTOR(768)"
+            f"ALTER TABLE iniciativas ALTER COLUMN descricao_vetor TYPE VECTOR({MODEL_DIMENSION}) USING descricao_vetor::VECTOR({MODEL_DIMENSION})"
         )
     # Se não disponível, mantém como TEXT
     # ### end Alembic commands ###
@@ -43,7 +46,7 @@ def downgrade() -> None:
     op.alter_column(
         "iniciativas",
         "descricao_vetor",
-        existing_type=pgvector.sqlalchemy.vector.VECTOR(dim=768),
+        existing_type=pgvector.sqlalchemy.vector.VECTOR(dim=MODEL_DIMENSION),
         type_=sa.TEXT(),
         existing_nullable=False,
     )
