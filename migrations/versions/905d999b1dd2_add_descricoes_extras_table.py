@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import text
 
-MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "1024"))
+MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "768"))
 
 
 def _vector_extension_available(connection) -> bool:

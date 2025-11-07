@@ -39,7 +39,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL}
       JWT_ISS: ${JWT_ISS}
-      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
     command: alembic upgrade head
     depends_on:
       db:
@@ -57,7 +57,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_TTL: ${JWT_TTL}
       JWT_ISS: ${JWT_ISS}
-      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
     command: python -m app.scripts.seed
     depends_on:
       migrate:
@@ -79,7 +79,7 @@ services:
       JWT_ISS: ${JWT_ISS}
       CORS_ORIGINS: ${CORS_ORIGINS}
       ENVIRONMENT: production
-      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-1024}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
     depends_on:
       seed:
