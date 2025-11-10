@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import { AuthProvider } from './contexts/AuthContext'
@@ -5,11 +6,10 @@ import AdminIniciativas from './pages/AdminIniciativas'
 import AdminUsuarios from './pages/AdminUsers'
 import DashboardPage from './pages/DashboardPage'
 import FormIniciativa from './pages/formIniciativa'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import HomePage from './pages/HomePage'
 import IniciativaPage from './pages/IniciativaPage'
-import ResultsPage from './pages/ResultsPage'
 import LoginAdminPage from './pages/LoginAdminPage'
+import ResultsPage from './pages/ResultsPage'
 
 const queryClient = new QueryClient()
 

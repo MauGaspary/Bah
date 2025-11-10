@@ -46,7 +46,6 @@ import {
 import { fetchOrganizadores } from '@/service/organizadores'
 import { fetchTags } from '@/service/tags'
 
-// Schema de validação para horários
 const scheduleSchema = z.object({
   id: z.string().optional(),
   dia: z
@@ -60,20 +59,15 @@ const scheduleSchema = z.object({
   }),
 })
 
-// Schema de validação para o formulário principal
 const initiativeSchema = z.object({
   titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
   local: z.string().min(3, 'O local deve ter pelo menos 3 caracteres.'),
-  link1: z
+  link: z
     .string()
-    .url('O link 1 deve ser uma URL válida.')
+    .url('O link deve ser uma URL válida.')
     .optional()
     .or(z.literal('')),
-  link2: z
-    .string()
-    .url('O link 2 deve ser uma URL válida.')
-    .optional()
-    .or(z.literal('')),
+
   organizador: z.string().min(1, 'O organizador é obrigatório.'),
   descricao: z
     .string()
@@ -101,8 +95,7 @@ export default function FormIniciativa() {
     defaultValues: {
       titulo: '',
       local: '',
-      link1: '',
-      link2: '',
+      link: '',
       organizador: '',
       descricao: '',
       descricoes_extras: [],
@@ -205,8 +198,8 @@ export default function FormIniciativa() {
       form.reset({
         titulo: admin.titulo || '',
         local: admin.local || '',
-        link1: admin.link || '',
-        organizador: organizadorValue,
+        link: admin.link || '',
+        organizador: admin.organizador_id || admin.organizador?.id,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
         isAtivo: Boolean(admin.destaque),
@@ -221,7 +214,6 @@ export default function FormIniciativa() {
         foto: admin.imagem_url,
       })
 
-      // Força a atualização do campo organizador especificamente
       setTimeout(() => {
         form.setValue('organizador', organizadorValue, { shouldValidate: true })
         console.log('Organizador setado via setValue:', organizadorValue)
@@ -244,9 +236,7 @@ export default function FormIniciativa() {
 
   const onSubmit = (data: InitiativeFormData) => {
     if (isEditing && id && iniciativaAdmin) {
-      const formatTimeToISO = (time: string): string => {
-        return `${time}:00`
-      }
+      const formatTimeToISO = (time: string): string => `${time}:00`
 
       const original = iniciativaAdmin.descricoes_extras || []
       const updated = data.descricoes_extras || []
@@ -256,18 +246,6 @@ export default function FormIniciativa() {
       )
       const descricoes_extras_delete_ids = original.slice(minLen).map(d => d.id)
       const descricoes_extras_add = updated.slice(minLen)
-
-      // const imagemUrlEdit =
-      //   typeof data.foto === 'string' && (data.foto as string).trim().length > 0
-      //     ? (data.foto as string)
-      //     : imagePreview && imagePreview.trim().length > 0
-      //       ? imagePreview
-      //       : ''
-
-      // if (!imagemUrlEdit) {
-      //   toast.error('Selecione uma imagem válida antes de salvar')
-      //   return
-      // }
 
       const newHorarios = data.schedules.map(s => ({
         data_evento: s.dia,
@@ -300,7 +278,7 @@ export default function FormIniciativa() {
         titulo: data.titulo,
         descricao: data.descricao,
         organizador_id: data.organizador,
-        link: data.link1 || '',
+        link: data.link || '',
         local: data.local,
         destaque: data.isAtivo,
         tags_ids: data.tags,
@@ -319,27 +297,13 @@ export default function FormIniciativa() {
       return
     }
 
-    const formatTimeToISO = (time: string): string => {
-      return `${time}:00`
-    }
-
-    // const imagemUrlCreate =
-    //   typeof data.foto === 'string' && (data.foto as string).trim().length > 0
-    //     ? (data.foto as string)
-    //     : imagePreview && imagePreview.trim().length > 0
-    //       ? imagePreview
-    //       : ''
-
-    // if (!imagemUrlCreate) {
-    //   toast.error('Selecione uma imagem válida antes de salvar')
-    //   return
-    // }
+    const formatTimeToISO = (time: string): string => `${time}:00`
 
     const iniciativaData: IniciativaCreate = {
       titulo: data.titulo,
       descricao: data.descricao,
       organizador_id: data.organizador,
-      link: data.link1 || '',
+      link: data.link || '',
       local: data.local,
       imagem_url:
         'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
@@ -377,7 +341,6 @@ export default function FormIniciativa() {
         </header>
 
         <Form form={form} onSubmit={onSubmit} className="w-full">
-          {/* Seção: Detalhes da Iniciativa */}
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -403,7 +366,6 @@ export default function FormIniciativa() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
-                  {/* Primeira linha: Título, Local, Link 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="titulo">
                       {({ field }) => (
@@ -441,11 +403,11 @@ export default function FormIniciativa() {
                       )}
                     </FormField>
 
-                    <FormField name="link1">
+                    <FormField name="link">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-                            Link 1
+                            Link
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -454,32 +416,13 @@ export default function FormIniciativa() {
                               className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
                             />
                           </FormControl>
-                          <FormMessage name="link1" />
+                          <FormMessage name="link" />
                         </FormItem>
                       )}
                     </FormField>
                   </div>
 
-                  {/* Segunda linha: Link 2, Organizador */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField name="link2">
-                      {({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-                            Link 2
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="https://linkedin.com/exemplo"
-                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
-                            />
-                          </FormControl>
-                          <FormMessage name="link2" />
-                        </FormItem>
-                      )}
-                    </FormField>
-
                     <FormField name="organizador">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
@@ -526,7 +469,6 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
-                  {/* Terceira linha: Descrição e Tags */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="descricao">
                       {({ field }) => (
@@ -605,13 +547,12 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Seção: Horários */}
           <section className="w-full max-w-none mt-8">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
-                    Descrições extras
+                    Descrições de busca
                   </CardTitle>
                   <div className="flex flex-col items-center">
                     <p className="text-footnote font-sf-pro text-label-primary mb-1">
@@ -625,7 +566,7 @@ export default function FormIniciativa() {
                       }
                       disabled={descricaoFields.length >= MAX_DESCRICOES}
                       className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
-                      aria-label="Adicionar descrição extra"
+                      aria-label="Adicionar descrição de busca"
                     >
                       +
                     </Button>
@@ -639,7 +580,7 @@ export default function FormIniciativa() {
                 >
                   {descricaoFields.length === 0 && (
                     <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
-                      Nenhuma descrição extra adicionada — clique em + para
+                      Nenhuma descrição de busca adicionada — clique em + para
                       adicionar.
                     </div>
                   )}
@@ -649,7 +590,7 @@ export default function FormIniciativa() {
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div className="text-callout-semibold font-sf-pro-text text-label-primary">
-                            Descrição extra {index + 1}
+                            Descrição de busca {index + 1}
                           </div>
                           <Button
                             type="button"
@@ -670,7 +611,7 @@ export default function FormIniciativa() {
                                 <Textarea
                                   {...field}
                                   placeholder="Digite a descrição"
-                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
+                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-20 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
                                 />
                               </FormControl>
                               <FormMessage
@@ -742,7 +683,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Seção: Foto */}
           <section className="w-full max-w-none mt-6">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -824,7 +764,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Botão de Submit */}
           <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
