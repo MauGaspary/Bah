@@ -58,16 +58,18 @@ function ListItem(props: ListItemProps) {
         </div>
 
         <div className="flex gap-3 self-center pr-16 pb-2">
-          <Button
-            variant="list"
-            className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95"
-            onClick={onEdit}
-          >
-            <SquarePenIcon className="w-3 h-3 text-editar" />
-            <span className="text-subheadline-regular font-mulish text-editar text-xs">
-              Editar
-            </span>
-          </Button>
+          {props.variant === 'usuario' ? null : (
+            <Button
+              variant="list"
+              className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95"
+              onClick={onEdit}
+            >
+              <SquarePenIcon className="w-3 h-3 text-editar" />
+              <span className="text-subheadline-regular font-mulish text-editar text-xs">
+                Editar
+              </span>
+            </Button>
+          )}
 
           <Button
             variant="list"

@@ -1,8 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, Star, Trash2Icon } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useEffect, useRef } from 'react'
+import { useForm } from 'react-hook-form'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
@@ -15,7 +14,6 @@ import type {
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormField,
@@ -25,26 +23,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import ScheduleItem from '@/components/ui/ScheduleItem'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import SidebarAdm from '@/components/ui/sidebar'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
 import {
   createUser,
   fetchUserById,
   patchUser,
 } from '@/service/users'
-
-
-
 
 // Schema de validação para o formulário principal
 const usuarioSchema = z.object({
@@ -61,8 +45,7 @@ export default function FormUsuario() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const queryClient = useQueryClient()
-  const MAX_DESCRICOES = 100
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  
   const objectUrlRef = useRef<string | null>(null)
 
   const form = useForm<UsuarioFormData>({
@@ -76,8 +59,6 @@ export default function FormUsuario() {
   })
 
   const {
-    control,
-    watch,
     formState: { isSubmitting },
   } = form
 
@@ -190,20 +171,6 @@ export default function FormUsuario() {
                   <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
                     Detalhes do Usuário
                   </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Star
-                      className={`w-5 h-5 text-gray-400 fill-gray-400`}
-                    />
-                    <FormField name="isAtivo">
-                      {({ field }) => (
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-bah-green data-[state=unchecked]:bg-gray-300 [&>span]:bg-white [&>span]:shadow-lg cursor-pointer"
-                        />
-                      )}
-                    </FormField>
-                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -252,7 +219,7 @@ export default function FormUsuario() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="email">
                       {({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="md:col-span-2 flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
                             Email
                           </FormLabel>
@@ -273,18 +240,26 @@ export default function FormUsuario() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="senha">
                       {({ field }) => (
-                        <FormItem className="md:col-span-2 flex flex-col">
+                        <FormItem className="flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-                            Descrição
+                            Senha
                           </FormLabel>
                           <FormControl>
-                            <Textarea
+                            <Input
                               {...field}
-                              placeholder="Digite a descrição"
-                              className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
+                              placeholder="Digite a senha"
+                              className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
+                              required
+                              trailing={
+                                <button
+                                  type="button"
+                                  className="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer" 
+                                >
+                                </button>
+                              }
                             />
                           </FormControl>
-                          <FormMessage name="descricao" />
+                          <FormMessage name="senha" />
                         </FormItem>
                       )}
                     </FormField>

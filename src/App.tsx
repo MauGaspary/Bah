@@ -32,10 +32,6 @@ function App() {
               element={<FormIniciativa />}
             />
             <Route path="/admin/usuarios/criarUsuario" element={<FormUsuario />} />
-            <Route
-              path="/admin/usuarios/:id/editar"
-              element={<FormUsuario />}
-            />
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/iniciativas" element={<AdminIniciativas />} />
           </Routes>
