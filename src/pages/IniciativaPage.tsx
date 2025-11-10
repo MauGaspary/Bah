@@ -116,7 +116,11 @@ function IniciativaPage() {
             </Carousel>
           </div>
 
-          <div className="hidden md:grid md:grid-cols-3 md:gap-6">
+          <div className={`hidden md:grid md:gap-6 flex justify-center items-center ${
+            processedHorarios.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' :
+            processedHorarios.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' :
+            'md:grid-cols-3'
+          }`}>
             {processedHorarios.map((h) => (
               <div key={(h as any).id ?? Math.random().toString()} className="px-2">
                 <HorarioCard item={h} />
