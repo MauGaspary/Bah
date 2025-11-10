@@ -12,7 +12,7 @@ export interface TagUpdate {
 }
 
 export async function fetchTags(): Promise<Tag[]> {
-  const response = await api.get<Tag[]>('/admin/tags')
+  const response = await api.get<Tag[]>('/admin/tags/')
   return response.data
 }
 

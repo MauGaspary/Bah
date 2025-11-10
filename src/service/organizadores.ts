@@ -10,7 +10,7 @@ export interface OrganizadorUpdate {
 }
 
 export async function fetchOrganizadores(): Promise<Organizador[]> {
-  const response = await api.get<Organizador[]>('/admin/organizadores')
+  const response = await api.get<Organizador[]>('/admin/organizadores/')
   return response.data
 }
 
