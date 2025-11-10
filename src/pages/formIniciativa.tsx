@@ -553,7 +553,7 @@ export default function FormIniciativa() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-title3-semibold font-sf-pro-text text-label-primary">
-                    Descrições extras
+                    Descrições de busca
                   </CardTitle>
                   <div className="flex flex-col items-center">
                     <p className="text-footnote font-sf-pro text-label-primary mb-1">
@@ -567,7 +567,7 @@ export default function FormIniciativa() {
                       }
                       disabled={descricaoFields.length >= MAX_DESCRICOES}
                       className="bg-[#f2f2f7] text-[#85858b] hover:bg-gray-300 flex items-center justify-center cursor-pointer min-w-[130px] h-[30px] rounded-[10px] p-0"
-                      aria-label="Adicionar descrição extra"
+                      aria-label="Adicionar descrição de busca"
                     >
                       +
                     </Button>
@@ -581,7 +581,7 @@ export default function FormIniciativa() {
                 >
                   {descricaoFields.length === 0 && (
                     <div className="col-span-full text-callout-regular font-sf-pro text-label-secondary">
-                      Nenhuma descrição extra adicionada — clique em + para
+                      Nenhuma descrição de busca adicionada — clique em + para
                       adicionar.
                     </div>
                   )}
@@ -591,7 +591,7 @@ export default function FormIniciativa() {
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div className="text-callout-semibold font-sf-pro-text text-label-primary">
-                            Descrição extra {index + 1}
+                            Descrição de busca {index + 1}
                           </div>
                           <Button
                             type="button"
@@ -612,7 +612,7 @@ export default function FormIniciativa() {
                                 <Textarea
                                   {...field}
                                   placeholder="Digite a descrição"
-                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-40 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
+                                  className="py-3 px-3 rounded-[0.8rem] text-sm h-20 resize-y placeholder:text-gray-400 border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-bah-purple focus-visible:ring-0 focus-visible:ring-offset-0"
                                 />
                               </FormControl>
                               <FormMessage
