@@ -96,7 +96,6 @@ export default function FormIniciativa() {
       titulo: '',
       local: '',
       link: '',
-
       organizador: '',
       descricao: '',
       descricoes_extras: [],
@@ -200,7 +199,7 @@ export default function FormIniciativa() {
         titulo: admin.titulo || '',
         local: admin.local || '',
         link: admin.link || '',
-        organizador: organizadorValue,
+        organizador: admin.organizador_id || admin.organizador?.id,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
         isAtivo: Boolean(admin.destaque),
@@ -404,7 +403,7 @@ export default function FormIniciativa() {
                       )}
                     </FormField>
 
-                    <FormField name="link1">
+                    <FormField name="link">
                       {({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
@@ -417,7 +416,7 @@ export default function FormIniciativa() {
                               className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
                             />
                           </FormControl>
-                          <FormMessage name="link1" />
+                          <FormMessage name="link" />
                         </FormItem>
                       )}
                     </FormField>
