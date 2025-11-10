@@ -99,15 +99,17 @@ export function CalendarSection({
   }, [selected, today])
 
   const highlightEvents = useMemo(() => {
-    const startIso = selected.toISOString().slice(0, 10)
-    const end = new Date(selected)
+    const todayIso = today.toISOString().slice(0, 10)
+    const end = new Date(today)
     end.setDate(end.getDate() + 15)
     const endIso = end.toISOString().slice(0, 10)
     return events
-      .filter(e => e.featured === true && e.date >= startIso && e.date <= endIso)
+      .filter(
+        e => e.featured === true && e.date >= todayIso && e.date <= endIso
+      )
       .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
       .slice(0, 3)
-  }, [events, selected])
+  }, [events, today])
 
   return (
     <section className="container mx-auto px-4 md:px-6 py-6 md:py-10">
