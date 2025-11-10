@@ -340,7 +340,6 @@ export default function FormIniciativa() {
         </header>
 
         <Form form={form} onSubmit={onSubmit} className="w-full">
-          {/* Seção: Detalhes da Iniciativa */}
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -764,7 +763,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Botão de Submit */}
           <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
