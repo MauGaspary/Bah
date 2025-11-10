@@ -1,14 +1,6 @@
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../pagination'
-
 import { useState } from 'react'
 import ListItem from './ListItem'
+import SimplePagination from '../PageList'
 
 const mockUsuarios = Array.from({ length: 22 }).map((_, i) => ({
   id: i + 1,
@@ -63,38 +55,15 @@ function UsuariosList() {
           ))}
         </div>
       </div>
-      <div className="py-8">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              />
-            </PaginationItem>
-
-            {[...Array(totalPages).keys()].map(i => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  href="#"
-                  isActive={currentPage === i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+      <div className="py-4 fixed bottom-0 right-0 left-[15%]">
+        <div className="py-8">
+          <SimplePagination
+            totalPages={totalPages}
+            page={currentPage}
+            setPage={setCurrentPage}
+            wrapperClassName="py-4 fixed bottom-0 left-[15%] w-[85%]"
+          />
+        </div>
       </div>
     </div>
   )
