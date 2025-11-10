@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 import Header from '@/components/ui/Header/Header'
 import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
 import type { CalendarEvent } from '@/components/ui/CalendarSection/CalendarSection'
+import JourneySection from '@/components/ui/JourneySection/JourneySection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { fetchCalendarioMensal } from '@/service/calendario'
 import { ChevronDown } from 'lucide-react'
@@ -143,7 +144,7 @@ function HomePage() {
       </div>
 
       <section id="journey-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Jornada</h2>
+        <JourneySection />
       </section>
 
       <section

@@ -11,6 +11,7 @@ import IniciativaPage from './pages/IniciativaPage'
 import LoginAdminPage from './pages/LoginAdminPage'
 import ResultsPage from './pages/ResultsPage'
 
+
 const queryClient = new QueryClient()
 
 function App() {
