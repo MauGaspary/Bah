@@ -61,7 +61,7 @@ function UsuariosList() {
             totalPages={totalPages}
             page={currentPage}
             setPage={setCurrentPage}
-            wrapperClassName="py-4 fixed bottom-0 right-0 left-0"
+            wrapperClassName="py-4 fixed bottom-0 left-[15%] w-[85%]"
           />
         </div>
       </div>
