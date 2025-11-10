@@ -1,16 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import type {
-  UserCreate,
-  UserPatch,
-  UserResponse,
-} from '@/interfaces/IUsers'
+import type { UserCreate, UserPatch, UserResponse } from '@/interfaces/IUsers'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,11 +21,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import SidebarAdm from '@/components/ui/sidebar'
-import {
-  createUser,
-  fetchUserById,
-  patchUser,
-} from '@/service/users'
+import { createUser, fetchUserById, patchUser } from '@/service/users'
 
 // Schema de validação para o formulário principal
 const usuarioSchema = z.object({
@@ -45,7 +38,8 @@ export default function FormUsuario() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const queryClient = useQueryClient()
-  
+  const [showPassword, setShowPassword] = useState(false)
+
   const objectUrlRef = useRef<string | null>(null)
 
   const form = useForm<UsuarioFormData>({
@@ -61,7 +55,6 @@ export default function FormUsuario() {
   const {
     formState: { isSubmitting },
   } = form
-
 
   const { data: user } = useQuery({
     queryKey: ['usuario', id],
@@ -122,11 +115,10 @@ export default function FormUsuario() {
 
   const onSubmit = (data: UsuarioFormData) => {
     if (isEditing && id && user) {
-      
       const payload: UserPatch = {
-        nome: user.nome, 
+        nome: user.nome,
         sobrenome: user.sobrenome,
-        email: user.email
+        email: user.email,
       }
 
       patchMutation.mutate({ usuarioId: id, payload })
@@ -155,9 +147,7 @@ export default function FormUsuario() {
               {isEditing ? 'Editar Usuário' : 'Criar Usuário'}
             </h1>
             <p className="text-body-regular font-sf-pro text-label-secondary">
-              {isEditing
-                ? 'Edite seu usuario'
-                : 'Crie aqui seu novo usuario'}
+              {isEditing ? 'Edite seu usuario' : 'Crie aqui seu novo usuario'}
             </p>
           </div>
         </header>
@@ -212,7 +202,6 @@ export default function FormUsuario() {
                         </FormItem>
                       )}
                     </FormField>
-
                   </div>
 
                   {/* Segunda linha: Email */}
@@ -247,14 +236,26 @@ export default function FormUsuario() {
                           <FormControl>
                             <Input
                               {...field}
+                              type={showPassword ? 'text' : 'password'}
                               placeholder="Digite a senha"
                               className="py-3 rounded-[0.8rem] text-sm placeholder:text-gray-400"
                               required
                               trailing={
                                 <button
                                   type="button"
-                                  className="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer" 
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                  aria-label={
+                                    showPassword
+                                      ? 'Ocultar senha'
+                                      : 'Mostrar senha'
+                                  }
                                 >
+                                  {showPassword ? (
+                                    <EyeOff className="w-5 h-5" />
+                                  ) : (
+                                    <Eye className="w-5 h-5" />
+                                  )}
                                 </button>
                               }
                             />
@@ -268,7 +269,6 @@ export default function FormUsuario() {
               </CardContent>
             </Card>
           </section>
-
 
           {/* Botão de Submit */}
           <div className="w-full mt-6 flex justify-end">
