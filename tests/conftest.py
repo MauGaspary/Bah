@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from app.config.database import get_db
 from app.config.integration_settings import get_integration_test_settings
 from app.main import create_app
+from app.utils.helpers import hash_url_to_base64
 
 
 def is_docker_available():
@@ -208,13 +209,15 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
 
     test_vector = np.random.rand(768).tolist()
 
+    imagem_hash = hash_url_to_base64("https://example.com/image-existente.jpg")
+
     iniciativa = Iniciativa(
         titulo="Iniciativa Teste Existente",
         descricao="Descrição da iniciativa teste existente",
         descricao_vetor=test_vector,
         organizador_id=organizador_fixture["id"],
         link="https://example.com/existente",
-        imagem_url="https://example.com/image-existente.jpg",
+        imagem_url=imagem_hash,
         destaque=False,
         criado_por=usuario_fixture["id"],
     )
@@ -271,13 +274,17 @@ def iniciativa_factory(db_session):
                 }
             ]
 
+        stored_image_url = (
+            hash_url_to_base64(imagem_url) if imagem_url is not None else None
+        )
+
         iniciativa = Iniciativa(
             titulo=titulo,
             descricao=descricao,
             descricao_vetor=[0.0] * 768,
             organizador_id=organizador_id,
             link=link,
-            imagem_url=imagem_url,
+            imagem_url=stored_image_url,
             destaque=destaque,
             local=local,
             criado_por=usuario_id,

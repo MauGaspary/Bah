@@ -22,6 +22,7 @@ from app.schemas.iniciativa_schema import (
     IniciativaSchema,
     TagSchema,
 )
+from app.utils.helpers import hash_url_to_base64
 
 
 class IniciativaService:
@@ -96,6 +97,9 @@ class IniciativaService:
         Regras 404/422 já são garantidas pelo repo e pelos validadores do schema.
         """
         data: Dict[str, Any] = payload.model_dump(exclude_none=True)
+
+        if "imagem_url" in data:
+            data["imagem_url"] = hash_url_to_base64(data["imagem_url"])
 
         if "descricoes_extras_update" in data and data["descricoes_extras_update"]:
             if model is None:
@@ -194,18 +198,21 @@ class IniciativaService:
                 pass
 
         try:
+            imagem_hashed = hash_url_to_base64(iniciativa_data.imagem_url)
+            payload = iniciativa_data.model_copy(update={"imagem_url": imagem_hashed})
+
             print("model", self.model)
             if self.model is None:
                 raise RuntimeError("Modelo de embedding não disponível")
 
             embedding = self.model.encode(  # type: ignore
-                iniciativa_data.descricao.lower(),
+                payload.descricao.lower(),
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
 
             embeddings_descricoes_extras = []
-            for description_for_search in iniciativa_data.descricoes_extras or []:
+            for description_for_search in payload.descricoes_extras or []:
                 embedding_extra = self.model.encode(
                     description_for_search.lower(),
                     convert_to_numpy=True,
@@ -214,7 +221,7 @@ class IniciativaService:
                 embeddings_descricoes_extras.append(embedding_extra)
 
             iniciativa = self.repository.create(
-                iniciativa_data,
+                payload,
                 criado_por,
                 descricao_vetor=embedding,
                 descricoes_extras_vetores=embeddings_descricoes_extras,

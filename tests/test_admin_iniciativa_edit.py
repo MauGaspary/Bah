@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from app.utils.helpers import hash_url_to_base64
 from tests.helpers import request_auth
 
 
@@ -136,10 +137,11 @@ def test_edit_iniciativa_all_fields(
 
     assert response.status_code == 200
     data = response.json()
+    expected_image_hash = hash_url_to_base64(payload["imagem_url"])
     assert data["titulo"] == payload["titulo"]
     assert data["descricao"] == payload["descricao"]
     assert data["organizador_id"] == payload["organizador_id"]
     assert data["link"] == payload["link"]
     assert data["local"] == payload["local"]
-    assert data["imagem_url"] == payload["imagem_url"]
+    assert data["imagem_url"] == expected_image_hash
     assert data["destaque"] == payload["destaque"]

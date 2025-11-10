@@ -2,6 +2,7 @@ from datetime import date, datetime, time
 
 from app.models.iniciativa_horario_model import HorarioTipo
 from app.models.iniciativa_model import Iniciativa
+from app.utils.helpers import hash_url_to_base64
 from tests.helpers import request, request_auth
 
 
@@ -38,11 +39,12 @@ def test_create_iniciativa_success(
 
     assert response.status_code == 201
     data = response.json()
+    expected_image_hash = hash_url_to_base64(payload["imagem_url"])
     assert data["titulo"] == payload["titulo"]
     assert data["descricao"] == payload["descricao"]
     assert data["organizador_id"] == payload["organizador_id"]
     assert data["link"] == payload["link"]
-    assert data["imagem_url"] == payload["imagem_url"]
+    assert data["imagem_url"] == expected_image_hash
     assert data["destaque"] == False
     assert len(data["horarios"]) == 1
     assert data["horarios"][0]["data_evento"] == "2025-12-01"
@@ -655,7 +657,7 @@ def test_calendario_todos_campos_presentes(
     assert "local" in iniciativa
     assert iniciativa["local"] == "Porto Alegre"
     assert "imagem_url" in iniciativa
-    assert iniciativa["imagem_url"] == "https://example.com/image.jpg"
+    assert iniciativa["imagem_url"] == hash_url_to_base64("https://example.com/image.jpg")
     assert "destaque" in iniciativa
     assert iniciativa["destaque"] == True
     assert "tags" in iniciativa
