@@ -46,7 +46,6 @@ import {
 import { fetchOrganizadores } from '@/service/organizadores'
 import { fetchTags } from '@/service/tags'
 
-// Schema de validação para horários
 const scheduleSchema = z.object({
   id: z.string().optional(),
   dia: z
@@ -60,16 +59,15 @@ const scheduleSchema = z.object({
   }),
 })
 
-// Schema de validação para o formulário principal
 const initiativeSchema = z.object({
   titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
   local: z.string().min(3, 'O local deve ter pelo menos 3 caracteres.'),
   link1: z
     .string()
-    .url('O link 1 deve ser uma URL válida.')
+    .url('O link deve ser uma URL válida.')
     .optional()
     .or(z.literal('')),
- 
+
   organizador: z.string().min(1, 'O organizador é obrigatório.'),
   descricao: z
     .string()
@@ -98,7 +96,7 @@ export default function FormIniciativa() {
       titulo: '',
       local: '',
       link1: '',
-     
+
       organizador: '',
       descricao: '',
       descricoes_extras: [],
@@ -344,7 +342,6 @@ export default function FormIniciativa() {
         </header>
 
         <Form form={form} onSubmit={onSubmit} className="w-full">
-          {/* Seção: Detalhes da Iniciativa */}
           <section className="w-full max-w-none">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -370,7 +367,6 @@ export default function FormIniciativa() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
-                  {/* Primeira linha: Título, Local, Link 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="titulo">
                       {({ field }) => (
@@ -412,7 +408,7 @@ export default function FormIniciativa() {
                       {({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel className="text-callout-semibold font-sf-pro-text text-label-primary mb-2">
-                            Link 1
+                            Link
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -427,7 +423,6 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
-                  {/* Segunda linha: Organizador (link2 removido) */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="organizador">
                       {({ field }) => (
@@ -475,7 +470,6 @@ export default function FormIniciativa() {
                     </FormField>
                   </div>
 
-                  {/* Terceira linha: Descrição e Tags */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField name="descricao">
                       {({ field }) => (
@@ -554,7 +548,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Seção: Horários */}
           <section className="w-full max-w-none mt-8">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -691,7 +684,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Seção: Foto */}
           <section className="w-full max-w-none mt-6">
             <Card className="bg-white border-gray-100 shadow-sm w-full">
               <CardHeader>
@@ -773,7 +765,6 @@ export default function FormIniciativa() {
             </Card>
           </section>
 
-          {/* Botão de Submit */}
           <div className="w-full mt-6 flex justify-end">
             <Button
               type="submit"
