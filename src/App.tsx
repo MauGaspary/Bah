@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import { AuthProvider } from './contexts/AuthContext'
@@ -6,11 +7,10 @@ import AdminUsuarios from './pages/AdminUsers'
 import DashboardPage from './pages/DashboardPage'
 import FormIniciativa from './pages/formIniciativa'
 import FormUsuario from './pages/formUsuario'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import HomePage from './pages/HomePage'
 import IniciativaPage from './pages/IniciativaPage'
-import ResultsPage from './pages/ResultsPage'
 import LoginAdminPage from './pages/LoginAdminPage'
+import ResultsPage from './pages/ResultsPage'
 
 const queryClient = new QueryClient()
 
@@ -31,7 +31,10 @@ function App() {
               path="/admin/iniciativas/:id/editar"
               element={<FormIniciativa />}
             />
-            <Route path="/admin/usuarios/criarUsuario" element={<FormUsuario />} />
+            <Route
+              path="/admin/usuarios/criarUsuario"
+              element={<FormUsuario />}
+            />
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/iniciativas" element={<AdminIniciativas />} />
           </Routes>

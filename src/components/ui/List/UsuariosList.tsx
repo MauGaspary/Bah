@@ -1,36 +1,14 @@
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '../pagination'
-
 import { useState, useEffect } from 'react'
 import ListItem from './ListItem'
 import ConfirmModal from '../ConfirmModal'
 
-import type {
-  User,
-  UsersListProps,
-} from '@/interfaces/IUsers'
+import type { User, UsersListProps } from '@/interfaces/IUsers'
 
 import { fetchUsers, deleteUser } from '@/service/users'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import SimplePagination from '../PageList'
 
-{/*
-
-const mockUsuarios = Array.from({ length: 22 }).map((_, i) => ({
-  id: i + 1,
-  title: `Usuário ${i + 1}`,
-  description: 'usuario@email.com',
-  imageUrl: 'https://placehold.co/150x150.png?text=',
-}))
-
-*/}
-
-function UsuariosList({searchQuery}: UsersListProps) {
+function UsuariosList({ searchQuery }: UsersListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -98,7 +76,7 @@ function UsuariosList({searchQuery}: UsersListProps) {
               Usuários Cadastrados
             </h1>
             <p className="text-body-regular font-mulish text-white">
-                {total} usuários encontrados
+              {total} usuários encontrados
             </p>
           </div>
         </div>
@@ -117,7 +95,7 @@ function UsuariosList({searchQuery}: UsersListProps) {
         <div className="space-y-3">
           {usuarios.map((item: User, index: number) => (
             <ListItem
-              variant='usuario'
+              variant="usuario"
               key={item.id}
               title={item.nome}
               email={item.email}
@@ -128,38 +106,15 @@ function UsuariosList({searchQuery}: UsersListProps) {
           ))}
         </div>
       </div>
-      <div className="py-8">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              />
-            </PaginationItem>
-
-            {[...Array(totalPages).keys()].map(i => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  href="#"
-                  isActive={currentPage === i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+      <div className="py-4 fixed bottom-0 right-0 left-[15%]">
+        <div className="py-8">
+          <SimplePagination
+            totalPages={totalPages}
+            page={currentPage}
+            setPage={setCurrentPage}
+            wrapperClassName="py-4 fixed bottom-0 left-[15%] w-[85%]"
+          />
+        </div>
       </div>
 
       <ConfirmModal

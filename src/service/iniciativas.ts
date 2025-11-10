@@ -17,7 +17,7 @@ export async function fetchIniciativas(
     params.q = searchQuery
   }
 
-  const response = await api.get<IniciativasResponse>('/admin/iniciativas', {
+  const response = await api.get<IniciativasResponse>('/admin/iniciativas/', {
     params,
   })
   return response.data

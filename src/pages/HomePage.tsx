@@ -3,9 +3,13 @@ import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from '@/components/ui/Header/Header'
 import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
+import JourneySection from '@/components/ui/JourneySection/JourneySection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { buildCalendarEvents } from '@/data/iniciativas'
 import { ChevronDown } from 'lucide-react'
+import LogoImg from '@/assets/logo.png'
+import SobreNos from '../components/ui/SobreNos'
+import NossosValoresPage from './NossosValoresPage'
 
 function HomePage() {
   const location = useLocation()
@@ -20,7 +24,6 @@ function HomePage() {
   useEffect(() => {
     const state = location.state as { scrollTo?: string } | null
     if (state?.scrollTo) {
-      // limpa o estado para evitar scroll repetido
       history.replaceState({}, '')
       const el = document.getElementById(state.scrollTo)
       if (el) {
@@ -47,7 +50,7 @@ function HomePage() {
       >
         <section className="container mx-auto px-4 py-8 md:py-20">
           <img
-            src="../src/assets/logo.png"
+            src={LogoImg}
             alt="logo"
             className="w-32 md:w-40 h-24 md:h-30 mb-3 mx-auto hidden md:block"
           />
@@ -76,7 +79,6 @@ function HomePage() {
               </button>
             ))}
           </div>
-          {/* Botão para descer até o calendário/carrossel — movido para fora da section */}
         </section>
         <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6">
           <button
@@ -99,32 +101,31 @@ function HomePage() {
         </div>
       </main>
 
-      {/* Mobile: Carrossel de próximos eventos */}
       <div className="md:hidden" id="calendar-section-mobile">
         <UpcomingCarousel events={eventsNext15Days} />
       </div>
 
-      {/* Desktop: Calendário com destaques */}
       <div className="hidden md:block" id="calendar-section">
         <CalendarSection events={eventsAll} />
       </div>
 
-      {/* Jornada */}
       <section id="journey-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Jornada</h2>
+        <JourneySection />
       </section>
 
-      {/* Sobre nós */}
-      <section id="about-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Sobre nós
-        </h2>
+      <section
+        id="about-section"
+        className="container mx-auto px-4 pt-16 md:pb-16"
+      >
+        <SobreNos />
       </section>
 
-      {/* Nossos Valores */}
-      <section id="values-section" className="container mx-auto px-4 py-16">
+      <section
+        id="values-section"
+        className="container mx-auto px-4 pb-16 md:pt-16"
+      >
         <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Nossos Valores
+          <NossosValoresPage />
         </h2>
       </section>
 
