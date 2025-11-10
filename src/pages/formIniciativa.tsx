@@ -62,7 +62,7 @@ const scheduleSchema = z.object({
 const initiativeSchema = z.object({
   titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
   local: z.string().min(3, 'O local deve ter pelo menos 3 caracteres.'),
-  link1: z
+  link: z
     .string()
     .url('O link deve ser uma URL válida.')
     .optional()
@@ -95,7 +95,7 @@ export default function FormIniciativa() {
     defaultValues: {
       titulo: '',
       local: '',
-      link1: '',
+      link: '',
 
       organizador: '',
       descricao: '',
@@ -199,7 +199,7 @@ export default function FormIniciativa() {
       form.reset({
         titulo: admin.titulo || '',
         local: admin.local || '',
-        link1: admin.link || '',
+        link: admin.link || '',
         organizador: organizadorValue,
         descricao: admin.descricao || '',
         descricoes_extras: admin.descricoes_extras?.map(d => d.descricao) || [],
@@ -279,7 +279,7 @@ export default function FormIniciativa() {
         titulo: data.titulo,
         descricao: data.descricao,
         organizador_id: data.organizador,
-        link: data.link1 || '',
+        link: data.link || '',
         local: data.local,
         destaque: data.isAtivo,
         tags_ids: data.tags,
@@ -304,7 +304,7 @@ export default function FormIniciativa() {
       titulo: data.titulo,
       descricao: data.descricao,
       organizador_id: data.organizador,
-      link: data.link1 || '',
+      link: data.link || '',
       local: data.local,
       imagem_url:
         'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
