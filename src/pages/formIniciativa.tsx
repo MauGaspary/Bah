@@ -67,6 +67,7 @@ const initiativeSchema = z.object({
     .url('O link deve ser uma URL válida.')
     .optional()
     .or(z.literal('')),
+
   organizador: z.string().min(1, 'O organizador é obrigatório.'),
   descricao: z
     .string()
