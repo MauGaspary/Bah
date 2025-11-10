@@ -539,45 +539,131 @@ class IniciativaRepository:
         last_day_num = calendar.monthrange(data.year, data.month)[1]
         return data.replace(day=last_day_num)
 
-    def search_by_embedding(
-        self, embedding: List[float], page: int, size: int
+    def search_hibrida(
+        self,
+        query_text: str,
+        embedding: List[float],
+        page: int,
+        size: int,
+        min_score: float,
+        rrf_k: float,
     ) -> Tuple[List[Iniciativa], int]:
         """
-        Busca iniciativas por similaridade de embedding (busca semântica).
-        Retorna tupla (iniciativas ordenadas por similaridade, total).
+        Busca iniciativas combinando resultados densos e esparsos via RRF.
+        Retorna tupla (iniciativas ordenadas pelo score híbrido, total).
         """
+        if self.db.bind.dialect.name != "postgresql":
+            return self._search_sqlite_fallback(query_text, page, size)
+
         offset = (page - 1) * size
 
         if isinstance(embedding, np.ndarray):
             embedding = embedding.tolist()
 
         embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
+        normalized_query = (query_text or "").strip()
+        rrf_constant = max(rrf_k, 1.0)
 
         query = text(
             """
-            WITH q AS (
-                SELECT (:embedding)::vector AS emb
+            WITH params AS (
+                SELECT
+                    (:embedding)::vector AS emb,
+                    NULLIF(:fts_query, '') AS raw_query,
+                    CASE
+                        WHEN NULLIF(:fts_query, '') IS NULL
+                            THEN NULL
+                        ELSE plainto_tsquery('portuguese', :fts_query)
+                    END AS ts_query
             ),
-            all_sims AS (
-                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+            semantic_candidates AS (
+                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM params)) AS sim
                 FROM iniciativas i
                 WHERE i.deletado_em IS NULL
                 UNION ALL
-                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM params)) AS sim
                 FROM descricoes_extras de
                 JOIN iniciativas i ON i.id = de.iniciativa_id
                 WHERE i.deletado_em IS NULL
             ),
-            best AS (
-                SELECT id, MAX(sim) AS best_sim
-                FROM all_sims
+            semantic_best AS (
+                SELECT
+                    id,
+                    MAX(sim) AS best_sim
+                FROM semantic_candidates
                 GROUP BY id
+            ),
+            semantic_ranked AS (
+                SELECT
+                    id,
+                    best_sim,
+                    ROW_NUMBER() OVER (ORDER BY best_sim DESC, id) AS sem_rank
+                FROM semantic_best
+            ),
+            tags_agg AS (
+                SELECT
+                    it.iniciativa_id,
+                    string_agg(t.nome || ' ' || COALESCE(t.descricao, ''), ' ') AS tags_text
+                FROM iniciativa_tag it
+                JOIN tags t ON t.id = it.tag_id
+                GROUP BY it.iniciativa_id
+            ),
+            extras_agg AS (
+                SELECT
+                    iniciativa_id,
+                    string_agg(descricao, ' ') AS extras_text
+                FROM descricoes_extras
+                GROUP BY iniciativa_id
+            ),
+            fts_docs AS (
+                SELECT
+                    i.id,
+                    (
+                        setweight(to_tsvector('portuguese', COALESCE(i.titulo, '')), 'A')
+                        || setweight(to_tsvector('portuguese', COALESCE(i.descricao, '')), 'B')
+                        || setweight(to_tsvector('portuguese', COALESCE(tags_agg.tags_text, '')), 'C')
+                        || setweight(to_tsvector('portuguese', COALESCE(extras_agg.extras_text, '')), 'C')
+                    ) AS document
+                FROM iniciativas i
+                LEFT JOIN tags_agg ON tags_agg.iniciativa_id = i.id
+                LEFT JOIN extras_agg ON extras_agg.iniciativa_id = i.id
+                WHERE i.deletado_em IS NULL
+            ),
+            fts_ranked AS (
+                SELECT
+                    fts_docs.id,
+                    ts_rank_cd(fts_docs.document, params.ts_query) AS fts_score,
+                    ROW_NUMBER() OVER (
+                        ORDER BY ts_rank_cd(fts_docs.document, params.ts_query) DESC, fts_docs.id
+                    ) AS fts_rank
+                FROM fts_docs
+                JOIN params ON TRUE
+                WHERE params.ts_query IS NOT NULL
+                  AND params.ts_query @@ fts_docs.document
+            ),
+            combined AS (
+                SELECT
+                    i.id,
+                    sem.best_sim,
+                    sem.sem_rank,
+                    fts.fts_rank,
+                    (
+                        COALESCE(1.0 / (:rrf_k + sem.sem_rank), 0)
+                        + COALESCE(1.0 / (:rrf_k + fts.fts_rank), 0)
+                    ) AS rrf_score
+                FROM iniciativas i
+                LEFT JOIN semantic_ranked sem ON sem.id = i.id
+                LEFT JOIN fts_ranked fts ON fts.id = i.id
+                WHERE i.deletado_em IS NULL
+                  AND (sem.id IS NOT NULL OR fts.id IS NOT NULL)
             )
-            SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
-            FROM best
-            JOIN iniciativas i ON i.id = best.id
-            WHERE i.deletado_em IS NULL
-            ORDER BY best.best_sim DESC
+            SELECT
+                combined.id,
+                combined.rrf_score,
+                combined.best_sim,
+                COUNT(*) OVER() AS total_count
+            FROM combined
+            ORDER BY combined.rrf_score DESC, combined.best_sim DESC, combined.id
             LIMIT :limit OFFSET :offset
         """
         )
@@ -587,33 +673,70 @@ class IniciativaRepository:
                 query,
                 {
                     "embedding": embedding_str,
+                    "fts_query": normalized_query,
                     "limit": size,
                     "offset": offset,
+                    "rrf_k": rrf_constant,
                 },
             )
             .mappings()
             .all()
         )
 
-        total = rows[0]["total_count"] if rows else 0
         if not rows:
             return [], 0
 
-        for r in rows:
-            sim = r["best_sim"] or 0.0
-            print(f"[SIM] ID={r['id']} | sim={sim:.4f} | título={r.get('titulo','')}")
+        filtered_rows = [r for r in rows if (r.get("rrf_score") or 0.0) >= min_score]
 
-        ids = [r["id"] for r in rows]
+        if not filtered_rows and rows:
+            filtered_rows = [rows[0]]
+
+        ids = [r["id"] for r in filtered_rows]
         iniciativas = (
             self.db.query(Iniciativa)
-            .filter(Iniciativa.id.in_(ids))
+            .filter(
+                Iniciativa.id.in_(ids),
+                Iniciativa.deletado_em.is_(None),
+            )
             .options(selectinload(Iniciativa.horarios))
             .all()
         )
         m = {i.id: i for i in iniciativas}
-        ordered = [m[_id] for _id in ids]
+        ordered = [m[_id] for _id in ids if _id in m]
 
-        return ordered, total
+        return ordered, len(filtered_rows)
+
+    def _search_sqlite_fallback(
+        self, query_text: str, page: int, size: int
+    ) -> Tuple[List[Iniciativa], int]:
+        """
+        Fallback simples para ambientes sem pgvector/FTS (SQLite em testes).
+        Usa apenas filtros LIKE para título/descrição.
+        """
+        pattern = f"%{query_text}%" if query_text else None
+        base_query = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.deletado_em.is_(None))
+            .options(
+                selectinload(Iniciativa.horarios),
+            )
+        )
+        if pattern:
+            base_query = base_query.filter(
+                or_(
+                    Iniciativa.titulo.ilike(pattern),
+                    Iniciativa.descricao.ilike(pattern),
+                )
+            )
+
+        total = base_query.count()
+        iniciativas = (
+            base_query.order_by(Iniciativa.criado_em.desc())
+            .offset((page - 1) * size)
+            .limit(size)
+            .all()
+        )
+        return iniciativas, total
 
     def create_index_if_not_exists(self):
         """
