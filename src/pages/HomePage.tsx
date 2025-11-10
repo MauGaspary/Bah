@@ -6,6 +6,7 @@ import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { buildCalendarEvents } from '@/data/iniciativas'
 import { ChevronDown } from 'lucide-react'
+import Contato from '@/components/ui/contato'
 
 function HomePage() {
   const location = useLocation()
@@ -130,7 +131,8 @@ function HomePage() {
 
       {/* Contato */}
       <section id="contact-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Contato</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center"></h2>
+        <Contato />
       </section>
     </>
   )
