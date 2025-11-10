@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormField, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
+import LogoImg from '@/assets/logo.png'
+import BahDecorative from '@/assets/bah-decorative-element.png'
 
 function LoginAdminPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -78,7 +79,7 @@ function LoginAdminPage() {
              max-[1400px]:w-[140px] max-[1024px]:w-[100px]"
       >
         <img
-          src="/src/assets/Bah Projeto Group 9.png"
+          src={BahDecorative}
           alt="Decorative Element"
           className="w-full h-auto"
         />
@@ -192,11 +193,7 @@ function LoginAdminPage() {
       <div className="w-1/2 bg-bah-purple flex items-center justify-center">
         <div className="text-center">
           <div className="mb-6">
-            <img
-              src="/src/assets/logo.png"
-              alt="BAH Logo"
-              className="w-72 h-auto mx-auto"
-            />
+            <img src={LogoImg} alt="BAH Logo" className="w-72 h-auto mx-auto" />
           </div>
         </div>
       </div>

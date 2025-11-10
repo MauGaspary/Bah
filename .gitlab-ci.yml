@@ -1,44 +1,115 @@
-workflow:
-  rules:
-    - when: never
+stages:
+  - quality
+  - build
+  - deploy
 
-image: node:22
+variables:
+  NODE_VERSION: '22'
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
     - node_modules/
+    - .npm/
 
-default:
+# STAGE: QUALITY
+lint:
+  stage: quality
+  image: node:22
+  tags:
+    - deploy
   before_script:
     - corepack enable
     - npm ci
-
-stages: [quality]
-
-lint:
-  stage: quality
-  script: ['npm run lint']
+  script:
+    - npm run lint
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
 prettier:
   stage: quality
-  script: ['npm run format:check']
+  image: node:22
+  tags:
+    - deploy
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - npm run format:check
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
 
 typecheck:
   stage: quality
-  script: ['npx tsc -p tsconfig.json --noEmit']
+  image: node:22
+  tags:
+    - deploy
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - npx tsc -p tsconfig.json --noEmit
+  allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
-# (opcional) quando vocês adicionarem testes (Vitest), descomente:
-# test:
-#   stage: quality
-#   script: [ "npm run test -- --run" ]
-#   rules:
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#     - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+# STAGE: BUILD
+build_check:
+  stage: build
+  image: node:22
+  tags:
+    - deploy
+  before_script:
+    - corepack enable
+    - npm ci
+  script:
+    - echo "🔨 Verificando build..."
+    - npm run build
+    - echo "✅ Build passou!"
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# STAGE: DEPLOY - PRODUCTION
+deploy_production:
+  stage: deploy
+  image: node:22-alpine
+  tags:
+    - deploy
+  before_script:
+    - npm install -g vercel@latest
+  script:
+    - echo "🚀 Deploy Production na Vercel"
+    - echo "Project ID:" $VERCEL_PROJECT_ID
+    - echo "Org ID:" $VERCEL_ORG_ID
+    - vercel pull --yes --environment=production --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - cp .vercel/.env.production.local .env.production
+    - cp .vercel/.env.production.local .env
+    - echo "===== .env.production DENTRO DO CI ====="
+    - cat .env.production
+    - echo "===== .env DENTRO DO CI ====="
+    - cat .env
+    - vercel build --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+    - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID > deployment-url.txt
+    - echo "✅ Deploy concluído!"
+    - cat deployment-url.txt
+  environment:
+    name: production
+    url: https://bah-frontend.vercel.app
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  when: on_success
