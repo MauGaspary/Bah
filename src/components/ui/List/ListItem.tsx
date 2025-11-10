@@ -33,7 +33,16 @@ function ListItem(props: ListItemProps) {
       )}
 
       <div className="flex justify-between gap-4 pt-2">
-        {props.variant === 'usuario' ? null : (
+        {props.variant === 'usuario' ? 
+          (
+          <div className='pl-6 pt-2'>
+            <div className="flex items-center justify-center w-14 h-14 bg-gray-200 rounded-full">
+              <span className="text-xl font-mulish text-gray-500">
+                {props.title.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          </div>
+        ) : (
           <div className="pl-6 pt-2">
             <img
               src={imageUrl}
