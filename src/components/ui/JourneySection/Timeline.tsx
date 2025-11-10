@@ -12,6 +12,7 @@ type StageVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>
 const stages: Array<{
   id: string
   title: string
+  mobileTitle: string
   variant: StageVariant
   description: string
   actions: string[]
@@ -20,6 +21,7 @@ const stages: Array<{
   {
     id: 'buscar-conhecimento',
     title: 'Buscar Conhecimento',
+    mobileTitle: 'Conhecimento',
     variant: 'success',
     description:
       'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
@@ -38,6 +40,7 @@ const stages: Array<{
   {
     id: 'conexoes',
     title: 'Conexões',
+    mobileTitle: 'Conexões',
     variant: 'error',
     description:
       'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
@@ -56,6 +59,7 @@ const stages: Array<{
   {
     id: 'conseguir-fundos',
     title: 'Conseguir Fundos',
+    mobileTitle: 'Fundos',
     variant: 'primary',
     description:
       'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
@@ -74,6 +78,7 @@ const stages: Array<{
   {
     id: 'operar-e-escalar',
     title: 'Operar e Escalar',
+    mobileTitle: 'Escalar',
     variant: 'salmon',
     description:
       'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
@@ -90,8 +95,9 @@ const stages: Array<{
     ],
   },
   {
-    id: 'desenvolver-capacidades',
-    title: 'Desenvolver Capacidades',
+    id: 'capacidades',
+    title: 'Capacidades',
+    mobileTitle: 'Capacidades',
     variant: 'darkBlue',
     description:
       'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
@@ -194,13 +200,16 @@ function Timeline() {
       const dotCenterX =
         (dotPos[activeIndex] / 100) * timelineRect.width +
         (timelineRect.left - parentRect.left)
-      const calculatedWidth = parentRect.width * 0.67
+      const isMobile = window.innerWidth < 768
+      const calculatedWidth = isMobile ? parentRect.width * 0.95 : parentRect.width * 0.67
       setDescriptionWidth(calculatedWidth)
 
       let desiredLeft: number
       const totalStages = stages.length
 
-      if (activeIndex === 0) {
+      if (isMobile) {
+        desiredLeft = (parentRect.width - calculatedWidth) / 2
+      } else if (activeIndex === 0) {
         desiredLeft = 0
       } else if (activeIndex === totalStages - 1) {
         desiredLeft = parentRect.width - calculatedWidth
@@ -247,8 +256,8 @@ function Timeline() {
   const activeColors = getVariantColors(active.variant)
 
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
-      <div ref={parentContainerRef} className="relative w-full pb-96">
+    <div className="flex flex-col items-center w-full max-w-4xl mx-auto px-4">
+      <div ref={parentContainerRef} className="relative w-full pb-64 md:pb-96">
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
           {lineCoordinates.map((coords, index) => (
             <line
@@ -273,7 +282,7 @@ function Timeline() {
           )}
         </svg>
 
-        <div className="relative w-full flex items-end justify-between mb-4 z-10">
+        <div className="relative w-full flex items-end justify-between mb-4 z-10 px-1 md:px-2">
           {stages.map((stage, index) => (
             <div
               key={stage.id}
@@ -281,19 +290,24 @@ function Timeline() {
                 buttonRefs.current[index] = el
               }}
               className={cn(
-                'relative flex flex-col items-center',
-                index % 2 === 0 && 'mb-16'
+                'relative flex flex-col items-center flex-1 min-w-0',
+                index % 2 === 0 && 'mb-8 md:mb-16'
               )}
             >
               <Button
                 variant={stage.variant}
                 className={cn(
                   active.id === stage.id &&
-                    'ring-2 ring-offset-2 ring-bah-purple'
+                    'ring-2 ring-offset-2 ring-bah-purple',
+                  'text-xs md:text-sm px-1 md:px-4 w-full max-w-[90px] md:max-w-none',
+                  'min-w-0',
+                  'whitespace-nowrap',
+                  'overflow-hidden text-ellipsis md:overflow-visible md:text-clip'
                 )}
                 onClick={() => setActive(stage)}
               >
-                {stage.title}
+                <span className="md:hidden truncate w-full">{stage.mobileTitle}</span>
+                <span className="hidden md:inline w-full">{stage.title}</span>
               </Button>
             </div>
           ))}

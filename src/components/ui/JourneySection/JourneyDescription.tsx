@@ -83,7 +83,7 @@ function JourneyDescription({
   }, [active])
 
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-12 w-full">
+    <div ref={containerRef} className="relative flex flex-col gap-6 md:gap-12 w-full">
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
         {line1 && (
           <line
@@ -112,7 +112,7 @@ function JourneyDescription({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full relative z-10">
         <Card
           ref={actionsCardRef}
           className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-zinc-300`}

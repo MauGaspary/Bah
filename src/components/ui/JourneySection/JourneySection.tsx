@@ -14,7 +14,7 @@ function JourneySection() {
         </p>
       </div>
 
-      <div className="flex gap-12 justify-center py-20">
+      <div className="flex gap-6 md:gap-12 justify-center py-10 md:py-20 px-4">
         <Timeline />
       </div>
     </div>
