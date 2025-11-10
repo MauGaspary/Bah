@@ -13,7 +13,7 @@ import pgvector.sqlalchemy
 import sqlalchemy as sa
 from alembic import op
 
-MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "1024"))
+MODEL_DIMENSION = int(os.getenv("MODEL_DIMENSIONS", "768"))
 
 # revision identifiers, used by Alembic.
 revision: str = "f31120b21f1a"
