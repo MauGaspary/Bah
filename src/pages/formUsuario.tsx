@@ -137,7 +137,7 @@ export default function FormUsuario() {
       nome: data.nome,
       sobrenome: data.sobrenome,
       email: data.email,
-      id: '',
+      password: data.senha,
     }
 
     createMutation.mutate(usuarioData)

@@ -17,7 +17,6 @@ import type {
 } from '@/interfaces/IUsers'
 
 import { fetchUsers, deleteUser } from '@/service/users'
-import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 {/*
@@ -32,7 +31,6 @@ const mockUsuarios = Array.from({ length: 22 }).map((_, i) => ({
 */}
 
 function UsuariosList({searchQuery}: UsersListProps) {
-  const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -50,14 +48,46 @@ function UsuariosList({searchQuery}: UsersListProps) {
     queryFn: () => fetchUsers(searchQuery, currentPage, itemsPerPage),
   })
 
+  const usuarios = usuariosData?.items || []
   const total = usuariosData?.total || 0
   const totalPages = Math.max(1, Math.ceil(total / itemsPerPage))
 
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentItems = usuariosData?.items.slice(
-      startIndex,
-      startIndex + itemsPerPage
-  )
+  const deleteMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+      closeDeleteConfirm()
+    },
+    onError: () => {
+      console.error('Erro ao excluir usuário')
+    },
+    onSettled: () => {
+      setDeletingId(null)
+    },
+  })
+
+  const openDeleteConfirm = (user: User) => {
+    setUserToDelete(user)
+    setIsDeleteModalOpen(true)
+  }
+
+  const closeDeleteConfirm = () => {
+    setUserToDelete(null)
+    setIsDeleteModalOpen(false)
+  }
+
+  useEffect(() => {
+    // Reset to first page when search changes
+    setCurrentPage(1)
+  }, [searchQuery])
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return
+
+    const { id } = userToDelete
+    setDeletingId(id)
+    deleteMutation.mutate(id)
+  }
 
   return (
     <div>
@@ -68,7 +98,7 @@ function UsuariosList({searchQuery}: UsersListProps) {
               Usuários Cadastrados
             </h1>
             <p className="text-body-regular font-mulish text-white">
-                {mockUsuarios.length} usuários encontrados
+                {total} usuários encontrados
             </p>
           </div>
         </div>
@@ -78,17 +108,22 @@ function UsuariosList({searchQuery}: UsersListProps) {
           <h1 className="text-body-regular font-mulish mr-51">Ações</h1>
         </div>
 
+        {!loading && error && (
+          <div className="mt-4 space-y-2 text-body-regular text-center font-mulish">
+            <p className="text-error">Erro ao carregar usuários</p>
+          </div>
+        )}
+
         <div className="space-y-3">
-          {currentItems.map((item, index) => (
+          {usuarios.map((item: User, index: number) => (
             <ListItem
-              key={item.id}
               variant='usuario'
-              title={item.title}
-              email={item.description}
-              imageUrl={item.imageUrl}
-              isLast={index === currentItems.length - 1}
-              onEdit={() => console.log("Editar")}
-              onDelete={() => console.log("Excluir")}
+              key={item.id}
+              title={item.nome}
+              email={item.email}
+              isLast={index === usuarios.length - 1}
+              isDeleting={deletingId === item.id}
+              onDelete={() => openDeleteConfirm(item)}
             />
           ))}
         </div>
@@ -126,6 +161,17 @@ function UsuariosList({searchQuery}: UsersListProps) {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Excluir Usuário"
+        message={`Tem certeza que deseja excluir o usuário "${userToDelete?.nome}"?`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        isLoading={deletingId === userToDelete?.id}
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteConfirm}
+      />
     </div>
   )
 }

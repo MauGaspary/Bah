@@ -2,7 +2,6 @@ import { SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { Button } from '../button'
 
 type BaseProps = {
-  imageUrl: string
   isLast?: boolean
   isDeleting?: boolean
   onEdit?: () => void
@@ -13,6 +12,7 @@ type DefaultVariant = {
   variant?: 'default'
   title: string
   description: string
+  imageUrl: string
 }
 
 type UsuarioVariant = {
@@ -33,14 +33,16 @@ function ListItem(props: ListItemProps) {
       )}
 
       <div className="flex justify-between gap-4 pt-2">
-        <div className="pl-6 pt-2">
-          <img
-            src={imageUrl}
-            alt={props.title}
-            className="w-14 h-14 rounded-full object-cover"
-          />
-        </div>
-
+        {props.variant === 'usuario' ? null : (
+          <div className="pl-6 pt-2">
+            <img
+              src={imageUrl}
+              alt={props.title}
+              className="w-14 h-14 rounded-full object-cover"
+            />
+          </div>
+        )}
+        
         <div className="flex flex-col flex-1 min-w-0 justify-center">
           <h1 className="text-body-semibold font-mulish truncate">
             {props.title}

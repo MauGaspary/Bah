@@ -1,8 +1,8 @@
 export interface UserCreate {
-  id: string
   nome: string
   sobrenome: string
   email: string
+  password: string
 }
 
 export interface UsersListProps {
@@ -31,4 +31,5 @@ export interface UserPatch {
   nome?: string
   sobrenome?: string
   email?: string
+  senha?: string
 }
