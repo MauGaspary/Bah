@@ -1,8 +1,9 @@
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Input } from '../Searchbar/Searchbar'
+import BahBgWhite from '@/assets/bah-bg-white.png'
+import BahBgPurple from '@/assets/bah-bg-purple.png'
 
 import { optionsItems } from './NavigationsItens'
 import type { NavigationItem } from './NavigationsItens'
@@ -24,6 +25,13 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchIconHovered, setIsSearchIconHovered] = useState(false)
+
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const queryFromUrl = searchParams.get('q')
+    setSearchQuery(queryFromUrl || '')
+  }, [searchParams])
 
   const navigate = useNavigate()
 
@@ -178,14 +186,14 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
             role="button"
           >
             <img
-              src="/src/assets/bah-bg-white.png"
+              src={BahBgWhite}
               alt="Logo"
               className={`h-14 w-auto transition-all duration-300 absolute top-1 left-0 ${
                 isScrolled ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
               }`}
             />
             <img
-              src="/src/assets/bah-bg-purple.png"
+              src={BahBgPurple}
               alt="Logo"
               className={`h-14 w-auto transition-all duration-200 absolute top-1 left-0 ${
                 isScrolled ? 'opacity-100 scale-100' : 'opacity-0 scale-100'
