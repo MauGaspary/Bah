@@ -8,6 +8,7 @@ import JourneySection from '@/components/ui/JourneySection/JourneySection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
 import { fetchCalendarioMensal } from '@/service/calendario'
 import { ChevronDown } from 'lucide-react'
+import Contato from '@/components/ui/contato'
 import LogoImg from '@/assets/logo.png'
 import SobreNos from '../components/ui/SobreNos'
 import NossosValoresPage from './NossosValoresPage'
@@ -154,18 +155,19 @@ function HomePage() {
         <SobreNos />
       </section>
 
-      <section
-        id="values-section"
-        className="container mx-auto px-4 pb-16 md:pt-16"
-      >
+      <section id="values-section" className="container mx-auto px-4 py-8">
         <h2 className="text-3xl md:text-4xl font-bold text-center">
           <NossosValoresPage />
         </h2>
       </section>
 
       {/* Contato */}
-      <section id="contact-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Contato</h2>
+      <section
+        id="contact-section"
+        className="container mx-auto px-4 py-8 md:pt-20"
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-center"></h2>
+        <Contato />
       </section>
     </>
   )
