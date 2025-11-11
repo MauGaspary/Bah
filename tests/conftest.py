@@ -206,7 +206,7 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
     from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
     from app.models.iniciativa_model import Iniciativa
 
-    vector_dim = int(os.getenv("MODEL_DIMENSIONS", "1024"))
+    vector_dim = int(os.getenv("MODEL_DIMENSIONS", "768"))
     test_vector = np.random.rand(vector_dim).tolist()
 
     iniciativa = Iniciativa(
@@ -272,7 +272,7 @@ def iniciativa_factory(db_session):
                 }
             ]
 
-        vector_dim = int(os.getenv("MODEL_DIMENSIONS", "1024"))
+        vector_dim = int(os.getenv("MODEL_DIMENSIONS", "768"))
 
         iniciativa = Iniciativa(
             titulo=titulo,
