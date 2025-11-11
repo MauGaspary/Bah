@@ -76,9 +76,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
                 <FaMapMarkerAlt className="text-[#c7d871] mt-1 flex-shrink-0" />
-                <span className="text-sm">
-                  R. do Arvoredo, 250 - Petrópolis, Porto Alegre - RS
-                </span>
+                <span className="text-sm">R. não sei, Porto Alegre - RS</span>
               </li>
               <li className="flex items-center space-x-2">
                 <FaEnvelope className="text-[#c7d871] flex-shrink-0" />
@@ -86,7 +84,7 @@ const Footer = () => {
                   href="mailto:contato@buracoadao.com.br"
                   className="text-sm hover:text-[#c7d871] transition-colors"
                 >
-                  contato@buracoadao.com.br
+                  contato@bah.com.br
                 </a>
               </li>
               <li className="flex items-center space-x-2">
