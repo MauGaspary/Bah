@@ -144,13 +144,16 @@ function HomePage() {
         <CalendarSection events={eventsAll} />
       </div>
 
-      <section id="journey-section" className="container mx-auto px-4 py-16">
+      <section
+        id="journey-section"
+        className="container mx-auto px-4 py-16 mb-12 md:mb-0"
+      >
         <JourneySection />
       </section>
 
       <section
         id="about-section"
-        className="container mx-auto px-4 pt-16 md:pb-16"
+        className="container mx-auto px-4 pt-8 md:pt-16 md:pb-16"
       >
         <SobreNos />
       </section>
