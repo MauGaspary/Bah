@@ -12,6 +12,7 @@ import Contato from '@/components/ui/contato'
 import LogoImg from '@/assets/logo.png'
 import SobreNos from '../components/ui/SobreNos'
 import NossosValoresPage from './NossosValoresPage'
+import Footer from '@/components/ui/Footer/Footer'
 
 function HomePage() {
   const location = useLocation()
@@ -169,6 +170,8 @@ function HomePage() {
         <h2 className="text-3xl md:text-4xl font-bold text-center"></h2>
         <Contato />
       </section>
+
+      <Footer />
     </>
   )
 }
