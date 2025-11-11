@@ -76,7 +76,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
                 <FaMapMarkerAlt className="text-[#c7d871] mt-1 flex-shrink-0" />
-                <span className="text-sm">R. não sei, Porto Alegre - RS</span>
+                <span className="text-sm">R. não sei, Caxias do Sul - RS</span>
               </li>
               <li className="flex items-center space-x-2">
                 <FaEnvelope className="text-[#c7d871] flex-shrink-0" />
