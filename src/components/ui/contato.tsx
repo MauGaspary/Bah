@@ -124,14 +124,14 @@ const SocialMediaLink: React.FC<SocialMediaLinkProps> = ({
 // Componente principal Contato
 const Contato: React.FC = () => {
   return (
-    <div className="min-h-screen container mx-auto px-4 pb-16 md:pt-4">
+    <div className="container mx-auto px-4">
       {/* Título e Subtítulo */}
       <header className="text-center mb-8">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-2">
+        <h2 className="text-3xl md:text-4xl font-bold text-center">
           Contato
           <span className="block w-[120px] h-[5px] bg-[#c7d871] mx-auto mt-2 rounded-full"></span>
-        </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        </h2>
+        <p className="mt-5 max-w-md mx-auto">
           Entre em contato conosco para mais informações sobre o ecossistema de
           inovação
         </p>
@@ -163,7 +163,7 @@ const Contato: React.FC = () => {
       </main>
 
       {/* Redes Sociais */}
-      <section className="text-center mt-16">
+      <section className="text-center mt-8 mb-4">
         <h3 className="text-xl font-bold text-gray-800 mb-6">
           Redes Sociais
           <span className="block w-[120px] h-[3px] bg-[#c7d871] mx-auto mt-2 rounded-full"></span>
