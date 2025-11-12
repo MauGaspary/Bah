@@ -29,10 +29,11 @@ function NossosValoresPage() {
   return (
     <>
       <div className="inline-block mb-5 md:mb-10">
-        <h2 className="text-xl md:text-4xl font-semibold md:font-bold text-center">
+        <h2 className="text-3xl md:text-4xl font-semibold md:font-bold text-center">
           Nossos valores
         </h2>
-        <div className="hidden md:block h-1 bg-bah-green w-[75%] mx-auto my-2" />
+        <span className="block w-[200px] h-[5px] bg-[#c7d871] mx-auto mt-2 rounded-full"></span>
+        
       </div>
 
       <section className="hidden md:block text-center">
@@ -48,7 +49,7 @@ function NossosValoresPage() {
         </div>
       </section>
 
-      <section className="md:hidden text-center flex justify-center px-4 py-10">
+      <section className="md:hidden text-center flex justify-center px-4 py-6">
         <ValoresCarousel valores={valores} />
       </section>
     </>

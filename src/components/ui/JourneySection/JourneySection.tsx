@@ -7,7 +7,7 @@ function JourneySection() {
         <h2 className="text-large-title md:text-4xl font-bold text-center">
           Jornada Empreendedora
         </h2>
-        <hr className="w-72 md:w-80 border-0 bg-bah-green h-1 rounded-full "></hr>
+        <hr className="w-95 md:w-80 border-0 bg-bah-green h-1 rounded-full "></hr>
         <p className="text-body-regular font-mulish text-label-primary text-center">
           Descubra em qual fase você está e encontre os recursos certos para
           avançar

@@ -7,7 +7,7 @@ function SobreNos() {
             <h2 className="text-3xl md:text-4xl font-bold text-center">
               Sobre Nós
             </h2>
-            <div className="h-1 bg-bah-green w-[75%] mx-auto my-2" />
+            <div className="h-1 bg-bah-green w-[90%] mx-auto my-2" />
           </div>
           <p className="mt-5 max-w-md mx-auto">
             Somos uma Plataforma de Inovação de Caxias do Sul que pensa de forma
