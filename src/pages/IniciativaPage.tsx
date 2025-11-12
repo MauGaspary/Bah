@@ -6,6 +6,7 @@ import type { Iniciativa } from '@/interfaces/IIniciativas'
 import { Link } from 'react-router-dom'
 import HorarioCard from '@/components/ui/HorarioCard'
 import Header from '@/components/ui/Header/Header'
+import Footer from '@/components/ui/Footer/Footer'
 import {
   Carousel,
   CarouselContent,
@@ -144,6 +145,8 @@ function IniciativaPage() {
           </div>
         </section>
       </main>
+
+      <Footer />
     </>
   )
 }
