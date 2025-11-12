@@ -75,25 +75,25 @@ const Footer = () => {
             <h3 className="text-white font-bold text-lg mb-4">Contato</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
-                <FaMapMarkerAlt className="text-[#c7d871] mt-1 flex-shrink-0" />
-                <span className="text-sm">R. não sei, Caxias do Sul - RS</span>
+                <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
+                <span className="text-sm">Rua Sinimbu, 1670, Caxias do Sul - RS</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaEnvelope className="text-[#c7d871] flex-shrink-0" />
+                <FaEnvelope className="text-primary flex-shrink-0" />
                 <a
                   href="mailto:contato@buracoadao.com.br"
-                  className="text-sm hover:text-[#c7d871] transition-colors"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   contato@bah.com.br
                 </a>
               </li>
               <li className="flex items-center space-x-2">
-                <FaPhoneAlt className="text-[#c7d871] flex-shrink-0" />
+                <FaPhoneAlt className="text-primary flex-shrink-0" />
                 <a
-                  href="tel:+555133086464"
-                  className="text-sm hover:text-[#c7d871] transition-colors"
+                  href="tel:+555432188000"
+                  className="text-sm hover:text-primary transition-colors"
                 >
-                  (51) 3308-6464
+                  (54) 3218-8000
                 </a>
               </li>
             </ul>
@@ -106,7 +106,7 @@ const Footer = () => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-2xl hover:text-[#c7d871] transition-colors"
+                className="text-2xl hover:text-primary transition-colors"
                 aria-label="Facebook"
               >
                 <FaFacebook />
@@ -115,7 +115,7 @@ const Footer = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-2xl hover:text-[#c7d871] transition-colors"
+                className="text-2xl hover:text-primary transition-colors"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -124,7 +124,7 @@ const Footer = () => {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-2xl hover:text-[#c7d871] transition-colors"
+                className="text-2xl hover:text-primary transition-colors"
                 aria-label="LinkedIn"
               >
                 <FaLinkedin />
@@ -133,7 +133,7 @@ const Footer = () => {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-2xl hover:text-[#c7d871] transition-colors"
+                className="text-2xl hover:text-primary transition-colors"
                 aria-label="YouTube"
               >
                 <FaYoutube />
@@ -145,7 +145,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 mt-8 pt-8">
+        <div className="mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
               © {currentYear} BAH Plataforma de Inovação de Caxias do Sul.

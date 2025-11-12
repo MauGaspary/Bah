@@ -125,17 +125,17 @@ const variantColors = {
   },
   error: {
     bg: 'bg-error',
-    border: 'border-error',
+    border: 'border-error/50',
     stroke: '#ff3b30',
   },
   primary: {
     bg: 'bg-bah-blue',
-    border: 'border-bah-blue',
+    border: 'border-bah-blue/80',
     stroke: '#41edee',
   },
   salmon: {
     bg: 'bg-bah-red',
-    border: 'border-bah-red',
+    border: 'border-bah-red/80',
     stroke: '#fe716f',
   },
   darkBlue: {
