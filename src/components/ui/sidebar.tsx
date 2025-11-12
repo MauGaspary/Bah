@@ -60,7 +60,7 @@ function SidebarAdm() {
             <div className="flex-1">
               <ul className="space-y-2 font-medium">
                 <li>
-                  <NavLink to="/dashboard" className="block -mx-3">
+                  <NavLink to="/" className="block -mx-3">
                     <div className="group flex w-full items-center px-6 py-4">
                       <img src={LogoImg} alt="Logo" className="w-[150px]" />
                     </div>

@@ -28,14 +28,14 @@ const valores = [
 function NossosValoresPage() {
   return (
     <>
-      <div className="inline-block mb-5 md:mb-20">
+      <div className="inline-block mb-5 md:mb-10">
         <h2 className="text-xl md:text-4xl font-semibold md:font-bold text-center">
           Nossos valores
         </h2>
         <div className="hidden md:block h-1 bg-bah-green w-[75%] mx-auto my-2" />
       </div>
 
-      <section className="hidden md:block text-center min-h-screen">
+      <section className="hidden md:block text-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {valores.map((valor, index) => (
             <ValueCard
@@ -48,7 +48,7 @@ function NossosValoresPage() {
         </div>
       </section>
 
-      <section className="md:hidden text-center flex justify-center md:min-h-screen px-4 py-10">
+      <section className="md:hidden text-center flex justify-center px-4 py-10">
         <ValoresCarousel valores={valores} />
       </section>
     </>

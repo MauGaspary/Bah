@@ -201,7 +201,9 @@ function Timeline() {
         (dotPos[activeIndex] / 100) * timelineRect.width +
         (timelineRect.left - parentRect.left)
       const isMobile = window.innerWidth < 768
-      const calculatedWidth = isMobile ? parentRect.width * 0.95 : parentRect.width * 0.67
+      const calculatedWidth = isMobile
+        ? parentRect.width * 0.95
+        : parentRect.width * 0.67
       setDescriptionWidth(calculatedWidth)
 
       let desiredLeft: number
@@ -257,7 +259,10 @@ function Timeline() {
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto px-4">
-      <div ref={parentContainerRef} className="relative w-full pb-64 md:pb-96">
+      <div
+        ref={parentContainerRef}
+        className="relative w-full pb-[32rem] md:pb-80"
+      >
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
           {lineCoordinates.map((coords, index) => (
             <line
@@ -306,7 +311,9 @@ function Timeline() {
                 )}
                 onClick={() => setActive(stage)}
               >
-                <span className="md:hidden truncate w-full">{stage.mobileTitle}</span>
+                <span className="md:hidden truncate w-full">
+                  {stage.mobileTitle}
+                </span>
                 <span className="hidden md:inline w-full">{stage.title}</span>
               </Button>
             </div>

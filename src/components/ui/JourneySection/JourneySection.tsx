@@ -2,7 +2,7 @@ import Timeline from './Timeline'
 
 function JourneySection() {
   return (
-    <div>
+    <div className="mb-12 md:mb-0">
       <div className="flex flex-col items-center gap-4">
         <h2 className="text-large-title md:text-4xl font-bold text-center">
           Jornada Empreendedora
