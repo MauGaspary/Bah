@@ -2,7 +2,6 @@ import { SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { Button } from '../button'
 
 type BaseProps = {
-  imageUrl: string
   isLast?: boolean
   isDeleting?: boolean
   onEdit?: () => void
@@ -13,6 +12,7 @@ type DefaultVariant = {
   variant?: 'default'
   title: string
   description: string
+  imageUrl: string
 }
 
 type UsuarioVariant = {
@@ -33,14 +33,25 @@ function ListItem(props: ListItemProps) {
       )}
 
       <div className="flex justify-between gap-4 pt-2">
-        <div className="pl-6 pt-2">
-          <img
-            src={imageUrl}
-            alt={props.title}
-            className="w-14 h-14 rounded-full object-cover"
-          />
-        </div>
-
+        {props.variant === 'usuario' ? 
+          (
+          <div className='pl-6 pt-2'>
+            <div className="flex items-center justify-center w-14 h-14 bg-gray-200 rounded-full">
+              <span className="text-xl font-mulish text-gray-500">
+                {props.title.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="pl-6 pt-2">
+            <img
+              src={imageUrl}
+              alt={props.title}
+              className="w-14 h-14 rounded-full object-cover"
+            />
+          </div>
+        )}
+        
         <div className="flex flex-col flex-1 min-w-0 justify-center">
           <h1 className="text-body-semibold font-mulish truncate">
             {props.title}
@@ -58,16 +69,18 @@ function ListItem(props: ListItemProps) {
         </div>
 
         <div className="flex gap-3 self-center pr-16 pb-2">
-          <Button
-            variant="list"
-            className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95"
-            onClick={onEdit}
-          >
-            <SquarePenIcon className="w-3 h-3 text-editar" />
-            <span className="text-subheadline-regular font-mulish text-editar text-xs">
-              Editar
-            </span>
-          </Button>
+          {props.variant === 'usuario' ? null : (
+            <Button
+              variant="list"
+              className="cursor-pointer border-editar-secondary/60 h-8 min-w-0 px-2 py-1 text-xs flex active:scale-95"
+              onClick={onEdit}
+            >
+              <SquarePenIcon className="w-3 h-3 text-editar" />
+              <span className="text-subheadline-regular font-mulish text-editar text-xs">
+                Editar
+              </span>
+            </Button>
+          )}
 
           <Button
             variant="list"
