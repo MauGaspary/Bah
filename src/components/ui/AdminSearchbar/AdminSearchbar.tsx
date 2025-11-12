@@ -10,7 +10,12 @@ type SearchbarProps = {
   onButtonClick?: () => void
 }
 
-function AdminSearchbar({ placeholder, buttonLabel, onButtonClick, onSearchChange }: SearchbarProps) {
+function AdminSearchbar({
+  placeholder,
+  buttonLabel,
+  onButtonClick,
+  onSearchChange,
+}: SearchbarProps) {
   const handleSearch = () => {
     console.log('Buscar')
   }
@@ -41,7 +46,7 @@ function AdminSearchbar({ placeholder, buttonLabel, onButtonClick, onSearchChang
           </div>
 
           <Button
-            className="cursor-pointer bg-success active:scale-95"
+            className="cursor-pointer bg-bah-purple hover:bg-bah-purple/90 active:scale-95 h-[48px] px-6 whitespace-nowrap rounded-full"
             onClick={onButtonClick}
           >
             {buttonLabel}
