@@ -18,7 +18,7 @@ function SobreNos() {
             <div className="w-full max-w-3xl">
               <div className="overflow-hidden rounded-md shadow-md">
                 <img
-                  src="/assets/sobre-nos.jpg"
+                  src="../src/assets/sobre-nos.jpg"
                   alt="Equipe BAH"
                   className="w-full h-64 md:h-80 object-cover"
                 />
