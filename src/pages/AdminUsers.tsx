@@ -15,26 +15,28 @@ function AdminUsuarios() {
           <SidebarAdm />
         </div>
 
-        <main className="flex-1 ml-[20%] py-6 pr-6 pl-6">
-          <div className="text-left ">
-            <h1 className="text-large-title font-mulish text-bah-purple ">
-              Lista de Usuários
-            </h1>
-            <p className="text-body-regular font-mulish text-label-secondary">
-              Gerencie todos usuários do sistema
-            </p>
-          </div>
+        <main className="flex-1 ml-[15%] py-6 pr-6 pl-6 flex justify-center">
+          <div className="w-full max-w-6xl">
+            <div className="text-left">
+              <h1 className="text-large-title font-mulish text-bah-purple">
+                Lista de Usuários
+              </h1>
+              <p className="text-body-regular font-mulish text-label-secondary">
+                Gerencie todos usuários do sistema
+              </p>
+            </div>
 
-          <div className="py-6 pr-6">
-            <AdminSearchbar
-              placeholder="Buscar usuários por nome, email, região..."
-              buttonLabel="Novo usuário"
-              onSearchChange={setSearchTerm}
-              onButtonClick={() => navigate('/admin/usuarios/criarUsuario')}
-            />
+            <div className="py-6 pr-6">
+              <AdminSearchbar
+                placeholder="Buscar usuários por nome, email, região..."
+                buttonLabel="Novo usuário"
+                onSearchChange={setSearchTerm}
+                onButtonClick={() => navigate('/admin/usuarios/criarUsuario')}
+              />
 
-            <div className="mt-8">
-              <UsuariosList searchQuery={searchTerm} />
+              <div className="mt-8 max-h-[570px] pb-16 3xl:max-h-none 2xl:mb-0 overflow-y-auto custom-scrollbar">
+                <UsuariosList searchQuery={searchTerm} />
+              </div>
             </div>
           </div>
         </main>
