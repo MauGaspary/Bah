@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { getIniciativaById } from "@/service/search";
 import type { Iniciativa } from "@/interfaces/IIniciativas";
+import { useRef } from "react"
 
 import { Link } from "react-router-dom";
 import HorarioCard from "@/components/ui/HorarioCard"
@@ -19,7 +20,7 @@ function IniciativaPage() {
   const { id } = useParams<{ id: string }>()
   const [iniciativa, setIniciativa] = useState<Iniciativa | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-
+  const carouselRef = useRef<any>(null);
   useEffect(() => {
     async function fetchIniciativa() {
       if (id) {
@@ -38,6 +39,12 @@ function IniciativaPage() {
 
   }, [id]);
 
+  const scrollToIndex = (index: number) => {
+    setActiveIndex(index);
+    if (carouselRef.current) {
+      carouselRef.current.scrollTo({ index });
+    }
+  };
   
 
   if(!iniciativa){
