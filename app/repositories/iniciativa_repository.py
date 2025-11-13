@@ -1,3 +1,5 @@
+import os
+
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -614,6 +616,141 @@ class IniciativaRepository:
         ordered = [m[_id] for _id in ids]
 
         return ordered, total
+
+    def ranking_by_rrf(
+        self,
+        embedding: List[float],
+        query_text: str,
+        page: int,
+        size: int,
+        *,
+        k: int = 60,
+    ) -> Tuple[List[Iniciativa], int]:
+        """
+        Fusiona resultados de embedding e FTS usando RRF.
+        Retorna tupla (iniciativas ordenadas, total).
+        """
+
+        weight_embedding = float(os.getenv("RRF_WEIGHT_EMBEDDING", "1.0"))
+        weight_fts = float(os.getenv("RRF_WEIGHT_FTS", "1.0"))
+        k_default = int(os.getenv("RRF_K", str(k)))
+        k_emb = int(os.getenv("RRF_K_EMBEDDING", str(k_default)))
+        k_fts = int(os.getenv("RRF_K_FTS", str(k_default)))
+
+        emb_items, emb_total = self.search_by_embedding(embedding, page=page, size=size)
+        fts_items, _fts_total = self.search_by_fts(query_text, page=page, size=size)
+
+        emb_rank = {obj.id: idx + 1 for idx, obj in enumerate(emb_items)}
+        fts_rank = {obj.id: idx + 1 for idx, obj in enumerate(fts_items)}
+        all_ids = list(set(emb_rank.keys()) | set(fts_rank.keys()))
+
+        obj_by_id: Dict[str, Iniciativa] = {}
+        for o in emb_items:
+            obj_by_id[o.id] = o
+        for o in fts_items:
+            obj_by_id.setdefault(o.id, o)
+
+        scored: List[Tuple[str, float, int, int]] = []
+        for _id in all_ids:
+            r_emb = emb_rank.get(_id)
+            r_fts = fts_rank.get(_id)
+            score = 0.0
+            if r_emb is not None:
+                score += weight_embedding * (1.0 / (k_emb + r_emb))
+            if r_fts is not None:
+                score += weight_fts * (1.0 / (k_fts + r_fts))
+            scored.append((_id, score, r_emb or 1_000_000, r_fts or 1_000_000))
+
+        scored.sort(key=lambda t: (-t[1], min(t[2], t[3]), t[2], t[3]))
+        fused_ids = [t[0] for t in scored[:size]]
+        ordered = [obj_by_id[i] for i in fused_ids if i in obj_by_id]
+        total = emb_total
+        return ordered, total
+    
+    def search_by_fts(
+        self, query_text: str, page: int, size: int
+    ) -> Tuple[List[Iniciativa], int]:
+        """
+        Busca iniciativas por FTS.
+        Retorna tupla (iniciativas ordenadas por relevância, total).
+        """
+        offset = (page - 1) * size
+
+        query = text(
+            """
+            WITH all_texts AS (
+                -- Texto principal das iniciativas
+                SELECT
+                    i.id,
+                    to_tsvector('portuguese', coalesce(i.titulo, '') || ' ' || coalesce(i.descricao, '')) AS document
+                FROM iniciativas i
+                WHERE i.deletado_em IS NULL
+
+                UNION ALL
+
+                -- Textos adicionais das descricoes_extras
+                SELECT
+                    de.iniciativa_id AS id,
+                    to_tsvector('portuguese', coalesce(de.descricao, '')) AS document
+                FROM descricoes_extras de
+                JOIN iniciativas i ON i.id = de.iniciativa_id
+                WHERE i.deletado_em IS NULL
+            ),
+            ranked AS (
+                SELECT
+                    id,
+                    MAX(ts_rank_cd(document, plainto_tsquery('portuguese', :query))) AS rank
+                FROM all_texts
+                WHERE document @@ plainto_tsquery('portuguese', :query)
+                GROUP BY id
+            )
+            SELECT
+                i.id,
+                i.titulo,
+                ranked.rank AS best_rank,
+                COUNT(*) OVER() AS total_count
+            FROM ranked
+            JOIN iniciativas i ON i.id = ranked.id
+            WHERE i.deletado_em IS NULL
+            ORDER BY ranked.rank DESC
+            LIMIT :limit OFFSET :offset
+            """
+        )
+
+        rows = (
+            self.db.execute(
+                query,
+                {
+                    "query": query_text,
+                    "limit": size,
+                    "offset": offset,
+                },
+            )
+            .mappings()
+            .all()
+        )
+
+        total = rows[0]["total_count"] if rows else 0
+        if not rows:
+            return [], 0
+
+        for r in rows:
+            rank = r["best_rank"] or 0.0
+            print(f"[FTS] ID={r['id']} | rank={rank:.4f} | título={r.get('titulo','')}")
+
+        ids = [r["id"] for r in rows]
+        iniciativas = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.id.in_(ids))
+            .options(selectinload(Iniciativa.horarios))
+            .all()
+        )
+
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids]
+
+        return ordered, total
+
 
     def create_index_if_not_exists(self):
         """
