@@ -18,6 +18,7 @@ function IniciativaPage() {
 
   const { id } = useParams<{ id: string }>()
   const [iniciativa, setIniciativa] = useState<Iniciativa | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     async function fetchIniciativa() {
@@ -36,6 +37,8 @@ function IniciativaPage() {
     fetchIniciativa();
 
   }, [id]);
+
+  
 
   if(!iniciativa){
       return;
@@ -111,8 +114,6 @@ function IniciativaPage() {
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
             </Carousel>
           </div>
 
@@ -127,6 +128,27 @@ function IniciativaPage() {
               </div>
             ))}
           </div>
+
+          {processedHorarios.length > 0  && (
+            console.log('processedHorarios', processedHorarios),
+             <div className="mt-4 flex justify-center gap-2">
+            {Array.from({ length: processedHorarios.length }, (_, i) => i).map(i => {
+              const key = processedHorarios[i]?.id ?? i
+              const activeDot = Math.min(activeIndex, processedHorarios.length - 1)
+              return (
+                <span
+                  key={key}
+                  role="button"
+                  aria-label={`Ir para card ${i + 1}`}
+                  onClick={() => scrollToIndex(i)}
+                  className={`h-2 w-2 rounded-full ${
+                    i === activeDot ? 'bg-[#6B4BA9]' : 'bg-gray-300'
+                  } cursor-pointer`}
+                />
+              )
+            })}
+          </div>
+          )}
         </section>
       </main>
     </>
