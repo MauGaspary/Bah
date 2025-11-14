@@ -64,15 +64,15 @@ describe('Criar Iniciativa test', () => {
       req.reply({ statusCode: 201, body: createdResponse })
     }).as('postIniciativa')
 
-  // First perform login
-  cy.visit('/admin')
-  cy.get('input[type="email"]').clear().type('admin@bah.com.br')
-  cy.get('input[type="password"]').clear().type('admin123')
-  cy.get('button[type="submit"]').click()
+    // First perform login
+    cy.visit('/admin')
+    cy.get('input[type="email"]').clear().type('admin@bah.com.br')
+    cy.get('input[type="password"]').clear().type('admin123')
+    cy.get('button[type="submit"]').click()
 
-  cy.url().should('include', '/iniciativas')
+    cy.url().should('include', '/iniciativas')
 
-  cy.get('.rounded-md').contains('Nova iniciativa').click()
+    cy.get('.rounded-md').contains('Nova iniciativa').click()
 
     // Fill out the form
     cy.get('input[name="titulo"]').type('Iniciativa E2E')
@@ -80,13 +80,39 @@ describe('Criar Iniciativa test', () => {
     cy.get('textarea[name="descricao"]').type('Descrição de teste')
 
     //  Organizador
-    //cy.get('[data-slot="card-content"] > :nth-child(1) > :nth-child(2) > .flex-col > div > .flex').click()
-    //cy.get('#radix-«rg»').contains('Prefeitura de Caxias do Sul').click()
+    cy.get('[data-slot="card-content"] > :nth-child(1) > :nth-child(2) > .flex-col > div > .flex').click()
+    cy.get('body').type('p{enter}') // Fecha o dropdown de tags
+
 
     //  Tags
     cy.get('.grid > :nth-child(1) > .w-4').click() // Seleciona a primeira tag
     cy.get('.grid > :nth-child(3) > .w-4').click() // Desseleciona a primeira tag
 
     cy.get(':nth-child(3) > .text-card-foreground').click()
+
+    cy.get('[name="link"]').type('https://exemplo.com')
+
+
+    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
+
+    // Botão de adicionar descrição extra
+    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
+    //cy.get('[name="descricoes_extras.0"]').type('teste')
+
+    // Botão de adicionar horario
+    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    
+    // Escolher dia
+    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    //cy.get('.bg-accent > .items-center').click()
+
+    // Horarios de inicio e fim
+    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
+
+    // Submit the form
+    cy.get('.justify-end > .inline-flex').click()
+
+    // Esta dando problema com assert do array de tags, então o cadastro não está indo de fato, estou rodando pela dev mesmo
 })
 })
