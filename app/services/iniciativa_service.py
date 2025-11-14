@@ -348,3 +348,27 @@ class IniciativaService:
         except Exception as e:
             print(f"Erro na busca: {type(e).__name__}: {str(e)}")
             raise ValueError(f"Erro interno do servidor na service: {str(e)}") from e
+
+    def search_iniciativas_rrf(
+        self, query: str, page: int, size: int
+    ) -> IniciativaListResponse:
+        """Busca de iniciativas hibrido"""
+        if self.model is None:
+            raise ValueError("Modelo de embedding não disponível")
+
+        embedding = self.model.encode(
+            query.lower(), convert_to_numpy=True, normalize_embeddings=True
+        )
+        try:
+            iniciativas, total = self.repository.ranking_by_rrf(
+                embedding, query, page, size
+            )
+
+            items = [IniciativaResponse.model_validate(i) for i in iniciativas]
+            filters = IniciativaFiltersSchema(q=query, page=page, size=size)
+            return IniciativaListResponse(items=items, total=total, filters=filters)
+        except Exception as e:
+            print(f"Erro na busca RRF: {type(e).__name__}: {str(e)}")
+            raise ValueError(
+                f"Erro interno do servidor na service (RRF): {str(e)}"
+            ) from e

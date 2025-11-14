@@ -115,3 +115,9 @@ class IniciativaController:
             return self.service.search_iniciativas(query, page, size)
         except HTTPException as e:
             raise e
+
+    def search_iniciativas_rrf(self, query: str, page: int, size: int):
+        try:
+            return self.service.search_iniciativas_rrf(query, page, size)
+        except HTTPException as e:
+            raise e

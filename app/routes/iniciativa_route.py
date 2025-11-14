@@ -37,6 +37,23 @@ def search_iniciativas(
     return controller.search_iniciativas(q, page, size)
 
 
+@router.get(
+    "/search-rrf",
+    response_model=IniciativaListResponse,
+    status_code=status.HTTP_200_OK,
+)
+def search_iniciativas_rrf(
+    q: str = Query(..., description="Texto da busca (usado em embedding e FTS)"),
+    page: int = Query(1, ge=1, description="Número da página"),
+    size: int = Query(10, ge=1, le=100, description="Itens por página"),
+    db: Session = Depends(get_db),
+    model: SentenceTransformer = Depends(get_embedding_model),
+):
+
+    controller = IniciativaController(db, model)
+    return controller.search_iniciativas_rrf(q, page, size)
+
+
 @router.post(
     "/", response_model=IniciativaResponse, status_code=status.HTTP_201_CREATED
 )
