@@ -321,7 +321,7 @@ def auth_token(usuario_fixture):
     """Fixture que gera um token JWT válido para testes"""
     from app.services.jwt_service import sign
 
-    return sign(usuario_fixture["id"], usuario_fixture["email"])
+    return sign(usuario_fixture["id"], usuario_fixture["email"], usuario_fixture["nome"])
 
 
 @pytest.fixture

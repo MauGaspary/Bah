@@ -18,6 +18,6 @@ class AuthService:
         if not usuario or not self.hasher.verify(password, usuario.senha_hash):
             raise InvalidCredentialsException("Invalid credentials")
 
-        token = sign(sub=str(usuario.id), email=usuario.email)
+        token = sign(sub=str(usuario.id), email=usuario.email, name=usuario.nome)
 
         return {"access_token": token, "token_type": "Bearer", "expires_in": JWT_TTL}
