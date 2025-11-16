@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import AdminIniciativas from './pages/AdminIniciativas'
 import AdminUsuarios from './pages/AdminUsers'
 import FormIniciativa from './pages/formIniciativa'
+import FormUsuario from './pages/formUsuario'
 import HomePage from './pages/HomePage'
 import IniciativaPage from './pages/IniciativaPage'
 import LoginAdminPage from './pages/LoginAdminPage'
@@ -27,6 +28,10 @@ function App() {
             <Route
               path="/admin/iniciativas/:id/editar"
               element={<FormIniciativa />}
+            />
+            <Route
+              path="/admin/usuarios/criarUsuario"
+              element={<FormUsuario />}
             />
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/iniciativas" element={<AdminIniciativas />} />
