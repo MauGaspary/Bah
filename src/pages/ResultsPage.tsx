@@ -5,6 +5,7 @@ import type { Iniciativa } from '@/interfaces/IIniciativas'
 
 import CardItem from '@/components/ui/CardItem'
 import Header from '@/components/ui/Header/Header'
+import Footer from '@/components/ui/Footer/Footer'
 import { searchIniciativas } from '@/service/search'
 
 function ResultsPage() {
@@ -73,6 +74,7 @@ function ResultsPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

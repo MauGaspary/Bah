@@ -10,12 +10,12 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
+import Footer from "@/components/ui/Footer/Footer";
 import Header from "@/components/ui/Header/Header"
 import HorarioCard from "@/components/ui/HorarioCard"
 import { getIniciativaById } from "@/service/search";
 
 function IniciativaPage() {
-
   const { id } = useParams<{ id: string }>()
   const [iniciativa, setIniciativa] = useState<Iniciativa | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -63,8 +63,7 @@ function IniciativaPage() {
       }
     }
 
-    fetchIniciativa();
-
+    fetchIniciativa()
   }, [id]);
 
   
@@ -76,12 +75,26 @@ function IniciativaPage() {
   const processedHorarios = (iniciativa.horarios ?? []).map((horario) => {
     const h = horario as IniciativaHorario
     const date = h.data_evento ? new Date(`${h.data_evento}T00:00:00`) : null
-    const weekdayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
+    const weekdayNames = [
+      'Domingo',
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado',
+    ]
     const dia = date ? weekdayNames[date.getDay()] : ''
     const data = date
-      ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date)
+      ? new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }).format(date)
       : ''
-    const modalidade = h.tipo ? String(h.tipo).charAt(0).toUpperCase() + String(h.tipo).slice(1) : ''
+    const modalidade = h.tipo
+      ? String(h.tipo).charAt(0).toUpperCase() + String(h.tipo).slice(1)
+      : ''
 
     return {
       ...h,
@@ -94,9 +107,11 @@ function IniciativaPage() {
   return (
     <>
       <Header />
-      
+
       <section
-        className={"relative min-h-[280px] md:min-h-[360px] w-full bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end"}
+        className={
+          'relative min-h-[280px] md:min-h-[360px] w-full bg-cover bg-top md:bg-center bg-no-repeat md:bg-fixed flex items-end'
+        }
         aria-label="Hero da iniciativa"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 pointer-events-none">
@@ -125,7 +140,9 @@ function IniciativaPage() {
 
       <main className="w-full max-w-6xl mx-auto px-4 py-10 md:py-16">
         <article className="prose prose-lg dark:prose-invert mx-auto text-center max-w-3xl">
-          <h1 className="text-2xl md:text-4xl font-bold">{iniciativa.titulo}</h1>
+          <h1 className="text-2xl md:text-4xl font-bold">
+            {iniciativa.titulo}
+          </h1>
           <p className="mt-2 text-base md:text-lg text-gray-700 dark:text-gray-300">
             {iniciativa.descricao}
           </p>
@@ -179,6 +196,8 @@ function IniciativaPage() {
           )}
         </section>
       </main>
+
+      <Footer />
     </>
   )
 }

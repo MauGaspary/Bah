@@ -1,12 +1,18 @@
 import SearchDropdown from '@/components/ui/Searchbar/SearchDropdown'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from '@/components/ui/Header/Header'
 import CalendarSection from '@/components/ui/CalendarSection/CalendarSection'
+import type { CalendarEvent } from '@/components/ui/CalendarSection/CalendarSection'
+import JourneySection from '@/components/ui/JourneySection/JourneySection'
 import UpcomingCarousel from '@/components/ui/UpcomingCarousel/UpcomingCarousel'
-import { buildCalendarEvents } from '@/data/iniciativas'
+import { fetchCalendarioMensal } from '@/service/calendario'
 import { ChevronDown } from 'lucide-react'
+import Contato from '@/components/ui/contato'
 import LogoImg from '@/assets/logo.png'
+import SobreNos from '../components/ui/SobreNos'
+import NossosValoresPage from './NossosValoresPage'
+import Footer from '@/components/ui/Footer/Footer'
 
 function HomePage() {
   const location = useLocation()
@@ -21,7 +27,6 @@ function HomePage() {
   useEffect(() => {
     const state = location.state as { scrollTo?: string } | null
     if (state?.scrollTo) {
-      // limpa o estado para evitar scroll repetido
       history.replaceState({}, '')
       const el = document.getElementById(state.scrollTo)
       if (el) {
@@ -31,7 +36,40 @@ function HomePage() {
       }
     }
   }, [location.state])
-  const eventsAll = useMemo(() => buildCalendarEvents(), [])
+  const [eventsAll, setEventsAll] = useState<CalendarEvent[]>([])
+
+  useEffect(() => {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    fetchCalendarioMensal(todayIso)
+      .then(resp => {
+        const inferCategory = (names: string[]): CalendarEvent['category'] => {
+          const n = names.map(s => s.toLowerCase())
+          if (n.some(s => s.includes('hack'))) return 'hackathon'
+          if (n.some(s => s.includes('work'))) return 'workshop'
+          if (n.some(s => s.includes('feira'))) return 'feira'
+          if (n.some(s => s.includes('meet'))) return 'meetup'
+          if (n.some(s => s.includes('network'))) return 'networking'
+          return 'meetup'
+        }
+
+        const mapped: CalendarEvent[] = resp.dias.flatMap(dia =>
+          dia.iniciativas.map(item => ({
+            id: item.horario_id,
+            title: item.titulo,
+            description: item.descricao,
+            date: dia.data,
+            category: inferCategory(item.tags.map(t => t.nome)),
+            location: item.local,
+            imageUrl: undefined,
+            featured: item.destaque,
+          }))
+        )
+        setEventsAll(mapped)
+      })
+      .catch(() => {
+        setEventsAll([])
+      })
+  }, [])
   const eventsNext15Days = useMemo(() => {
     const todayIso = new Date().toISOString().slice(0, 10)
     const end = new Date()
@@ -77,7 +115,6 @@ function HomePage() {
               </button>
             ))}
           </div>
-          {/* Botão para descer até o calendário/carrossel — movido para fora da section */}
         </section>
         <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-6">
           <button
@@ -100,39 +137,44 @@ function HomePage() {
         </div>
       </main>
 
-      {/* Mobile: Carrossel de próximos eventos */}
       <div className="md:hidden" id="calendar-section-mobile">
         <UpcomingCarousel events={eventsNext15Days} />
       </div>
 
-      {/* Desktop: Calendário com destaques */}
       <div className="hidden md:block" id="calendar-section">
         <CalendarSection events={eventsAll} />
       </div>
 
-      {/* Jornada */}
-      <section id="journey-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Jornada</h2>
+      <section
+        id="journey-section"
+        className="container mx-auto px-4 py-16 mb-12 md:mb-0"
+      >
+        <JourneySection />
       </section>
 
-      {/* Sobre nós */}
-      <section id="about-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Sobre nós
-        </h2>
+      <section
+        id="about-section"
+        className="container mx-auto px-4 pt-8 md:pt-16 md:pb-16"
+      >
+        <SobreNos />
       </section>
 
-      {/* Nossos Valores */}
-      <section id="values-section" className="container mx-auto px-4 py-16">
+      <section id="values-section" className="container mx-auto px-4 py-8">
         <h2 className="text-3xl md:text-4xl font-bold text-center">
-          Nossos Valores
+          <NossosValoresPage />
         </h2>
       </section>
 
       {/* Contato */}
-      <section id="contact-section" className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center">Contato</h2>
+      <section
+        id="contact-section"
+        className="container mx-auto px-4 py-8 md:pt-20"
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-center"></h2>
+        <Contato />
       </section>
+
+      <Footer />
     </>
   )
 }

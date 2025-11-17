@@ -88,3 +88,22 @@ export function is_authenticated(): boolean {
     return false
   }
 }
+
+export interface UserInfo {
+  name: string
+  email: string
+}
+
+export function getUserFromToken(): UserInfo | null {
+  const token = getToken()
+  if (!token) return null
+
+  try {
+    const payload = verify_token(token)
+    const name = (payload.name || payload.sub || 'Usuário') as string
+    const email = (payload.email || '') as string
+    return { name, email }
+  } catch {
+    return null
+  }
+}

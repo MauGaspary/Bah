@@ -13,6 +13,12 @@ const buttonVariants = cva(
         'bg-bah-blue hover:bg-bah-blue/90 text-white focus-visible:ring-bah-blue/50 rounded-button',
       success:
         'bg-bah-green hover:bg-bah-green/90 text-white focus-visible:ring-bah-green/50 rounded-button',
+      error:
+        'bg-error hover:bg-error/90 text-white focus-visible:ring-error/50 rounded-button',
+      salmon:
+        'bg-bah-red hover:bg-bah-red/90 text-white focus-visible:ring-bah-red/50 rounded-button',
+      darkBlue:
+        'bg-bah-dark-blue hover:bg-bah-dark-blue/90 text-white focus-visible:ring-bah-dark-blue/50 rounded-button',
       secondary:
         'bg-background-secondary hover:bg-gray3 text-label-primary border border-stroke-primary focus-visible:ring-gray/50 rounded-button',
       purple:

@@ -84,7 +84,7 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ index, onRemove }) => {
                       <PopoverTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="min-w-1 w-full h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none justify-start text-left font-normal rounded-lg overflow-hidden"
+                          className={`min-w-1 w-full h-11 border px-4 border-gray-300 py-3 text-sm focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none justify-start text-left font-normal rounded-lg overflow-hidden ${field.value ? 'text-black' : 'text-gray-400'}`}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                           <span className="truncate">
@@ -162,7 +162,9 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ index, onRemove }) => {
                   </FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
+                      <SelectTrigger
+                        className={`w-full h-11 border px-4 border-gray-300 py-3 text-sm focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg ${field.value ? 'text-black' : 'text-gray-400'}`}
+                      >
                         <SelectValue placeholder="Selecione o horário" />
                       </SelectTrigger>
                       <SelectContent className="border-bah-purple bg-white">
@@ -194,7 +196,9 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ index, onRemove }) => {
                   </FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
+                      <SelectTrigger
+                        className={`w-full h-11 border px-4 border-gray-300 py-3 text-sm focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg ${field.value ? 'text-black' : 'text-gray-400'}`}
+                      >
                         <SelectValue placeholder="Selecione o horário" />
                       </SelectTrigger>
                       <SelectContent className="border-bah-purple bg-white">
@@ -227,7 +231,9 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ index, onRemove }) => {
                 </FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full h-11 border px-4 border-gray-300 py-3 text-sm text-gray-400 focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg">
+                    <SelectTrigger
+                      className={`w-full h-11 border px-4 border-gray-300 py-3 text-sm focus-visible:ring-2 focus-visible:ring-bah-purple focus-visible:border-transparent data-[state=open]:ring-2 data-[state=open]:ring-bah-purple data-[state=open]:border-transparent shadow-none rounded-lg ${field.value ? 'text-black' : 'text-gray-400'}`}
+                    >
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent className="border-bah-purple bg-white">
