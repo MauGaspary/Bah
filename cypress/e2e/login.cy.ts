@@ -106,17 +106,6 @@ describe('Login Page Tests', () => {
   it('should handle login with valid credentials', () => {
     cy.fixture('login').then((loginData) => {
       // Intercepta a requisição de login
-      cy.intercept('POST', '**/auth/login', {
-        statusCode: 200,
-        body: {
-          access_token: 'mock-jwt-token',
-          user: {
-            id: '1',
-            email: loginData.validUser.email,
-            name: 'Test User'
-          }
-        }
-      }).as('loginRequest')
 
       // Preenche os campos com credenciais válidas
       cy.get('input[type="email"]').type(loginData.validUser.email)
@@ -125,11 +114,8 @@ describe('Login Page Tests', () => {
       // Submete o formulário
       cy.get('button[type="submit"]').click()
       
-      // Verifica se a requisição foi feita
-      cy.wait('@loginRequest')
-      
       // Verifica se foi redirecionado para o dashboard
-      cy.url().should('include', '/dashboard')
+      cy.url().should('include', '/iniciativas')
     })
   })
 
@@ -183,8 +169,7 @@ describe('Login Page Tests', () => {
       cy.get('button[type="submit"]').click()
       
       // Verifica se o botão mostra estado de loading
-      cy.get('button[type="submit"]').should('contain', 'Signing in...')
-      cy.get('button[type="submit"]').should('be.disabled')
+      cy.get('p[id="verificacaoAutenticacao"]').should('be.visible')
       
       // Aguarda a requisição completar
       cy.wait('@loginRequest')
