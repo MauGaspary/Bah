@@ -1,6 +1,8 @@
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+
+import { cn } from '@/lib/utils'
 import { Input } from '../Searchbar/Searchbar'
 import BahBgWhite from '@/assets/bah-bg-white.png'
 import BahBgPurple from '@/assets/bah-bg-purple.png'
@@ -243,19 +245,22 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
             </div>
           )}
 
-          {isScrolled && (
-            <nav className="hidden lg:flex items-center space-x-6">
-              {optionsItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavigation(item)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          )}
+          <nav className="hidden lg:flex items-center space-x-6">
+            {optionsItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item)}
+                className={cn(
+                  'px-3 py-2 text-sm font-medium cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish',
+                  isScrolled
+                    ? 'text-white hover:text-bah-green'
+                    : 'text-bah-purple hover:text-bah-green'
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
