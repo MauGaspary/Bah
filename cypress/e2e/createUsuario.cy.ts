@@ -65,11 +65,14 @@ describe('Criar Usuario test', () => {
 
     cy.get('.inline-flex').contains('Salvar Usuário').click()
     // ensure the mocked request was triggered and returned 201
-    cy.wait('@postUsuario').then(({ response }) => {
-      expect(response.statusCode).to.equal(201)
-      expect(response.body).to.have.property('detail', 'Usuário criado com sucesso')
-    })
-    })
+        cy.wait('@postUsuario').then((interception) => {
+          // assert the response exists to satisfy TypeScript's strict checks
+          expect(interception.response).to.not.be.undefined
+          const response = interception.response!
+          expect(response.statusCode).to.equal(201)
+          expect(response.body).to.have.property('detail', 'Usuário criado com sucesso')
+        })
+        })
 
   // Additional API error cases (do not modify existing tests above)
   it('simula erro 409 quando email já cadastrado', () => {
@@ -97,7 +100,8 @@ describe('Criar Usuario test', () => {
 
     cy.get('.inline-flex').contains('Salvar Usuário').click()
 
-    cy.wait('@postUsuarioConflict').then(({ response }) => {
+    cy.wait('@postUsuarioConflict').then((interception) => {
+      const response = interception.response!
       expect(response.statusCode).to.equal(409)
       expect(response.body).to.have.property('detail', 'Email já cadastrado')
     })
@@ -128,7 +132,8 @@ describe('Criar Usuario test', () => {
 
     cy.get('.inline-flex').contains('Salvar Usuário').click()
 
-    cy.wait('@postUsuarioServerError').then(({ response }) => {
+    cy.wait('@postUsuarioServerError').then((interception) => {
+      const response = interception.response!
       expect(response.statusCode).to.equal(500)
       expect(response.body).to.have.property('detail', 'Erro interno do servidor')
     })
