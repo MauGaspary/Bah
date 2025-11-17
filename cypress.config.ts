@@ -10,6 +10,9 @@ export default defineConfig({
     defaultCommandTimeout: 10000,
     requestTimeout: 10000,
     responseTimeout: 10000,
+    env: {
+      apiUrl: process.env.VITE_API_BASE_URL,
+    },
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
