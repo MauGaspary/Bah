@@ -25,7 +25,8 @@ from app.schemas.iniciativa_schema import (
     TagSchema,
 )
 
-
+from dotenv import load_dotenv
+load_dotenv()
 class IniciativaService:
 
     def __init__(self, db: Session, model: Optional[SentenceTransformer] = None):
@@ -362,7 +363,7 @@ class IniciativaService:
         rrf_k = max(rrf_k_env, 1.0)
 
         try:
-            iniciativas, total = self.repository.search_hibrida(
+            iniciativas, total = self.repository.ranking_by_rrf(
                 query, embedding, page, size, min_score, rrf_k
             )
 
