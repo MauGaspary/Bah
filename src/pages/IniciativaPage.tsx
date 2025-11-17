@@ -1,24 +1,54 @@
-import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { getIniciativaById } from "@/service/search";
-import type { Iniciativa } from "@/interfaces/IIniciativas";
+import { useParams , Link } from "react-router-dom"
 
-import { Link } from "react-router-dom";
-import HorarioCard from "@/components/ui/HorarioCard"
-import Header from "@/components/ui/Header/Header"
+
+import type { CarouselApi } from "@/components/ui/carousel"
+import type { Iniciativa, IniciativaHorario } from "@/interfaces/IIniciativas";
+
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel"
+import Header from "@/components/ui/Header/Header"
+import HorarioCard from "@/components/ui/HorarioCard"
+import { getIniciativaById } from "@/service/search";
 
 function IniciativaPage() {
 
   const { id } = useParams<{ id: string }>()
   const [iniciativa, setIniciativa] = useState<Iniciativa | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+
+  type EmblaWithSelected = CarouselApi & {
+    selectedScrollSnap?: () => number
+  }
+
+  useEffect(() => {
+    if (!carouselApi) return
+
+    const updateActive = () => {
+      const sel = (carouselApi as EmblaWithSelected).selectedScrollSnap?.() ?? 0
+      setActiveIndex(Number(sel))
+    }
+
+    updateActive()
+    carouselApi.on?.("select", updateActive)
+    carouselApi.on?.("reInit", updateActive)
+
+    return () => {
+      carouselApi.off?.("select", updateActive)
+      carouselApi.off?.("reInit", updateActive)
+    }
+  }, [carouselApi])
+
+  function scrollToIndex(i: number) {
+    if (carouselApi?.scrollTo) {
+      carouselApi.scrollTo(i)
+      setActiveIndex(i)
+    }
+  }
 
   useEffect(() => {
     async function fetchIniciativa() {
@@ -26,11 +56,10 @@ function IniciativaPage() {
         try {
           const response = await getIniciativaById(id);
           setIniciativa(response);
-          console.log(response);
-        } catch (error) {
-          console.error("Error fetching iniciativa data:", error);
+        } catch {
+          console.error("Error fetching iniciativa data:", new Error('fetch failed'));
           // navigate('/not-found'); 
-        }  
+        }
       }
     }
 
@@ -45,7 +74,7 @@ function IniciativaPage() {
   }
 
   const processedHorarios = (iniciativa.horarios ?? []).map((horario) => {
-    const h: any = horario
+    const h = horario as IniciativaHorario
     const date = h.data_evento ? new Date(`${h.data_evento}T00:00:00`) : null
     const weekdayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
     const dia = date ? weekdayNames[date.getDay()] : ''
@@ -103,19 +132,19 @@ function IniciativaPage() {
         </article>
 
         <section className="mt-10">
-          <div className="flex justify-center items-center md:hidden">
-            <Carousel className="w-full max-w-xs">
-                <CarouselContent>
-                    {processedHorarios.map((h, index) => (
-                        <CarouselItem key={index}>
-                            <div className="p-1">
-                                <HorarioCard item={h} />
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
+            <div className="flex justify-center items-center md:hidden">
+            <Carousel className="w-full max-w-xs" setApi={setCarouselApi}>
+              <CarouselContent>
+                {processedHorarios.map((h, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <HorarioCard item={h} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
             </Carousel>
-          </div>
+            </div>
 
           <div className={`hidden md:grid md:gap-6 flex justify-center items-center ${
             processedHorarios.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' :
@@ -123,15 +152,14 @@ function IniciativaPage() {
             'md:grid-cols-3'
           }`}>
             {processedHorarios.map((h) => (
-              <div key={(h as any).id ?? Math.random().toString()} className="px-2">
+              <div key={h.id ?? Math.random().toString()} className="px-2">
                 <HorarioCard item={h} />
               </div>
             ))}
           </div>
 
           {processedHorarios.length > 0  && (
-            console.log('processedHorarios', processedHorarios),
-             <div className="mt-4 flex justify-center gap-2">
+             <div className="mt-4 flex justify-center gap-2 md:hidden">
             {Array.from({ length: processedHorarios.length }, (_, i) => i).map(i => {
               const key = processedHorarios[i]?.id ?? i
               const activeDot = Math.min(activeIndex, processedHorarios.length - 1)
