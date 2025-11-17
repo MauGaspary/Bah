@@ -7,7 +7,7 @@ function SobreNos() {
             <h2 className="text-3xl md:text-4xl font-bold text-center">
               Sobre Nós
             </h2>
-            <div className="h-1 bg-bah-green w-[75%] mx-auto my-2" />
+            <div className="h-1 bg-bah-green w-[90%] mx-auto my-2" />
           </div>
           <p className="mt-5 max-w-md mx-auto">
             Somos uma Plataforma de Inovação de Caxias do Sul que pensa de forma
@@ -18,7 +18,7 @@ function SobreNos() {
             <div className="w-full max-w-3xl">
               <div className="overflow-hidden rounded-md shadow-md">
                 <img
-                  src="/assets/sobre-nos.jpg"
+                  src="../src/assets/sobre-nos.jpg"
                   alt="Equipe BAH"
                   className="w-full h-64 md:h-80 object-cover"
                 />

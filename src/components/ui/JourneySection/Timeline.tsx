@@ -43,17 +43,16 @@ const stages: Array<{
     mobileTitle: 'Conexões',
     variant: 'error',
     description:
-      'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
+      'Nesta fase, você percebe que precisa se conectar com outras pessoas, especialistas e comunidades que podem acelerar sua jornada. O foco é criar relacionamentos relevantes, trocar conhecimentos e encontrar oportunidades que surgem por meio do networking. As conexões certas podem oferecer direcionamento, apoio e até abrir portas para colaborações importantes.',
     actions: [
-      'Estruturar equipe e processos',
-      'Expandir para novos mercados',
-      'Buscar parcerias estratégicas',
-      'Implementar métricas de crescimento',
+      'Participar de eventos, feiras e encontros do setor',
+      'Buscar mentores e pessoas mais experientes',
+      'Engajar com comunidades, grupos e redes profissionais',
     ],
     challenges: [
-      'Não sei por onde começar',
-      'Meu esforço não está sendo suficiente',
-      'Não encontro soluções para meu problema',
+      'Dificuldade em encontrar pessoas realmente relevantes',
+      'Falta de confiança para iniciar conversas e apresentar sua ideia',
+      'Sensação de estar isolado ou desconectado do ecossistema',
     ],
   },
   {
@@ -62,17 +61,16 @@ const stages: Array<{
     mobileTitle: 'Fundos',
     variant: 'primary',
     description:
-      'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
+      'Nesta etapa, você já validou parte da sua ideia e compreende que precisa de recursos financeiros para avançar. O foco é buscar investimentos, programas de apoio, créditos ou iniciativas que possibilitem a evolução do projeto. Aqui, preparar uma boa apresentação e demonstrar o potencial do negócio é essencial.',
     actions: [
-      'Estruturar equipe e processos',
-      'Expandir para novos mercados',
-      'Buscar parcerias estratégicas',
-      'Implementar métricas de crescimento',
+      'Preparar pitch, apresentação e materiais para investidores',
+      'Mapear fontes de financiamento (investidores, editais, bancos, aceleradoras)',
+      'Ajustar o modelo financeiro e projeções do negócio',
     ],
     challenges: [
-      'Não sei por onde começar',
-      'Meu esforço não está sendo suficiente',
-      'Não encontro soluções para meu problema',
+      'Não saber como falar com investidores',
+      'Falta de clareza sobre o valor necessário e como usá-lo',
+      'Dificuldade em comprovar números ou apresentar resultados',
     ],
   },
   {
@@ -81,17 +79,16 @@ const stages: Array<{
     mobileTitle: 'Escalar',
     variant: 'salmon',
     description:
-      'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
+      'Neste ponto, seu negócio já está em funcionamento, e o foco passa a ser otimizar operações, melhorar processos e aumentar a capacidade de entrega. É a fase de profissionalização: tornar as atividades mais eficientes, gerar previsibilidade e preparar a empresa para crescer sem perder qualidade.',
     actions: [
-      'Estruturar equipe e processos',
-      'Expandir para novos mercados',
-      'Buscar parcerias estratégicas',
-      'Implementar métricas de crescimento',
+      'Padronizar processos internos e fluxos de trabalho',
+      'Monitorar indicadores de desempenho com regularidade',
+      'Implementar ferramentas de gestão e automação',
     ],
     challenges: [
-      'Não sei por onde começar',
-      'Meu esforço não está sendo suficiente',
-      'Não encontro soluções para meu problema',
+      'Problemas de organização interna e processos falhos',
+      'Dificuldade em delegar e construir uma equipe sólida',
+      'Falta de previsibilidade financeira e operacional',
     ],
   },
   {
@@ -100,17 +97,16 @@ const stages: Array<{
     mobileTitle: 'Capacidades',
     variant: 'darkBlue',
     description:
-      'Você está começando sua jornada e percebe que precisa de mais conhecimento para desenvolver sua ideia. Nesta fase, o foco é observar informações e entender melhor o mercado e as possibilidades.',
+      'Nesta fase, você entende que, para sustentar o crescimento, precisa desenvolver novas habilidades — tanto pessoais quanto da equipe. É um momento de aprimoramento contínuo para fortalecer competências técnicas, estratégicas e comportamentais que permitirão avançar com mais segurança e maturidade.',
     actions: [
-      'Estruturar equipe e processos',
-      'Expandir para novos mercados',
-      'Buscar parcerias estratégicas',
-      'Implementar métricas de crescimento',
+      'Desenvolver habilidades de liderança, gestão e tomada de decisão',
+      'Criar uma cultura organizacional sólida e alinhada',
+      'Incentivar o desenvolvimento da equipe e planos de carreira',
     ],
     challenges: [
-      'Não sei por onde começar',
-      'Meu esforço não está sendo suficiente',
-      'Não encontro soluções para meu problema',
+      'Falta de tempo para aprender ou se desenvolver',
+      'Dificuldade em criar uma cultura forte e engajada',
+      'Falta de profissionais capacitados para acompanhar o ritmo',
     ],
   },
 ]
@@ -125,17 +121,17 @@ const variantColors = {
   },
   error: {
     bg: 'bg-error',
-    border: 'border-error',
+    border: 'border-error/50',
     stroke: '#ff3b30',
   },
   primary: {
     bg: 'bg-bah-blue',
-    border: 'border-bah-blue',
+    border: 'border-bah-blue/80',
     stroke: '#41edee',
   },
   salmon: {
     bg: 'bg-bah-red',
-    border: 'border-bah-red',
+    border: 'border-bah-red/80',
     stroke: '#fe716f',
   },
   darkBlue: {
