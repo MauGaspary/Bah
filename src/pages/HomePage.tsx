@@ -13,6 +13,7 @@ import LogoImg from '@/assets/logo.png'
 import SobreNos from '../components/ui/SobreNos'
 import NossosValoresPage from './NossosValoresPage'
 import Footer from '@/components/ui/Footer/Footer'
+import { Link } from 'react-router-dom'
 
 function HomePage() {
   const location = useLocation()
@@ -107,12 +108,13 @@ function HomePage() {
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
             {tags.map(tag => (
-              <button
+              <Link
                 key={tag.value}
+                to={`/results?q=${encodeURIComponent(tag.name)}`}
                 className="bg-bah-purple/60 hover:bg-bah-purple/80 cursor-pointer text-white px-3 py-1.5 rounded-full text-sm font-medium border border-bah-purple/30 transition-all duration-200"
               >
                 {tag.name}
-              </button>
+              </Link>
             ))}
           </div>
         </section>
