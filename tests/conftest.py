@@ -85,6 +85,16 @@ def postgres_container():
 @pytest.fixture(scope="session")
 def test_engine(postgres_container):
     """Engine de teste com PostgreSQL ou SQLite"""
+    # Importar todos os models ANTES de qualquer outra coisa
+    from app.models.base import Base
+    from app.models.contato_model import Contato  # noqa
+    from app.models.iniciativa_horario_model import IniciativaHorario  # noqa
+    from app.models.iniciativa_model import Iniciativa  # noqa
+    from app.models.iniciativa_tag_model import IniciativaTag  # noqa
+    from app.models.organizador_model import Organizador  # noqa
+    from app.models.tag_model import Tag  # noqa
+    from app.models.usuario_model import Usuario  # noqa
+    
     database_url = postgres_container.get_connection_url()
 
     if USE_CONTAINERS or os.getenv("DOCKER_ENV") == "true":
@@ -99,7 +109,6 @@ def test_engine(postgres_container):
                 )
             print(f"✅ Usando banco de teste seguro: {db_name}", flush=True)
             
-            from app.models.base import Base
             Base.metadata.drop_all(bind=engine)
             Base.metadata.create_all(bind=engine)
         else:
@@ -109,7 +118,6 @@ def test_engine(postgres_container):
         engine = create_engine(
             "sqlite:///:memory:", connect_args={"check_same_thread": False}
         )
-        from app.models.base import Base
 
         Base.metadata.create_all(bind=engine)
 
@@ -145,18 +153,6 @@ def client(db_session, postgres_container):
     app = create_app(settings)
     app.dependency_overrides[get_db] = override_get_db
     return TestClient(app)
-
-
-@pytest.fixture
-def admin_global(db_session):
-    """Fixture que cria um admin para usar em testes"""
-    from app.models.demo_model import Demo
-
-    demo = Demo(username="test_admin", email="test_admin@example.com")
-    db_session.add(demo)
-    db_session.flush()
-
-    return {"id": demo.id, "username": demo.username, "email": demo.email}
 
 
 @pytest.fixture

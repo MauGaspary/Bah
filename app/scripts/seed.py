@@ -11,7 +11,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 from app.config.database import SessionLocal
-from app.models.demo_model import Demo
 from app.models.descricoes_extras_model import DescricoesExtras
 from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
 from app.models.iniciativa_model import Iniciativa
@@ -19,56 +18,6 @@ from app.models.iniciativa_tag_model import IniciativaTag
 from app.models.organizador_model import Organizador
 from app.models.usuario_model import Usuario
 from app.utils.password_hasher import PasswordHasher
-
-
-def seed_demos():
-    db = SessionLocal()
-
-    try:
-        result = db.execute(
-            text(
-                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'demos')"
-            )
-        )
-        table_exists = result.scalar()
-
-        if not table_exists:
-            print("Tabela 'demos' não existe. Execute as migrations primeiro.")
-            return
-
-        existing_count = db.query(Demo).count()
-        if existing_count > 0:
-            print(f"Seed já executado. Encontrados {existing_count} demos.")
-            return
-
-        admins_data = [
-            {
-                "username": "pedro",
-                "email": "pedro@bah.com.br",
-            },
-            {
-                "username": "joao.silva",
-                "email": "joao.silva@bah.com.br",
-            },
-            {
-                "username": "maria.santos",
-                "email": "maria.santos@bah.com.br",
-            },
-        ]
-
-        for demo_data in admins_data:
-            demo = Demo(**demo_data)
-            db.add(demo)
-
-        db.commit()
-        print(f"Seed executado com sucesso. Criados {len(admins_data)} demos.")
-
-    except Exception as e:
-        db.rollback()
-        print(f"Erro ao executar seed: {e}")
-        sys.exit(1)
-    finally:
-        db.close()
 
 
 def seed_users():
@@ -432,5 +381,4 @@ if __name__ == "__main__":
     seed_organizadores()
     seed_tags()
     seed_iniciativas()
-    seed_demos()
     print("Seed finalizado")

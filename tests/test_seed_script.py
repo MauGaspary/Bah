@@ -150,7 +150,6 @@ def patch_seed_dependencies(monkeypatch):
     def make_dummy(name):
         return type(f"{name}Dummy", (DummyModel,), {})
 
-    monkeypatch.setattr(seed, "Demo", make_dummy("Demo"), raising=False)
     monkeypatch.setattr(seed, "Usuario", make_dummy("Usuario"), raising=False)
     monkeypatch.setattr(seed, "Organizador", make_dummy("Organizador"), raising=False)
     monkeypatch.setattr(seed, "Tag", make_dummy("Tag"), raising=False)
@@ -189,56 +188,6 @@ def raise_exit(code):
 def configure_session(monkeypatch, session):
     monkeypatch.setattr(seed, "SessionLocal", lambda: session)
     return session
-
-
-def test_seed_demos_missing_table(monkeypatch, capture_seed_print):
-    session = SeedSession(execute_scalar_values=[False])
-    configure_session(monkeypatch, session)
-    seed.seed_demos()
-    assert capture_seed_print[0].startswith("Tabela 'demos'")
-    assert session.closed is True
-
-
-def test_seed_demos_already_seeded(monkeypatch, capture_seed_print):
-    session = SeedSession(
-        execute_scalar_values=[True],
-        query_map={seed.Demo: lambda: FakeSeedQuery(count=5)},
-    )
-    configure_session(monkeypatch, session)
-    seed.seed_demos()
-    assert "Seed já executado" in capture_seed_print[0]
-    assert session.commit_calls == 0
-
-
-def test_seed_demos_creates_records(monkeypatch):
-    session = SeedSession(
-        execute_scalar_values=[True],
-        query_map={seed.Demo: lambda: FakeSeedQuery(count=0)},
-    )
-    configure_session(monkeypatch, session)
-    seed.seed_demos()
-    assert session.commit_calls == 1
-    assert len(session.added) == 3
-    assert session.closed is True
-
-
-def test_seed_demos_raises_and_rolls_back(monkeypatch, capture_seed_print):
-    session = SeedSession(
-        execute_scalar_values=[True],
-        query_map={seed.Demo: lambda: FakeSeedQuery(count=0)},
-        commit_exception=RuntimeError("db error"),
-    )
-    configure_session(monkeypatch, session)
-
-    def fake_exit(code):
-        raise ExitCalled(code)
-
-    monkeypatch.setattr(seed.sys, "exit", fake_exit)
-    with pytest.raises(ExitCalled) as excinfo:
-        seed.seed_demos()
-    assert excinfo.value.code == 1
-    assert session.rollback_called is True
-    assert "Erro ao executar seed" in capture_seed_print[-1]
 
 
 def test_seed_users_returns_when_existing(monkeypatch, capture_seed_print):
@@ -441,7 +390,6 @@ def test_seed_main_invocation(monkeypatch):
         "seed_organizadores": lambda: fake_seed("organizadores"),
         "seed_tags": lambda: fake_seed("tags"),
         "seed_iniciativas": lambda: fake_seed("iniciativas"),
-        "seed_demos": lambda: fake_seed("demos"),
         "print": lambda *args, **kwargs: None,
     }
 
@@ -464,4 +412,4 @@ def test_seed_main_invocation(monkeypatch):
         namespace,
     )
 
-    assert set(calls) == {"users", "organizadores", "tags", "iniciativas", "demos"}
+    assert set(calls) == {"users", "organizadores", "tags", "iniciativas"}

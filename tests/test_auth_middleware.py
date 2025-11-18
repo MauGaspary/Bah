@@ -11,10 +11,6 @@ def get_valid_token(test_user, client):
 
 class TestAuthMiddleware:
 
-    def test_demo_endpoint_bypasses_middleware(self, client):
-        response = request(client, "GET", "/demo/")
-        assert response.status_code == 200
-
     def test_auth_endpoint_bypasses_middleware(self, client, test_user):
         response = request(client, "POST", "/auth/login", json=VALID_USER)
         assert response.status_code == 200

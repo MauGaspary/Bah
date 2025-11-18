@@ -9,7 +9,6 @@ from app.config.settings import Settings
 from app.middleware.auth_middleware import JWTMiddleware
 from app.routes.admin_iniciativa_route import router as admin_iniciativa_router
 from app.routes.auth_routes import router as auth_router
-from app.routes.demo_route import router as demo_router
 from app.routes.iniciativa_route import router as iniciativa_router
 from app.routes.organizador_route import router as organizador_router
 from app.routes.tag_route import router as tag_router
@@ -56,7 +55,6 @@ def create_app(settings=None):
     else:
         app.state.embedding_model = None
 
-    app.include_router(demo_router, prefix="/demo", tags=["demo"])
     app.include_router(
         admin_iniciativa_router, prefix="/admin/iniciativas", tags=["admin_iniciativas"]
     )
