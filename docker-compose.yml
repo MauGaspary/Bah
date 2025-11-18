@@ -164,8 +164,39 @@ services:
     profiles:
       - tools
 
+  umami-db:
+    image: postgres:15
+    container_name: umami-db
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - umami_data:/var/lib/postgresql/data
+    ports:
+      - "5000:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    container_name: umami
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
+      APP_SECRET: "uma-chave-bem-grande-aqui"
+    depends_on:
+      umami-db:
+        condition: service_healthy
+
+
 volumes:
   postgres_data_dev:
+  umami_data:
 
 networks:
   bah_network:
