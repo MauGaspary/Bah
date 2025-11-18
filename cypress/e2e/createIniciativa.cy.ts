@@ -36,27 +36,8 @@ describe('Criar Iniciativa test', () => {
   })
   })
 
-  it.only('preenche o formulário e envia, validando o request e a toast de sucesso', () => {
-    const createdResponse = {
-      titulo: 'Iniciativa E2E',
-      descricao: 'Descrição de teste',
-      local: 'Local Teste',
-      link: 'https://exemplo.com',
-      imagem_url: '',
-      destaque: false,
-      horarios: [],
-    }
-
-    // Intercept POST and assert the request body
-    cy.intercept('POST', '/admin/iniciativas/', (req) => {
-      // basic assertions about body shape
-      expect(req.body).to.have.property('titulo', 'Iniciativa E2E')
-      expect(req.body).to.have.property('local', 'Local Teste')
-      expect(req.body).to.have.property('descricao', 'Descrição de teste')
-      expect(req.body).to.have.property('link', 'https://exemplo.com')
-
-      req.reply({ statusCode: 201, body: createdResponse })
-    }).as('postIniciativa')
+  it('cadastra, validando o request e após exclui', () => {
+    cy.intercept('DELETE', '**/iniciativas/*').as('deleteInitiativa');
 
     // First perform login
     cy.visit('/admin')
@@ -86,8 +67,74 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('https://exemplo.com')
 
+    // Botão de adicionar descrição extra
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
+    // Botão de adicionar horario
+    cy.get('button[id="addScheduleButton"]').click()
+    
+    // Escolher dia
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
+
+    // Horarios de inicio e fim
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
+
+    // Submit the form
+    cy.get('.justify-end > .inline-flex').click()
+
+    // Validate the request and success toast
+    cy.get('body').should('contain.text', 'Iniciativa criada com sucesso!')
+
+    //  Deleting iniciativa
+    cy.contains('.justify-between', 'Iniciativa E2E')     // acha o card pelo nome
+    .parent()                                           // sobe um nível até o container correto
+    .find('button')                                     // pega os botões dentro desse card
+    .contains('Excluir')                                // acha o botão Excluir
+    .click();
+
+    cy.get('.text-xl').parent().find('button').contains('Excluir').click();
+
+    cy.wait('@deleteInitiativa').then((intercept) => {
+      expect(intercept.response.statusCode).to.eq(204); // ou 204 dependendo da API
+    });
+})
+
+  it('cadastra inicitiva destaque, validando o request e após exclui', () => {
+    cy.intercept('DELETE', '**/iniciativas/*').as('deleteInitiativa');
+
+    // First perform login
+    cy.visit('/admin')
+    cy.get('input[type="email"]').clear().type('admin@bah.com.br')
+    cy.get('input[type="password"]').clear().type('admin123')
+    cy.get('button[type="submit"]').click()
+
+    cy.url().should('include', '/iniciativas')
+
+    cy.get('.rounded-md').contains('Nova iniciativa').click()
+
+    // Fill out the form
+    cy.get('input[name="titulo"]').type('Iniciativa E2E')
+    cy.get('input[name="local"]').type('Local Teste')
+    cy.get('textarea[name="descricao"]').type('Descrição de teste')
+
+    //  Destaque
+    cy.get('.peer').click()
+
+    //  Organizador
+    cy.get('[data-slot="card-content"] > :nth-child(1) > :nth-child(2) > .flex-col > div > .flex').click()
+    cy.get('body').type('{enter}') // Fecha o dropdown de tags
+
+
+    //  Tags
+    cy.get('.grid > :nth-child(1) > .w-4').click() // Seleciona a primeira tag
+    cy.get('.grid > :nth-child(3) > .w-4').click() // Desseleciona a primeira tag
+
+    cy.get(':nth-child(3) > .text-card-foreground').click()
+
+    cy.get('[name="link"]').type('https://exemplo.com')
 
     // Botão de adicionar descrição extra
     cy.get('button[id="descricaoExtraButton"]').click()
@@ -102,10 +149,26 @@ describe('Criar Iniciativa test', () => {
 
     // Horarios de inicio e fim
     cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow} {enter}')
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     // Submit the form
     cy.get('.justify-end > .inline-flex').click()
+
+    // Validate the request and success toast
+    cy.get('body').should('contain.text', 'Iniciativa criada com sucesso!')
+
+    //  Deleting iniciativa
+    cy.contains('.justify-between', 'Iniciativa E2E')     // acha o card pelo nome
+    .parent()                                           // sobe um nível até o container correto
+    .find('button')                                     // pega os botões dentro desse card
+    .contains('Excluir')                                // acha o botão Excluir
+    .click();
+
+    cy.get('.text-xl').parent().find('button').contains('Excluir').click();
+
+    cy.wait('@deleteInitiativa').then((intercept) => {
+      expect(intercept.response.statusCode).to.eq(204); // ou 204 dependendo da API
+    });
 })
 
   it('simula erro 409 quando iniciativa já existe', () => {
@@ -216,27 +279,24 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('https://exemplo.com')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
-
-    // Botão de adicionar descrição extra
-    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
-    //cy.get('[name="descricoes_extras.0"]').type('teste')
+   // Botão de adicionar descrição extra
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
     // Botão de adicionar horario
-    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    cy.get('button[id="addScheduleButton"]').click()
     
     // Escolher dia
-    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
-    //cy.get('.bg-accent > .items-center').click()
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
 
     // Horarios de inicio e fim
-    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
-
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     cy.get('.justify-end > .inline-flex').click()
 
-    // validation message for nome
+    // validation message for titulo
     cy.get('.leading-tight').should('contain.text', 'O título deve ter pelo menos 3 caracteres.')
   })
 
@@ -269,27 +329,24 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('https://exemplo.com')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
-
-    // Botão de adicionar descrição extra
-    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
-    //cy.get('[name="descricoes_extras.0"]').type('teste')
+   // Botão de adicionar descrição extra
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
     // Botão de adicionar horario
-    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    cy.get('button[id="addScheduleButton"]').click()
     
     // Escolher dia
-    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
-    //cy.get('.bg-accent > .items-center').click()
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
 
     // Horarios de inicio e fim
-    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
-
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     cy.get('.justify-end > .inline-flex').click()
 
-    // validation message for nome
+    // validation message for local
     cy.get('.leading-tight').should('contain.text', 'O local deve ter pelo menos 3 caracteres')
   })
 
@@ -315,27 +372,24 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('https://exemplo.com')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
-
     // Botão de adicionar descrição extra
-    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
-    //cy.get('[name="descricoes_extras.0"]').type('teste')
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
     // Botão de adicionar horario
-    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    cy.get('button[id="addScheduleButton"]').click()
     
     // Escolher dia
-    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
-    //cy.get('.bg-accent > .items-center').click()
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
 
     // Horarios de inicio e fim
-    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
-
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     cy.get('.justify-end > .inline-flex').click()
 
-    // validation message for nome
+    // validation message for tags
     cy.get('.leading-tight').should('contain.text', 'Adicione pelo menos uma tag.')
   })
 
@@ -367,27 +421,24 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('https://exemplo.com')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
-
     // Botão de adicionar descrição extra
-    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
-    //cy.get('[name="descricoes_extras.0"]').type('teste')
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
     // Botão de adicionar horario
-    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    cy.get('button[id="addScheduleButton"]').click()
     
     // Escolher dia
-    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
-    //cy.get('.bg-accent > .items-center').click()
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
 
     // Horarios de inicio e fim
-    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
-
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     cy.get('.justify-end > .inline-flex').click()
 
-    // validation message for nome
+    // validation message for descricao
     cy.get('.leading-tight').should('contain.text', 'A descrição deve ter pelo menos 10 caracteres.')
   })
 
@@ -420,27 +471,76 @@ describe('Criar Iniciativa test', () => {
 
     cy.get('[name="link"]').type('teste.com')
 
-    // Ambos botões de adicionar horario e adicionar descrição não estou conseguindo pegar o path correto
-
     // Botão de adicionar descrição extra
-    //cy.get(':nth-child(2) > .@container/card-header > .flex-col > .gap-2').click()
-    //cy.get('[name="descricoes_extras.0"]').type('teste')
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
 
     // Botão de adicionar horario
-    //cy.get(':nth-child(3) > .bg-white > .\@container\/card-header > .justify-between > .flex-col > .gap-2').click()
+    cy.get('button[id="addScheduleButton"]').click()
     
     // Escolher dia
-    //cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
-    //cy.get('.bg-accent > .items-center').click()
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
 
     // Horarios de inicio e fim
-    //cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
-    //cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}') 
-
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{downArrow}placeholder{enter}')
 
     cy.get('.justify-end > .inline-flex').click()
 
-    // validation message for nome
+    // validation message for link
     cy.get('.leading-tight').should('contain.text', 'O link deve ser uma URL válida.')
+  })
+
+  it('horario invalido', () => {
+    
+    // First perform login
+    cy.visit('/admin')
+    cy.get('input[type="email"]').clear().type('admin@bah.com.br')
+    cy.get('input[type="password"]').clear().type('admin123')
+    cy.get('button[type="submit"]').click()
+
+    cy.url().should('include', '/iniciativas')
+
+    cy.get('.rounded-md').contains('Nova iniciativa').click()
+
+    // Fill out the form
+    cy.get('input[name="titulo"]').type('Iniciativa E2E')
+    cy.get('input[name="local"]').type('Local Teste')
+    cy.get('textarea[name="descricao"]').type('Descrição de teste')
+
+    //  Organizador
+    cy.get('[data-slot="card-content"] > :nth-child(1) > :nth-child(2) > .flex-col > div > .flex').click()
+    cy.get('body').type('{enter}') // Fecha o dropdown de tags
+
+
+    //  Tags
+    cy.get('.grid > :nth-child(1) > .w-4').click() // Seleciona a primeira tag
+    cy.get('.grid > :nth-child(3) > .w-4').click() // Desseleciona a primeira tag
+
+    cy.get(':nth-child(3) > .text-card-foreground').click()
+
+    cy.get('[name="link"]').type('https://exemplo.com')
+
+   // Botão de adicionar descrição extra
+    cy.get('button[id="descricaoExtraButton"]').click()
+    cy.get('[name="descricoes_extras.0"]').type('teste')
+
+    // Botão de adicionar horario
+    cy.get('button[id="addScheduleButton"]').click()
+    
+    // Escolher dia
+    cy.get('.space-y-4 > :nth-child(1) > .flex > div > .inline-flex').click()
+    cy.get('.bg-accent > .items-center').click()
+
+    // Horarios de inicio e fim
+    cy.get('.space-y-4 > :nth-child(2) > .flex-col').type('{enter}') 
+    cy.get('.space-y-4 > :nth-child(3) > .flex-col').type('{enter}')
+
+    cy.get('.justify-end > .inline-flex').click()
+
+    // validation message for titulo
+    cy.get('body').should('contain.text', 'Erro ao criar iniciativa')
+  
   })
 })
