@@ -559,6 +559,7 @@ export default function FormIniciativa() {
                       Clique para adicionar
                     </p>
                     <Button
+                      id='descricaoExtraButton'
                       type="button"
                       onClick={() =>
                         descricaoFields.length < MAX_DESCRICOES &&
@@ -646,6 +647,7 @@ export default function FormIniciativa() {
                       Clique para adicionar
                     </p>
                     <Button
+                      id="addScheduleButton"
                       type="button"
                       onClick={() =>
                         appendSchedule({
