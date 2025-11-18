@@ -3,11 +3,13 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import type { Iniciativa } from '@/interfaces/IIniciativas'
+
 import { Input } from '@/components/ui/Searchbar/Searchbar'
 import SearchItem from '@/components/ui/Searchbar/SearchItem'
 import { cn } from '@/lib/utils'
 import { searchIniciativas } from '@/service/search'
-import type { Iniciativa } from '@/interfaces/IIniciativas'
 
 function SearchDropdown() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -46,6 +48,16 @@ function SearchDropdown() {
       }
     }
     fetchResults()
+  }, [debouncedQuery])
+
+  // Track what the user types (debounced) with Umami
+  useEffect(() => {
+    if (!debouncedQuery.trim()) return
+    try {
+      window.umami?.track('search_query', { query: debouncedQuery })
+    } catch {
+      // Intencionalmente silencioso para não quebrar a UX
+    }
   }, [debouncedQuery])
 
   useEffect(() => {
