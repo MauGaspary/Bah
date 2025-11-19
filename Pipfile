@@ -23,6 +23,7 @@ pgvector = "~=0.4.1"
 torch = {version = "==2.8.0", index = "pytorch-cpu"}
 huggingface-hub = {version = "==0.35.3", extras = ["hf_xet"]}
 sentence-transformers = "~=5.1.1"
+python-multipart = "*"
 
 [dev-packages]
 black = "~=24.10.0"
