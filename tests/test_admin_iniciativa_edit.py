@@ -45,7 +45,7 @@ def test_edit_iniciativa_partial_update(client, iniciativa_fixture, auth_token):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["titulo"] == original_titulo  # Mantém título original
+    assert data["titulo"] == original_titulo
     assert data["descricao"] == payload["descricao"]
 
 
