@@ -65,7 +65,9 @@ function LoginAdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-background-secondary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bah-purple mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando autenticação...</p>
+          <p id="verificacaoAutenticacao" className="text-gray-600">
+            Verificando autenticação...
+          </p>
         </div>
       </div>
     )

@@ -1,6 +1,8 @@
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+
+import { cn } from '@/lib/utils'
 import { Input } from '../Searchbar/Searchbar'
 import BahBgWhite from '@/assets/bah-bg-white.png'
 import BahBgPurple from '@/assets/bah-bg-purple.png'
@@ -23,6 +25,7 @@ interface HeaderProps {
 function Header({ variant = 'default', customColors }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedHeaderQuery, setDebouncedHeaderQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSearchIconHovered, setIsSearchIconHovered] = useState(false)
 
@@ -76,6 +79,22 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
     observer.observe(homeSection)
     return () => observer.disconnect()
   }, [])
+
+  // debounce do texto digitado no input do header
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedHeaderQuery(searchQuery), 1000)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // envio de evento customizado ao Umami quando o debounce dispara
+  useEffect(() => {
+    if (!debouncedHeaderQuery.trim()) return
+    try {
+      window.umami?.track('search_query', { query: debouncedHeaderQuery })
+    } catch {
+      // silencioso para não afetar UX
+    }
+  }, [debouncedHeaderQuery])
 
   const handleNavigation = (item: NavigationItem) => {
     const mapIdToSection: Record<string, string> = {
@@ -243,19 +262,22 @@ function Header({ variant = 'default', customColors }: HeaderProps) {
             </div>
           )}
 
-          {isScrolled && (
-            <nav className="hidden lg:flex items-center space-x-6">
-              {optionsItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavigation(item)}
-                  className="px-3 py-2 text-sm font-medium text-white hover:text-bah-green cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          )}
+          <nav className="hidden lg:flex items-center space-x-6">
+            {optionsItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item)}
+                className={cn(
+                  'px-3 py-2 text-sm font-medium cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 font-mulish',
+                  isScrolled
+                    ? 'text-white hover:text-bah-green'
+                    : 'text-bah-purple hover:text-bah-green'
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 

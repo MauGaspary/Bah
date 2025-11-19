@@ -1,38 +1,10 @@
 import React from 'react'
-import {
-  FaMapMarkerAlt,
-  FaEnvelope,
-  FaPhoneAlt,
-  FaFacebook,
-  FaInstagram,
-  FaLinkedin,
-  FaYoutube,
-} from 'react-icons/fa'
-
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import type {
   ContactFormState,
-  ContactInfoItemProps,
-  SocialMediaLinkProps,
 } from '@/interfaces/interfaceContato'
-
-const ContactInfoItem: React.FC<ContactInfoItemProps> = ({
-  icon,
-  title,
-  content,
-}) => (
-  <div className="flex items-start space-x-3 mb-6">
-    <div className="text-2xl mt-1" style={{ color: '#c7d871' }}>
-      {icon}
-    </div>
-    <div>
-      <h4 className="font-bold text-gray-800">{title}</h4>
-      <p className="text-sm text-gray-600">{content}</p>
-    </div>
-  </div>
-)
 
 // Componente do formulário de contato
 const ContactForm: React.FC = () => {
@@ -98,28 +70,12 @@ const ContactForm: React.FC = () => {
         className="resize-none"
       />
 
-      <Button type="submit" className="bg-[#542E82] hover:bg-purple-800">
+      <Button type="submit" className="bg-[#542E82] hover:bg-purple-800 block self-end justify-self-end">
         Enviar mensagem
       </Button>
     </form>
   )
 }
-
-// Componente de link de redes sociais
-const SocialMediaLink: React.FC<SocialMediaLinkProps> = ({
-  icon,
-  href,
-  color,
-}) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className={`text-white p-3 rounded-full shadow-lg hover:opacity-80 transition duration-300 ease-in-out ${color}`}
-  >
-    {icon}
-  </a>
-)
 
 // Componente principal Contato
 const Contato: React.FC = () => {
@@ -137,48 +93,12 @@ const Contato: React.FC = () => {
         </p>
       </header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:items-center">
+      <main className="flex flex-row w-full gap-12 items-center justify-center">
         {/* Formulário */}
-        <div className="lg:col-span-1">
+        <div className="w-full md:w-2/3">
           <ContactForm />
         </div>
-
-        <div className="lg:col-span-1 flex flex-col justify-center lg:ml-16">
-          <ContactInfoItem
-            icon={<FaMapMarkerAlt />}
-            title="Endereço"
-            content="Rua Sinimbu, 1670, Caxias do Sul - RS"
-          />
-          <ContactInfoItem
-            icon={<FaEnvelope />}
-            title="Email"
-            content="contato@bah3.com.br"
-          />
-          <ContactInfoItem
-            icon={<FaPhoneAlt />}
-            title="Telefone"
-            content="(54) 3218-8000"
-          />
-        </div>
       </main>
-
-      {/* Redes Sociais */}
-      <section className="text-center mt-8 mb-4">
-        <h3 className="text-xl font-bold text-gray-800 mb-6">
-          Redes Sociais
-          <span className="block w-[120px] h-[3px] bg-[#c7d871] mx-auto mt-2 rounded-full"></span>
-        </h3>
-        <div className="flex justify-center space-x-4 text-3xl">
-          <SocialMediaLink icon={<FaFacebook />} href="#" color="bg-blue-600" />
-          <SocialMediaLink
-            icon={<FaInstagram />}
-            href="#"
-            color="bg-pink-600"
-          />
-          <SocialMediaLink icon={<FaLinkedin />} href="#" color="bg-blue-700" />
-          <SocialMediaLink icon={<FaYoutube />} href="#" color="bg-red-600" />
-        </div>
-      </section>
     </div>
   )
 }

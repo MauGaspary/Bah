@@ -105,7 +105,7 @@ function JourneyDescription({
 
       <Card
         ref={mainCardRef}
-        className={`${borderColor} border-2 bg- w-full bg-zinc-300 relative z-10`}
+        className={`${borderColor} border-2 bg- w-full bg-white/80 relative z-10`}
       >
         <CardContent>
           <p className="text-sm text-muted-foreground">{active.description}</p>
@@ -115,7 +115,7 @@ function JourneyDescription({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full relative z-10">
         <Card
           ref={actionsCardRef}
-          className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-zinc-300`}
+          className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-white/80`}
         >
           <CardHeader>
             <CardTitle>Suas ações nesta fase:</CardTitle>
@@ -133,7 +133,7 @@ function JourneyDescription({
 
         <Card
           ref={challengesCardRef}
-          className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-zinc-300`}
+          className={`${borderColor} border-2 max-h-64 overflow-y-auto bg-white/80`}
         >
           <CardHeader>
             <CardTitle>Desafios comuns:</CardTitle>

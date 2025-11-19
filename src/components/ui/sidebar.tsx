@@ -1,9 +1,10 @@
 import { NotebookText, UsersRound, LogOut } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import LogoImg from '../../assets/logo.png'
 import '../../index.css'
 import { useAuth } from '../../contexts/AuthContext'
+import { getUserFromToken } from '../../lib/auth'
 import Modal from '../logoutModal'
 
 interface MenuItemProps {
@@ -41,7 +42,9 @@ function MenuItem({ to, label, Icon }: MenuItemProps) {
 function SidebarAdm() {
   const [logoutPopup, setLogoutPopup] = useState(false)
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, token } = useAuth()
+
+  const userInfo = useMemo(() => getUserFromToken(), [token])
 
   const handleLogout = () => {
     logout()
@@ -85,9 +88,11 @@ function SidebarAdm() {
             <div className="font-medium text-white">
               <div className="flex items-center justify-between px-3 py-2">
                 <div className="flex flex-col">
-                  <span className="whitespace-nowrap">Admin</span>
+                  <span className="whitespace-nowrap">
+                    {userInfo?.name || 'Usuário'}
+                  </span>
                   <span className="text-sm text-gray-400 opacity-90">
-                    admin@gmail.com
+                    {userInfo?.email || ''}
                   </span>
                 </div>
                 <button
