@@ -28,11 +28,16 @@ export async function deleteIniciativa(iniciativaId: string): Promise<void> {
 }
 
 export async function createIniciativa(
-  iniciativaData: IniciativaCreate
+  formData: FormData
 ): Promise<Iniciativa> {
   const response = await api.post<Iniciativa>(
     '/admin/iniciativas/',
-    iniciativaData
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
   )
   return response.data
 }
@@ -48,11 +53,16 @@ export async function fetchIniciativaById(
 
 export async function patchIniciativa(
   iniciativaId: string,
-  payload: IniciativaPatch
+  formData: FormData
 ): Promise<IniciativaAdmin> {
   const response = await api.patch<IniciativaAdmin>(
     `/admin/iniciativas/${iniciativaId}`,
-    payload
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
   )
   return response.data
 }

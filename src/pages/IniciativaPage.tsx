@@ -13,6 +13,7 @@ import {
 import Footer from "@/components/ui/Footer/Footer";
 import Header from "@/components/ui/Header/Header"
 import HorarioCard from "@/components/ui/HorarioCard"
+import { getImageUrl } from "@/lib/imageUrl"
 import { getIniciativaById } from "@/service/search";
 
 function IniciativaPage() {
@@ -116,7 +117,7 @@ function IniciativaPage() {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 pointer-events-none">
           <img
-            src={iniciativa.imagem_url}
+            src={getImageUrl(iniciativa.imagem_url) || ''}
             alt={iniciativa.titulo}
             className="w-full h-full object-cover"
           />
