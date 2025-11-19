@@ -13,7 +13,10 @@ from app.models.organizador_model import Organizador
 from app.models.tag_model import Tag
 from app.schemas.iniciativa_schema import IniciativaCreate, TagSchema
 from app.utils.exceptions import ResourceNotFound
+import os
 
+from dotenv import load_dotenv
+load_dotenv()
 
 class IniciativaRepository:
 
@@ -127,7 +130,7 @@ class IniciativaRepository:
         order_by: str = "criado_em",
         order_dir: str = "desc",
         page: int = 1,
-        size: int = 10,
+        size: int = 20,
     ) -> List[Iniciativa]:
         """Lista iniciativas com filtros e paginação (usado pelo admin)."""
         query = select(Iniciativa).options(
@@ -538,47 +541,313 @@ class IniciativaRepository:
 
         last_day_num = calendar.monthrange(data.year, data.month)[1]
         return data.replace(day=last_day_num)
+    
+    def ranking_by_rrf(
+    self,
+    query_text: str,
+    embedding: List[float],
+    page: int,
+    size: int,
+    min_score: float,
+    rrf_k: float,
+) -> Tuple[List[Iniciativa], int]:
+        """
+        Fusiona resultados de embedding e FTS usando RRF.
+        Retorna tupla (iniciativas ordenadas, total após threshold).
 
+        min_score e rrf_k vêm da service.
+        Pesos e k específicos vêm do env.
+        """
+
+        page = max(page, 1)
+        size = max(size, 1)
+
+        weight_embedding = float(os.getenv("RRF_WEIGHT_EMBEDDING", "1.0"))
+        weight_fts       = float(os.getenv("RRF_WEIGHT_FTS", "1.0"))
+
+        k_base = max(rrf_k, 1.0)
+
+        k_emb = float(os.getenv("RRF_K_EMBEDDING", str(k_base)))
+        k_fts = float(os.getenv("RRF_K_FTS", str(k_base)))
+        k_emb = max(k_emb, 1.0)
+        k_fts = max(k_fts, 1.0)
+
+        min_results = int(os.getenv("HYBRID_SEARCH_MIN_RESULTS", "1"))
+        min_results = max(0, min_results)
+
+        max_candidates_env = int(os.getenv("HYBRID_SEARCH_MAX_CANDIDATES", "200"))
+
+        emb_items, _ = self.search_by_embedding(embedding, size=size)
+        fts_items, _ = self.search_by_fts(query_text, page=1, size=size)
+
+        if not emb_items and not fts_items:
+            return [], 0
+
+        emb_rank = {o.id: idx+1 for idx, o in enumerate(emb_items)}
+        fts_rank = {o.id: idx+1 for idx, o in enumerate(fts_items)}
+        all_ids = list(set(emb_rank) | set(fts_rank))
+
+        obj_map = {o.id: o for o in emb_items}
+        for o in fts_items:
+            obj_map.setdefault(o.id, o)
+
+        BIG = 1_000_000
+        scored = []
+
+        for _id in all_ids:
+            r_emb = emb_rank.get(_id)
+            r_fts = fts_rank.get(_id)
+
+            score = 0.0
+            if r_emb is not None:
+                score += weight_embedding * (1 / (k_emb + r_emb))
+            if r_fts is not None:
+                score += weight_fts * (1 / (k_fts + r_fts))
+
+            scored.append((_id, score, r_emb or BIG, r_fts or BIG))
+
+        scored.sort(key=lambda t: (-t[1], min(t[2], t[3]), t[2], t[3]))
+
+        if max_candidates_env > 0:
+            scored = scored[:max_candidates_env]
+
+        print(f"[RRF] threshold={min_score:.4f} | k_emb={k_emb} | k_fts={k_fts}")
+        for _id, s, re, rf in scored[:20]:
+            print(f"[RRF] ID={_id} | score={s:.6f} | emb={re} | fts={rf}")
+
+        if min_score > 0:
+            filtered = [t for t in scored if t[1] >= min_score]
+        else:
+            filtered = scored[:]
+
+        if not filtered:
+            filtered = scored[:min_results]
+        elif len(filtered) < min_results:
+            extra = [t for t in scored if t not in filtered]
+            needed = min(min_results - len(filtered), len(extra))
+            filtered.extend(extra[:needed])
+
+        total = len(filtered)
+
+        start = (page - 1) * size
+        end = start + size
+        page_slice = filtered[start:end]
+
+        result_ids = [t[0] for t in page_slice]
+        ordered = [obj_map[i] for i in result_ids]
+
+        return ordered, total
+    
+    def search_by_fts(
+        self, query_text: str, page: int, size: int
+    ) -> Tuple[List[Iniciativa], int]:
+        """
+        Busca iniciativas por FTS.
+        Retorna tupla (iniciativas ordenadas por relevância, total).
+        """
+        if self.db.bind.dialect.name != "postgresql":
+            return self._search_sqlite_fallback(query_text, page, size)
+        
+        max_results = int(os.getenv("FTS_MAX_RESULTS", 10))
+
+        min_rank = float(os.getenv("FTS_MIN_RANK", "0.0"))
+
+        # Pesos para cada componente do documento
+        valid_weights = {"A", "B", "C", "D"}
+
+        def _get_weight(env_name: str, default: str) -> str:
+            v = os.getenv(env_name, default).upper()
+            return v if v in valid_weights else default
+
+        title_weight = _get_weight("FTS_WEIGHT_TITLE", "A")
+        desc_weight = _get_weight("FTS_WEIGHT_DESC", "B")
+        tags_weight = _get_weight("FTS_WEIGHT_TAGS", "C")
+        extras_weight = _get_weight("FTS_WEIGHT_EXTRAS", "B")
+   
+        normalized_query = (query_text or "").strip()
+
+        if not normalized_query:
+            return [], 0
+
+
+        query = text(
+            f"""
+            WITH params AS (
+                SELECT plainto_tsquery('portuguese', :query) AS ts_query
+            ),
+            tags_agg AS (
+                SELECT
+                    it.iniciativa_id,
+                    string_agg(t.nome || ' ' || COALESCE(t.descricao, ''), ' ') AS tags_text
+                FROM iniciativa_tag it
+                JOIN tags t ON t.id = it.tag_id
+                GROUP BY it.iniciativa_id
+            ),
+            extras_agg AS (
+                SELECT
+                    iniciativa_id,
+                    string_agg(descricao, ' ') AS extras_text
+                FROM descricoes_extras
+                GROUP BY iniciativa_id
+            ),
+            fts_docs AS (
+                SELECT
+                    i.id,
+                    (
+                        setweight(to_tsvector('portuguese', COALESCE(i.titulo, '')), '{title_weight}')
+                        || setweight(to_tsvector('portuguese', COALESCE(i.descricao, '')), '{desc_weight}')
+                        || setweight(to_tsvector('portuguese', COALESCE(tags_agg.tags_text, '')), '{tags_weight}')
+                        || setweight(to_tsvector('portuguese', COALESCE(extras_agg.extras_text, '')), '{extras_weight}')
+                    ) AS document
+                FROM iniciativas i
+                LEFT JOIN tags_agg ON tags_agg.iniciativa_id = i.id
+                LEFT JOIN extras_agg ON extras_agg.iniciativa_id = i.id
+                WHERE i.deletado_em IS NULL
+            ),
+            ranked AS (
+                SELECT
+                    fts_docs.id,
+                    ts_rank_cd(
+                        fts_docs.document,
+                        params.ts_query
+                    ) AS rank
+                FROM fts_docs
+                JOIN params ON TRUE
+                WHERE params.ts_query @@ fts_docs.document
+            ),
+            filtered AS (
+                SELECT
+                    id,
+                    rank AS best_rank
+                FROM ranked
+                WHERE rank >= :min_rank
+            )
+            SELECT
+                i.id,
+                i.titulo,
+                filtered.best_rank,
+                COUNT(*) OVER() AS total_count
+            FROM filtered
+            JOIN iniciativas i ON i.id = filtered.id
+            WHERE i.deletado_em IS NULL
+            ORDER BY filtered.best_rank DESC, i.id
+            LIMIT :limit
+        """
+        )
+
+        rows = (
+            self.db.execute(
+                query,
+                {
+                    "query": normalized_query,
+                    "min_rank": min_rank,
+                    "limit": max_results,
+                },
+            )
+            .mappings()
+            .all()
+        )
+
+        total = rows[0]["total_count"] if rows else 0
+        if not rows:
+            return [], 0        
+        
+        for r in rows:
+            rank = r["best_rank"] or 0.0
+            print(f"[FTS] ID={r['id']} | rank={rank:.4f} | título={r.get('titulo','')}")
+
+
+        ids = [r["id"] for r in rows]
+        iniciativas = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.id.in_(ids))
+            .options(selectinload(Iniciativa.horarios))
+            .all()
+        )
+
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids if _id in m]
+
+        return ordered, total
+    
     def search_by_embedding(
-        self, embedding: List[float], page: int, size: int
+        self, embedding: List[float], size: int
     ) -> Tuple[List[Iniciativa], int]:
         """
         Busca iniciativas por similaridade de embedding (busca semântica).
         Retorna tupla (iniciativas ordenadas por similaridade, total).
         """
-        offset = (page - 1) * size
+
+        max_results = int(os.getenv("SEMANTIC_SEARCH_MAX_RESULTS", 10))
+        
+        min_sim = float(os.getenv("EMBEDDING_MIN_SIM", "0.0"))
+        include_main_desc_env = os.getenv("EMBEDDING_INCLUDE_MAIN_DESC", "true").lower()
+        
+        include_main_desc = include_main_desc_env not in ("0", "false", "no")
 
         if isinstance(embedding, np.ndarray):
             embedding = embedding.tolist()
 
         embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
 
-        query = text(
-            """
-            WITH q AS (
-                SELECT (:embedding)::vector AS emb
-            ),
-            all_sims AS (
-                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+        all_sims_parts = []
+
+        if include_main_desc:
+            all_sims_parts.append(
+                """
+                SELECT
+                    i.id,
+                    1 - (i.descricao_vetor <-> (SELECT emb FROM q)) AS sim
                 FROM iniciativas i
                 WHERE i.deletado_em IS NULL
-                UNION ALL
-                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
-                FROM descricoes_extras de
-                JOIN iniciativas i ON i.id = de.iniciativa_id
-                WHERE i.deletado_em IS NULL
-            ),
-            best AS (
-                SELECT id, MAX(sim) AS best_sim
-                FROM all_sims
-                GROUP BY id
+                """
             )
-            SELECT i.id, i.titulo, best.best_sim, COUNT(*) OVER() AS total_count
-            FROM best
-            JOIN iniciativas i ON i.id = best.id
+
+        all_sims_parts.append(
+            """
+            SELECT
+                de.iniciativa_id AS id,
+                1 - (de.descricao_vetor <-> (SELECT emb FROM q)) AS sim
+            FROM descricoes_extras de
+            JOIN iniciativas i ON i.id = de.iniciativa_id
             WHERE i.deletado_em IS NULL
-            ORDER BY best.best_sim DESC
-            LIMIT :limit OFFSET :offset
+            """
+        )
+
+        all_sims_sql = " UNION ALL ".join(all_sims_parts)
+
+        query = text(
+            f"""
+        WITH q AS (
+            SELECT (:embedding)::vector AS emb
+        ),
+        all_sims AS (
+            {all_sims_sql}
+        ),
+        best AS (
+            SELECT
+                id,
+                MAX(sim) AS best_sim
+            FROM all_sims
+            GROUP BY id
+        ),
+        filtered AS (
+            SELECT
+                id,
+                best_sim
+            FROM best
+            WHERE best_sim >= :min_sim
+        )
+        SELECT
+            i.id,
+            i.titulo,
+            filtered.best_sim,
+            COUNT(*) OVER() AS total_count
+        FROM filtered
+        JOIN iniciativas i ON i.id = filtered.id
+        WHERE i.deletado_em IS NULL
+        ORDER BY filtered.best_sim DESC, i.id
+        LIMIT :limit
         """
         )
 
@@ -587,8 +856,8 @@ class IniciativaRepository:
                 query,
                 {
                     "embedding": embedding_str,
-                    "limit": size,
-                    "offset": offset,
+                    "min_sim": min_sim,
+                    "limit": max_results,
                 },
             )
             .mappings()
@@ -611,9 +880,42 @@ class IniciativaRepository:
             .all()
         )
         m = {i.id: i for i in iniciativas}
-        ordered = [m[_id] for _id in ids]
+        ordered = [m[_id] for _id in ids if _id in m]
 
         return ordered, total
+
+
+    def _search_sqlite_fallback(
+        self, query_text: str, page: int, size: int
+    ) -> Tuple[List[Iniciativa], int]:
+        """
+        Fallback simples para ambientes sem pgvector/FTS (SQLite em testes).
+        Usa apenas filtros LIKE para título/descrição.
+        """
+        pattern = f"%{query_text}%" if query_text else None
+        base_query = (
+            self.db.query(Iniciativa)
+            .filter(Iniciativa.deletado_em.is_(None))
+            .options(
+                selectinload(Iniciativa.horarios),
+            )
+        )
+        if pattern:
+            base_query = base_query.filter(
+                or_(
+                    Iniciativa.titulo.ilike(pattern),
+                    Iniciativa.descricao.ilike(pattern),
+                )
+            )
+
+        total = base_query.count()
+        iniciativas = (
+            base_query.order_by(Iniciativa.criado_em.desc())
+            .offset((page - 1) * size)
+            .limit(size)
+            .all()
+        )
+        return iniciativas, total
 
     def create_index_if_not_exists(self):
         """
@@ -640,3 +942,192 @@ class IniciativaRepository:
             """
             self.db.execute(create_index_query)
             self.db.commit()
+
+    def search_hibrida(
+        self,
+        query_text: str,
+        embedding: List[float],
+        page: int,
+        size: int,
+        min_score: float,
+        rrf_k: float,
+    ) -> Tuple[List[Iniciativa], int]:
+        
+        if self.db.bind.dialect.name != "postgresql":
+            return self._search_sqlite_fallback(query_text, page, size)
+
+        offset = (page - 1) * size
+
+        if isinstance(embedding, np.ndarray):
+            embedding = embedding.tolist()
+
+        embedding_str = f"[{', '.join(str(x) for x in embedding)}]"
+        normalized_query = (query_text or "").strip()
+        rrf_constant = max(rrf_k, 1.0)
+
+        query = text(
+            """
+            WITH params AS (
+                SELECT
+                    (:embedding)::vector AS emb,
+                    NULLIF(:fts_query, '') AS raw_query,
+                    CASE
+                        WHEN NULLIF(:fts_query, '') IS NULL
+                            THEN NULL
+                        ELSE plainto_tsquery('portuguese', :fts_query)
+                    END AS ts_query
+            ),
+            semantic_candidates AS (
+                SELECT i.id, 1 - (i.descricao_vetor <-> (SELECT emb FROM params)) AS sim
+                FROM iniciativas i
+                WHERE i.deletado_em IS NULL
+                UNION ALL
+                SELECT de.iniciativa_id AS id, 1 - (de.descricao_vetor <-> (SELECT emb FROM params)) AS sim
+                FROM descricoes_extras de
+                JOIN iniciativas i ON i.id = de.iniciativa_id
+                WHERE i.deletado_em IS NULL
+            ),
+            semantic_best AS (
+                SELECT
+                    id,
+                    MAX(sim) AS best_sim
+                FROM semantic_candidates
+                GROUP BY id
+            ),
+            semantic_ranked AS (
+                SELECT
+                    id,
+                    best_sim,
+                    ROW_NUMBER() OVER (ORDER BY best_sim DESC, id) AS sem_rank
+                FROM semantic_best
+            ),
+            tags_agg AS (
+                SELECT
+                    it.iniciativa_id,
+                    string_agg(t.nome || ' ' || COALESCE(t.descricao, ''), ' ') AS tags_text
+                FROM iniciativa_tag it
+                JOIN tags t ON t.id = it.tag_id
+                GROUP BY it.iniciativa_id
+            ),
+            extras_agg AS (
+                SELECT
+                    iniciativa_id,
+                    string_agg(descricao, ' ') AS extras_text
+                FROM descricoes_extras
+                GROUP BY iniciativa_id
+            ),
+            fts_docs AS (
+                SELECT
+                    i.id,
+                    (
+                        setweight(to_tsvector('portuguese', COALESCE(i.titulo, '')), 'A')
+                        || setweight(to_tsvector('portuguese', COALESCE(i.descricao, '')), 'B')
+                        || setweight(to_tsvector('portuguese', COALESCE(tags_agg.tags_text, '')), 'C')
+                        || setweight(to_tsvector('portuguese', COALESCE(extras_agg.extras_text, '')), 'C')
+                    ) AS document
+                FROM iniciativas i
+                LEFT JOIN tags_agg ON tags_agg.iniciativa_id = i.id
+                LEFT JOIN extras_agg ON extras_agg.iniciativa_id = i.id
+                WHERE i.deletado_em IS NULL
+            ),
+            fts_ranked AS (
+                SELECT
+                    fts_docs.id,
+                    ts_rank_cd(fts_docs.document, params.ts_query) AS fts_score,
+                    ROW_NUMBER() OVER (
+                        ORDER BY ts_rank_cd(fts_docs.document, params.ts_query) DESC, fts_docs.id
+                    ) AS fts_rank
+                FROM fts_docs
+                JOIN params ON TRUE
+                WHERE params.ts_query IS NOT NULL
+                  AND params.ts_query @@ fts_docs.document
+            ),
+            combined AS (
+                SELECT
+                    i.id,
+                    sem.best_sim,
+                    sem.sem_rank,
+                    fts.fts_rank,
+                    (
+                        COALESCE(1.0 / (:rrf_k + sem.sem_rank), 0)
+                        + COALESCE(1.0 / (:rrf_k + fts.fts_rank), 0)
+                    ) AS rrf_score
+                FROM iniciativas i
+                LEFT JOIN semantic_ranked sem ON sem.id = i.id
+                LEFT JOIN fts_ranked fts ON fts.id = i.id
+                WHERE i.deletado_em IS NULL
+                  AND (sem.id IS NOT NULL OR fts.id IS NOT NULL)
+            )
+            SELECT
+                combined.id,
+                combined.rrf_score,
+                combined.best_sim,
+                COUNT(*) OVER() AS total_count
+            FROM combined
+            ORDER BY combined.rrf_score DESC, combined.best_sim DESC, combined.id
+            LIMIT :limit OFFSET :offset
+        """
+        )
+
+        rows = (
+            self.db.execute(
+                query,
+                {
+                    "embedding": embedding_str,
+                    "fts_query": normalized_query,
+                    "limit": size,
+                    "offset": offset,
+                    "rrf_k": rrf_constant,
+                },
+            )
+            .mappings()
+            .all()
+        )
+
+        if not rows:
+            return [], 0
+
+        filtered_rows = [r for r in rows if (r.get("rrf_score") or 0.0) >= min_score]
+
+        if not filtered_rows and rows:
+            filtered_rows = [rows[0]]
+
+        ids = [r["id"] for r in filtered_rows]
+        iniciativas = (
+            self.db.query(Iniciativa)
+            .filter(
+                Iniciativa.id.in_(ids),
+                Iniciativa.deletado_em.is_(None),
+            )
+            .options(selectinload(Iniciativa.horarios))
+            .all()
+        )
+        m = {i.id: i for i in iniciativas}
+        ordered = [m[_id] for _id in ids if _id in m]
+
+        return ordered, len(filtered_rows)
+
+def _get_rrf_base_k(self) -> int:
+    # K base global do RRF (mínimo 60 por segurança)
+    return max(int(os.getenv("RRF_K", "60")), 60)
+
+def _get_rrf_k_emb(self) -> int:
+    base = self._get_rrf_base_k()
+    return max(int(os.getenv("RRF_K_EMBEDDING", str(base))), 60)
+
+def _get_rrf_k_fts(self) -> int:
+    base = self._get_rrf_base_k()
+    return max(int(os.getenv("RRF_K_FTS", str(base))), 60)
+
+def _get_rrf_weights(self) -> Tuple[float, float]:
+    weight_embedding = float(os.getenv("RRF_WEIGHT_EMBEDDING", "1.0"))
+    weight_fts = float(os.getenv("RRF_WEIGHT_FTS", "1.0"))
+    return weight_embedding, weight_fts
+
+def _get_rrf_candidate_multiplier(self) -> int:
+    # ex.: quantas vezes o tamanho da página você quer buscar para RRF
+    return max(int(os.getenv("RRF_CAND_MULTIPLIER", "5")), 1)
+
+def _get_default_min_score(self) -> float:
+    # min_score global para híbrida (pode deixar baixo e ajustar depois)
+    return float(os.getenv("RRF_MIN_SCORE", "0.0"))

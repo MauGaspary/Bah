@@ -11,9 +11,10 @@ def get_embedding_model(request: Request) -> Optional[object]:
             def encode(self, texts, **kwargs):
                 import numpy as np
 
+                dim = int(os.getenv("MODEL_DIMENSIONS", "768"))
                 if isinstance(texts, str):
-                    return np.random.rand(768).tolist()
-                return [np.random.rand(768).tolist() for _ in texts]
+                    return np.random.rand(dim).tolist()
+                return [np.random.rand(dim).tolist() for _ in texts]
 
         return MockEmbeddingModel()
 

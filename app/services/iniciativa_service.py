@@ -1,3 +1,5 @@
+import math
+import os
 from datetime import date, datetime
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -23,7 +25,8 @@ from app.schemas.iniciativa_schema import (
     TagSchema,
 )
 
-
+from dotenv import load_dotenv
+load_dotenv()
 class IniciativaService:
 
     def __init__(self, db: Session, model: Optional[SentenceTransformer] = None):
@@ -329,16 +332,39 @@ class IniciativaService:
     def search_iniciativas(
         self, query: str, page: int, size: int
     ) -> IniciativaListResponse:
-        """Busca semântica de iniciativas por embedding (endpoint público)."""
+        """Busca híbrida de iniciativas combinando embedding e sinais lexicais."""
         if self.model is None:
             raise ValueError("Modelo de embedding não disponível")
+
+        try:
+            min_score = float(os.getenv("HYBRID_SEARCH_MIN_SCORE", "0.0"))
+        except ValueError:
+            min_score = 0.0
+
+        try:
+            max_results_env = int(os.getenv("HYBRID_SEARCH_MAX_RESULTS", "50"))
+        except ValueError:
+            max_results_env = 50
+
+        max_results = max(1, max_results_env)
+        size = max(1, min(size, max_results))
+        max_pages = max(1, math.ceil(max_results / size))
+        if page > max_pages:
+            page = max_pages
 
         embedding = self.model.encode(
             query.lower(), convert_to_numpy=True, normalize_embeddings=True
         )
+
         try:
-            iniciativas, total = self.repository.search_by_embedding(
-                embedding, page, size
+            rrf_k_env = float(os.getenv("HYBRID_SEARCH_RRF_K", "60"))
+        except ValueError:
+            rrf_k_env = 60.0
+        rrf_k = max(rrf_k_env, 1.0)
+
+        try:
+            iniciativas, total = self.repository.ranking_by_rrf(
+                query, embedding, page, size, min_score, rrf_k
             )
 
             items = [IniciativaResponse.model_validate(i) for i in iniciativas]

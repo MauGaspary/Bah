@@ -61,7 +61,7 @@ def postgres_container():
 
         yield MockContainer()
     else:
-        with PostgresContainer("postgres:15") as postgres:
+        with PostgresContainer("pgvector/pgvector:pg15") as postgres:
             if os.getenv("DOCKER_ENV") == "true":
                 url = postgres.get_connection_url().replace(
                     "localhost", "host.docker.internal"
@@ -206,7 +206,8 @@ def iniciativa_fixture(db_session, organizador_fixture, usuario_fixture):
     from app.models.iniciativa_horario_model import HorarioTipo, IniciativaHorario
     from app.models.iniciativa_model import Iniciativa
 
-    test_vector = np.random.rand(768).tolist()
+    vector_dim = int(os.getenv("MODEL_DIMENSIONS", "768"))
+    test_vector = np.random.rand(vector_dim).tolist()
 
     iniciativa = Iniciativa(
         titulo="Iniciativa Teste Existente",
@@ -271,10 +272,12 @@ def iniciativa_factory(db_session):
                 }
             ]
 
+        vector_dim = int(os.getenv("MODEL_DIMENSIONS", "768"))
+
         iniciativa = Iniciativa(
             titulo=titulo,
             descricao=descricao,
-            descricao_vetor=[0.0] * 768,
+            descricao_vetor=[0.0] * vector_dim,
             organizador_id=organizador_id,
             link=link,
             imagem_url=imagem_url,
