@@ -7,12 +7,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import type {
-  IniciativaCreate,
-  IniciativaPatch,
-  IniciativaAdmin,
-} from '@/interfaces/IIniciativas'
-
+import type { IniciativaAdmin } from '@/interfaces/IIniciativas'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -38,6 +33,7 @@ import SidebarAdm from '@/components/ui/sidebar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { HorarioTipo } from '@/enums/HorarioTipo'
+import { getImageUrl } from '@/lib/imageUrl'
 import {
   createIniciativa,
   fetchIniciativaById,
@@ -173,11 +169,11 @@ export default function FormIniciativa() {
   const patchMutation = useMutation({
     mutationFn: ({
       iniciativaId,
-      payload,
+      formData,
     }: {
       iniciativaId: string
-      payload: IniciativaPatch
-    }) => patchIniciativa(iniciativaId, payload),
+      formData: FormData
+    }) => patchIniciativa(iniciativaId, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
       toast.success('Iniciativa atualizada com sucesso!')
@@ -216,11 +212,14 @@ export default function FormIniciativa() {
 
       setTimeout(() => {
         form.setValue('organizador', organizadorValue, { shouldValidate: true })
-        console.log('Organizador setado via setValue:', organizadorValue)
       }, 100)
 
       if (admin.imagem_url) {
-        setImagePreview(admin.imagem_url)
+        // Construir URL completa para exibição
+        const fullImageUrl = getImageUrl(admin.imagem_url)
+        if (fullImageUrl) {
+          setImagePreview(fullImageUrl)
+        }
       }
     }
   }, [isEditing, iniciativaAdmin, form])
@@ -235,18 +234,63 @@ export default function FormIniciativa() {
   }, [])
 
   const onSubmit = (data: InitiativeFormData) => {
-    if (isEditing && id && iniciativaAdmin) {
-      const formatTimeToISO = (time: string): string => `${time}:00`
+    const formatTimeToISO = (time: string): string => `${time}:00`
 
+    if (isEditing && id && iniciativaAdmin) {
+      // ============ MODO EDIÇÃO ============
+      const formData = new FormData()
+
+      // Campos simples
+      formData.append('titulo', data.titulo)
+      formData.append('descricao', data.descricao)
+      formData.append('organizador_id', data.organizador)
+      formData.append('link', data.link || '')
+      formData.append('local', data.local)
+      formData.append('destaque', String(data.isAtivo))
+
+      // Imagem: enviar arquivo se foi selecionado, senão enviar URL existente
+      if (data.foto instanceof File) {
+        formData.append('imagem', data.foto)
+      } else if (typeof data.foto === 'string') {
+        formData.append('imagem_url', data.foto)
+      } else if (iniciativaAdmin.imagem_url) {
+        formData.append('imagem_url', iniciativaAdmin.imagem_url)
+      }
+
+      // Tags
+      formData.append('tag_ids', JSON.stringify(data.tags))
+
+      // Descrições extras
       const original = iniciativaAdmin.descricoes_extras || []
       const updated = data.descricoes_extras || []
       const minLen = Math.min(original.length, updated.length)
+
       const descricoes_extras_update = Array.from({ length: minLen }).map(
         (_, i) => ({ id: original[i].id, descricao: updated[i] })
       )
       const descricoes_extras_delete_ids = original.slice(minLen).map(d => d.id)
       const descricoes_extras_add = updated.slice(minLen)
 
+      if (descricoes_extras_update.length > 0) {
+        formData.append(
+          'descricoes_extras_update',
+          JSON.stringify(descricoes_extras_update)
+        )
+      }
+      if (descricoes_extras_delete_ids.length > 0) {
+        formData.append(
+          'descricoes_extras_delete_ids',
+          JSON.stringify(descricoes_extras_delete_ids)
+        )
+      }
+      if (descricoes_extras_add.length > 0) {
+        formData.append(
+          'descricoes_extras_add',
+          JSON.stringify(descricoes_extras_add)
+        )
+      }
+
+      // Horários - verificar se mudaram
       const newHorarios = data.schedules.map(s => ({
         data_evento: s.dia,
         hora_inicio: formatTimeToISO(s.inicio),
@@ -274,51 +318,56 @@ export default function FormIniciativa() {
         originalSerialized.length !== updatedSerialized.length ||
         originalSerialized.some((val, idx) => val !== updatedSerialized[idx])
 
-      const payload: IniciativaPatch = {
-        titulo: data.titulo,
-        descricao: data.descricao,
-        organizador_id: data.organizador,
-        link: data.link || '',
-        local: data.local,
-        destaque: data.isAtivo,
-        tags_ids: data.tags,
-        descricoes_extras_update,
-        descricoes_extras_delete_ids,
-        descricoes_extras_add,
-        imagem_url:
-          'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
-      }
-
       if (horariosChanged) {
-        payload.horarios = newHorarios
+        formData.append('horarios', JSON.stringify(newHorarios))
       }
 
-      patchMutation.mutate({ iniciativaId: id, payload })
+      patchMutation.mutate({ iniciativaId: id, formData })
       return
     }
 
-    const formatTimeToISO = (time: string): string => `${time}:00`
+    // ============ MODO CRIAÇÃO ============
+    const formData = new FormData()
 
-    const iniciativaData: IniciativaCreate = {
-      titulo: data.titulo,
-      descricao: data.descricao,
-      organizador_id: data.organizador,
-      link: data.link || '',
-      local: data.local,
-      imagem_url:
-        'https://cdn.awsli.com.br/1000x5000/2547/2547358/arquivos/Blog%20computadores.png',
-      destaque: data.isAtivo,
-      horarios: data.schedules.map(schedule => ({
-        data_evento: schedule.dia,
-        hora_inicio: formatTimeToISO(schedule.inicio),
-        hora_fim: formatTimeToISO(schedule.fim),
-        tipo: schedule.tipo as HorarioTipo,
-      })),
-      tag_ids: data.tags,
-      descricoes_extras: data.descricoes_extras ?? [],
+    // Campos simples
+    formData.append('titulo', data.titulo)
+    formData.append('descricao', data.descricao)
+    formData.append('organizador_id', data.organizador)
+    formData.append('link', data.link || '')
+    formData.append('local', data.local)
+    formData.append('destaque', String(data.isAtivo))
+
+    // Imagem: enviar arquivo se disponível
+    if (data.foto instanceof File) {
+      formData.append('imagem', data.foto)
+    } else if (!data.foto) {
+      toast.error('Por favor, selecione uma imagem')
+      return
     }
 
-    createMutation.mutate(iniciativaData)
+    // Horários (JSON string)
+    const horarios = data.schedules.map(schedule => ({
+      data_evento: schedule.dia,
+      hora_inicio: formatTimeToISO(schedule.inicio),
+      hora_fim: formatTimeToISO(schedule.fim),
+      tipo: schedule.tipo,
+    }))
+    formData.append('horarios', JSON.stringify(horarios))
+
+    // Tags (JSON string)
+    if (data.tags && data.tags.length > 0) {
+      formData.append('tag_ids', JSON.stringify(data.tags))
+    }
+
+    // Descrições extras (JSON string)
+    if (data.descricoes_extras && data.descricoes_extras.length > 0) {
+      formData.append(
+        'descricoes_extras',
+        JSON.stringify(data.descricoes_extras)
+      )
+    }
+
+    createMutation.mutate(formData)
   }
 
   return (

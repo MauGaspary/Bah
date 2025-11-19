@@ -6,6 +6,7 @@ import type { Iniciativa } from '@/interfaces/IIniciativas'
 import CardItem from '@/components/ui/CardItem'
 import Header from '@/components/ui/Header/Header'
 import Footer from '@/components/ui/Footer/Footer'
+import { getImageUrl } from '@/lib/imageUrl'
 import { searchIniciativas } from '@/service/search'
 
 function ResultsPage() {
@@ -63,7 +64,7 @@ function ResultsPage() {
                   <CardItem
                     key={iniciativa.id}
                     id={iniciativa.id}
-                    imageUrl={iniciativa.imagem_url}
+                    imageUrl={getImageUrl(iniciativa.imagem_url) || ''}
                     title={iniciativa.titulo}
                     description={iniciativa.descricao}
                     horarios={iniciativa.horarios}

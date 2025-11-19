@@ -8,6 +8,7 @@ import type { Iniciativa } from '@/interfaces/IIniciativas'
 
 import { Input } from '@/components/ui/Searchbar/Searchbar'
 import SearchItem from '@/components/ui/Searchbar/SearchItem'
+import { getImageUrl } from '@/lib/imageUrl'
 import { cn } from '@/lib/utils'
 import { searchIniciativas } from '@/service/search'
 
@@ -148,7 +149,7 @@ function SearchDropdown() {
                   className="cursor-pointer hover:bg-gray-50 transition-colors py-2"
                 >
                   <SearchItem
-                    imageUrl={item.imagem_url}
+                    imageUrl={getImageUrl(item.imagem_url) || ''}
                     title={item.titulo}
                     description={item.descricao}
                   />
@@ -196,7 +197,7 @@ function SearchDropdown() {
                   className="cursor-pointer hover:bg-gray-50 transition-colors p-2 rounded-lg"
                 >
                   <SearchItem
-                    imageUrl={item.imagem_url}
+                    imageUrl={getImageUrl(item.imagem_url) || ''}
                     title={item.titulo}
                     description={item.descricao}
                   />

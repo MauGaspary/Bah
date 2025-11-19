@@ -2,15 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import ConfirmModal from '../ConfirmModal'
-import ListItem from './ListItem'
-
 import type {
   IniciativasListProps,
   Iniciativa,
 } from '@/interfaces/IIniciativas'
-import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
+import ConfirmModal from '../ConfirmModal'
+import ListItem from './ListItem'
 import SimplePagination from '../PageList'
+import { getImageUrl } from '@/lib/imageUrl'
+import { fetchIniciativas, deleteIniciativa } from '@/service/iniciativas'
 
 function IniciativasList({ searchQuery }: IniciativasListProps) {
   const navigate = useNavigate()
@@ -105,7 +105,7 @@ function IniciativasList({ searchQuery }: IniciativasListProps) {
               key={item.id}
               title={item.titulo}
               description={item.descricao}
-              imageUrl={item.imagem_url}
+              imageUrl={getImageUrl(item.imagem_url) || ''}
               isLast={index === iniciativas.length - 1}
               isDeleting={deletingId === item.id}
               onEdit={() => navigate(`/admin/iniciativas/${item.id}/editar`)}
