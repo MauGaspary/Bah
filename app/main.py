@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config.settings import Settings
 from app.middleware.auth_middleware import JWTMiddleware
@@ -79,6 +80,12 @@ def create_app(settings=None):
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Montar diretório de uploads para servir arquivos estáticos
+    upload_path = os.getenv("UPLOAD_PATH", "uploads")
+    if not os.path.exists(upload_path):
+        os.makedirs(upload_path, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=upload_path), name="uploads")
 
     @app.get("/")
     def root():
