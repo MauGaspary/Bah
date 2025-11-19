@@ -17,7 +17,7 @@ export async function fetchUsers(
   }
   console.log('222')
   //ERRO DA LISTA NA LINHA ABAIXO
-  const response = await api.get<UsersResponse>('/admin/usuarios', {
+  const response = await api.get<UsersResponse>('/admin/usuarios/', {
     params,
   })
   console.log('999');
@@ -32,7 +32,7 @@ export async function fetchUserById(userId: string): Promise<User> {
 export async function createUser(
   userData: UserCreate
 ): Promise<User> {
-  const response = await api.post<User>('/admin/usuarios', userData)
+  const response = await api.post<User>('/admin/usuarios/', userData)
   return response.data
 }
 
