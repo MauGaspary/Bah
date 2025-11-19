@@ -17,6 +17,7 @@ export interface CalendarioIniciativaItem {
   local?: string
   destaque: boolean
   tags: CalendarioTag[]
+  imagem_url?: string
 }
 
 export interface DiaCalendario {

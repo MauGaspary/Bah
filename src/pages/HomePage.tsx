@@ -11,6 +11,7 @@ import { ChevronDown } from 'lucide-react'
 import Contato from '@/components/ui/contato'
 import LogoImg from '@/assets/logo.png'
 import SobreNos from '../components/ui/SobreNos'
+import { getImageUrl } from '@/lib/imageUrl'
 import NossosValoresPage from './NossosValoresPage'
 import Footer from '@/components/ui/Footer/Footer'
 import { Link } from 'react-router-dom'
@@ -61,7 +62,7 @@ function HomePage() {
             date: dia.data,
             category: inferCategory(item.tags.map(t => t.nome)),
             location: item.local,
-            imageUrl: undefined,
+            imageUrl: getImageUrl(item.imagem_url),
             featured: item.destaque,
           }))
         )
