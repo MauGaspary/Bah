@@ -133,6 +133,7 @@ services:
 
 volumes:
   postgres_data_prod:
+  umami_data:
 
 networks:
   bah_network:
