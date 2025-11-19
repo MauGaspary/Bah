@@ -257,7 +257,7 @@ function Timeline() {
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto px-4">
       <div
         ref={parentContainerRef}
-        className="relative w-full pb-[32rem] md:pb-80"
+        className="relative w-full overflow-visible pb-[620px] md:pb-80"
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
           {lineCoordinates.map((coords, index) => (
