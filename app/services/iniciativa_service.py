@@ -22,7 +22,7 @@ from app.schemas.iniciativa_schema import (
     IniciativaSchema,
     TagSchema,
 )
-from app.utils.helpers import hash_url_to_base64
+from app.utils.helpers import process_image_input
 
 
 class IniciativaService:
@@ -99,7 +99,7 @@ class IniciativaService:
         data: Dict[str, Any] = payload.model_dump(exclude_none=True)
 
         if "imagem_url" in data:
-            data["imagem_url"] = hash_url_to_base64(data["imagem_url"])
+            data["imagem_url"] = process_image_input(data["imagem_url"])
 
         if "descricoes_extras_update" in data and data["descricoes_extras_update"]:
             if model is None:
@@ -198,8 +198,8 @@ class IniciativaService:
                 pass
 
         try:
-            imagem_hashed = hash_url_to_base64(iniciativa_data.imagem_url)
-            payload = iniciativa_data.model_copy(update={"imagem_url": imagem_hashed})
+            imagem_base64 = process_image_input(iniciativa_data.imagem_url)
+            payload = iniciativa_data.model_copy(update={"imagem_url": imagem_base64})
 
             print("model", self.model)
             if self.model is None:

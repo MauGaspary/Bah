@@ -25,13 +25,11 @@ def process_image_input(image_input: str) -> str:
     
     image_input = image_input.strip()
     
-    # Caso 1: Data URI - extrai só o base64
     if image_input.startswith("data:image/"):
         if ";base64," in image_input:
             return image_input.split(";base64,", 1)[1]
         raise ValueError("Data URI inválida - formato esperado: data:image/...;base64,...")
     
-    # Caso 2: URL - baixa e converte para base64
     if image_input.startswith(("http://", "https://")):
         try:
             response = httpx.get(image_input, timeout=10.0)
@@ -41,7 +39,6 @@ def process_image_input(image_input: str) -> str:
         except httpx.HTTPError as e:
             raise ValueError(f"Erro ao baixar imagem da URL: {str(e)}") from e
     
-    # Caso 3: Base64 puro - valida e retorna
     try:
         base64.b64decode(image_input, validate=True)
         return image_input
