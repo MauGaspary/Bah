@@ -89,7 +89,6 @@ def get_calendario_mensal(
 def get_iniciativa_by_id(
     iniciativa_id: str,
     db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
     """Busca uma iniciativa pelo ID."""
     controller = IniciativaController(db)

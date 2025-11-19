@@ -48,6 +48,10 @@ class UsuarioResponse(BaseModel):
     nome: str
     sobrenome: str
     email: str
-    senha: str
     criado_em: Optional[datetime]
     criado_por: Optional[str]
+
+
+class UsersResponse(BaseModel):
+    items: list[UserResponse]
+    total: int

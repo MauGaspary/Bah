@@ -348,7 +348,6 @@ class IniciativaService:
                 embedding, page, size
             )
 
-            # Converter modelos para schemas
             items = [IniciativaResponse.model_validate(i) for i in iniciativas]
 
             filters = IniciativaFiltersSchema(q=query, page=page, size=size)

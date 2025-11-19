@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.repositories.usuario_repository import UsuarioRepository
-from app.schemas.usuario_schema import UserCreate, UserResponse, UsuarioResponse
+from app.schemas.usuario_schema import UserCreate, UserResponse
 from app.utils.exceptions import EmailAlreadyExistsException
 from app.utils.helpers import validate_email
 
@@ -39,8 +39,21 @@ class UsuarioService:
             raise RuntimeError("Erro ao deletar usuário")
         return True
 
-    def get_usuario_by_id(self, usuario_id: str) -> UsuarioResponse:
+    def get_usuario_by_id(self, usuario_id: str) -> UserResponse:
         usuario = self.repository.get_by_id(usuario_id)
         if not usuario:
             raise ValueError("Usuario não encontrado")
-        return UsuarioResponse.model_validate(usuario)
+        return UserResponse.model_validate(usuario)
+
+    def list_users(
+        self, page: int = 1, size: int = 10, q: Optional[str] = None
+    ) -> tuple[list[UserResponse], int]:
+        skip = max(0, (page - 1) * size)
+        try:
+            items, total = self.repository.list(skip=skip, limit=size, q=q)
+            users = [UserResponse.model_validate(u) for u in items]
+            return users, total
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Erro interno do servidor: {str(e)}"
+            ) from e

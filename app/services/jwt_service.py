@@ -11,13 +11,14 @@ from jwt.exceptions import (
 import app.config.settings as settings
 
 
-def sign(sub: str, email: str) -> str:
+def sign(sub: str, email: str, name: str) -> str:
 
     iat = int(time.time())
     exp = iat + settings.JWT_TTL
     payload = {
         "sub": sub,
-        "email": email,
+    "email": email,
+    "name": name,
         "iat": iat,
         "exp": exp,
         "iss": settings.JWT_ISS,
