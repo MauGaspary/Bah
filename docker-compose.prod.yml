@@ -123,7 +123,7 @@ services:
     image: ghcr.io/umami-software/umami:latest
     container_name: umami
     ports:
-      - "3000:3000"
+      - "8000:8000"
     environment:
       DATABASE_URL: ${UMAMI_DATABASE}
       APP_SECRET: ${UMAMI_APP_SECRET}
