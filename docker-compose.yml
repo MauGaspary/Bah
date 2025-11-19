@@ -169,8 +169,8 @@ services:
     container_name: umami-db
     environment:
       POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
+      POSTGRES_USER: ${UMAMI_DATABASE_USER}
+      POSTGRES_PASSWORD: ${UMAMI_DATABASE_PASSWORD}
     volumes:
       - umami_data:/var/lib/postgresql/data
     ports:
@@ -187,8 +187,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
-      APP_SECRET: "uma-chave-bem-grande-aqui"
+      DATABASE_URL: ${UMAMI_DATABASE}
+      APP_SECRET: ${UMAMI_APP_SECRET}
     depends_on:
       umami-db:
         condition: service_healthy
