@@ -56,7 +56,7 @@ def postgres_container():
 
         yield MockContainer()
     else:
-        with PostgresContainer("postgres:15") as postgres:
+        with PostgresContainer("pgvector/pgvector:pg15") as postgres:
             yield postgres
 
 

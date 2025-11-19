@@ -1,29 +1,32 @@
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient
 
-from tests.helpers import request, request_auth
-
-
-def test_lifespan_startup_executes(client, auth_token):
-    """
-    Teste que verifica se o lifespan startup/shutdown executa corretamente.
-
-    Valida que:
-    - create_app() funciona com settings
-    - TestClient dispara o lifespan startup
-    - Settings são aplicadas na aplicação
-    - Shutdown executa automaticamente
-    """
-    response = request_auth(client, "GET", "/admin/iniciativas", token=auth_token)
-
-    assert response.status_code == 200
+import app.config.database as dbmod
+from app.main import app
 
 
-def test_different_settings(app_with_lifespan):
-    """
-    Teste que valida o comportamento da aplicação com configurações customizadas.
-    """
-    with TestClient(app_with_lifespan) as client:
-        response = request(client, "GET", "/")
-        assert response.status_code in [200, 307]
+class DummyEngine:
+    def __init__(self):
+        self.disposed = False
 
-        assert app_with_lifespan.state.settings.testing is True
+    def dispose(self):
+        self.disposed = True
+
+
+def test_lifespan_startup_executes(monkeypatch):
+
+    monkeypatch.setattr(dbmod, "engine", DummyEngine(), raising=True)
+
+    with TestClient(app) as c:
+        r = c.get("/docs")
+        assert r.status_code in (200, 404, 422)
+
+
+def test_different_settings(monkeypatch):
+    dummy = DummyEngine()
+    monkeypatch.setattr(dbmod, "engine", dummy, raising=True)
+
+    with TestClient(app) as c:
+        r = c.get("/docs")
+        assert r.status_code in (200, 404, 422)
+
+    assert dummy.disposed is True

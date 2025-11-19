@@ -13,9 +13,8 @@ from app.services.jwt_service import verify
 
 class JWTMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/admin/") and not request.url.path.startswith(
-            "/demo/"
-        ):
+        if request.url.path.startswith("/admin/"):
+            
             auth = request.headers.get("Authorization")
 
             if not auth or not auth.startswith("Bearer "):
