@@ -1,0 +1,18 @@
+{
+  "validUser": {
+    "email": "admin@bah.com.br",
+    "password": "admin123"
+  },
+  "invalidUser": {
+    "email": "invalid@test.com",
+    "password": "wrongpassword"
+  },
+  "invalidEmail": {
+    "email": "invalid-email",
+    "password": "password123"
+  },
+  "emptyFields": {
+    "email": "",
+    "password": ""
+  }
+}

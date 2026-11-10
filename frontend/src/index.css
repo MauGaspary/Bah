@@ -1,0 +1,291 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700&display=swap');
+
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+@tailwind utilities;
+
+/* Custom theme variables */
+@theme {
+  --font-kanit: Kanit, sans-serif;
+  --font-mulish: Mulish, sans-serif;
+  --font-sf-pro-rounded:
+    'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    sans-serif;
+  --font-sf-pro:
+    'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    sans-serif;
+  --font-sf-pro-text:
+    'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    sans-serif;
+
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f2f2f7;
+  --color-background-tertiary: #ffffff;
+  --color-label-primary: #000000;
+  --color-label-secondary: rgba(60, 60, 67, 0.6);
+  --color-label-tertiary: rgba(60, 60, 67, 0.3);
+  --color-stroke-primary: #c6c6c8;
+  --color-stroke-secondary: #3c3c43;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gray: #8e8e93;
+  --color-gray2: #aeaeb2;
+  --color-gray3: #c7c7cc;
+  --color-accent: #007aff;
+  --color-error: #ff3b30;
+  --color-success: #34c759;
+  --color-bah-blue: #41edee;
+  --color-bah-red: #fe716f;
+  --color-bah-green: #c7d871;
+  --color-bah-purple: #542e82;
+  --color-bah-dark-blue: #98a1cc;
+  --color-editar: #155dfc;
+  --color-editar-secondary: #c6dfff;
+  --color-excluir: #e60f1a;
+  --color-excluir-secondary: #ffc9c9;
+
+  --radius-button: 16px;
+  --radius-card: 32px;
+
+  --font-size-large-title: 34px;
+  --font-size-medium-title: 32px;
+  --font-size-title1: 28px;
+  --font-size-title3-regular: 20px;
+  --font-size-title3-semibold: 20px;
+
+  --font-size-body-regular: 17px;
+  --font-size-body-semibold: 17px;
+  --font-size-callout-regular: 16px;
+  --font-size-callout-semibold: 16px;
+  --font-size-subheadline-regular: 15px;
+  --font-size-subheadline-semibold: 15px;
+  --font-size-footnote: 13px;
+
+  /* Cores padrão do Tailwind para gradientes */
+  --color-gray-50: #f9fafb;
+  --color-blue-50: #eff6ff;
+  --color-purple-50: #faf5ff;
+}
+
+/* Body background override */
+body {
+  background: linear-gradient(to bottom right, #f9fafb, #eff6ff, #faf5ff);
+  min-height: 100vh;
+}
+
+/* Custom utility classes */
+.font-kanit {
+  font-family: var(--font-kanit);
+}
+.font-mulish {
+  font-family: var(--font-mulish);
+}
+.font-sf-pro-rounded {
+  font-family: var(--font-sf-pro-rounded);
+}
+.font-sf-pro {
+  font-family: var(--font-sf-pro);
+}
+.font-sf-pro-text {
+  font-family: var(--font-sf-pro-text);
+}
+
+.text-large-title {
+  font-size: var(--font-size-large-title);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.text-medium-title {
+  font-size: var(--font-size-medium-title);
+  line-height: 1.2;
+  font-weight: 400;
+}
+
+.text-title1 {
+  font-size: var(--font-size-title1);
+  line-height: 1.3;
+  font-weight: 700;
+}
+.text-title3-regular {
+  font-size: var(--font-size-title3-regular);
+  line-height: 1.4;
+  font-weight: 400;
+}
+.text-title3-semibold {
+  font-size: var(--font-size-title3-semibold);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.text-body-regular {
+  font-size: var(--font-size-body-regular);
+  line-height: 1.5;
+  font-weight: 400;
+}
+.text-body-semibold {
+  font-size: var(--font-size-body-semibold);
+  line-height: 1.5;
+  font-weight: 600;
+}
+.text-callout-regular {
+  font-size: var(--font-size-callout-regular);
+  line-height: 1.4;
+  font-weight: 400;
+}
+.text-callout-semibold {
+  font-size: var(--font-size-callout-semibold);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.text-subheadline-regular {
+  font-size: var(--font-size-subheadline-regular);
+  line-height: 1.4;
+  font-weight: 400;
+}
+.text-subheadline-semibold {
+  font-size: var(--font-size-subheadline-semibold);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.text-footnote {
+  font-size: var(--font-size-footnote);
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.bg-background-primary {
+  background-color: var(--color-background-primary);
+}
+.bg-background-secondary {
+  background-color: var(--color-background-secondary);
+}
+.bg-background-tertiary {
+  background-color: var(--color-background-tertiary);
+}
+.text-label-primary {
+  color: var(--color-label-primary);
+}
+.text-label-secondary {
+  color: var(--color-label-secondary);
+}
+.text-label-tertiary {
+  color: var(--color-label-tertiary);
+}
+.border-stroke-primary {
+  border-color: var(--color-stroke-primary);
+}
+.bg-black {
+  background-color: var(--color-black);
+}
+.bg-white {
+  background-color: var(--color-white);
+}
+.bg-gray {
+  background-color: var(--color-gray);
+}
+.bg-gray2 {
+  background-color: var(--color-gray2);
+}
+.bg-gray3 {
+  background-color: var(--color-gray3);
+}
+.bg-accent {
+  background-color: var(--color-accent);
+}
+.text-accent {
+  color: var(--color-accent);
+}
+.bg-error {
+  background-color: var(--color-error);
+}
+.text-error {
+  color: var(--color-error);
+}
+.bg-success {
+  background-color: var(--color-success);
+}
+.text-success {
+  color: var(--color-success);
+}
+.bg-bah-blue {
+  background-color: var(--color-bah-blue);
+}
+.bg-bah-red {
+  background-color: var(--color-bah-red);
+}
+.bg-bah-green {
+  background-color: var(--color-bah-green);
+}
+.bg-bah-purple {
+  background-color: var(--color-bah-purple);
+}
+
+.text-bah-purple {
+  color: var(--color-bah-purple);
+}
+
+.rounded-button {
+  border-radius: var(--radius-button);
+}
+.rounded-card {
+  border-radius: var(--radius-card);
+}
+
+:root {
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-bah-purple) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-bah-purple);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #4a2570;
+}
