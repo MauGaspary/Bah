@@ -1,0 +1,62 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+verify_ssl = true
+
+[packages]
+fastapi = "~=0.115.14"
+uvicorn = "~=0.34.3"
+pydantic = "~=2.11.7"
+httpx = "~=0.27.2"
+sqlalchemy = "~=2.0.23"
+psycopg2-binary = "~=2.9.9"
+alembic = "~=1.13.1"
+pyjwt = "2.10.1"
+python-dotenv = "1.1.1"
+bcrypt = "~=4.0.1"
+pgvector = "~=0.4.1"
+torch = {version = "==2.8.0", index = "pytorch-cpu"}
+huggingface-hub = {version = "==0.35.3", extras = ["hf_xet"]}
+sentence-transformers = "~=5.1.1"
+python-multipart = "*"
+
+[dev-packages]
+black = "~=24.10.0"
+isort = "~=5.13.2"
+pre-commit = "==4.0.1"
+pylint = "~=3.3.2"
+testcontainers = "~=4.8.2"
+mypy = "~=1.11.0"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+
+[requires]
+python_version = "3.12"
+
+[scripts]
+app = "uvicorn app.main:app --reload"
+test = "pytest tests -vv --show-capture=all"
+"test:cov" = "pytest --cov=app --cov-report=term-missing --cov-fail-under=80 tests"
+"test:local" = "env USE_CONTAINERS=false pytest tests -vv --show-capture=all"
+"test:containers" = "env USE_CONTAINERS=true pytest tests -vv --show-capture=all"
+"test:cov:html" = "pytest --cov=app --cov-report=html tests"
+"test:integration" = "pytest -m integration tests/integration"
+"test:unit" = "pytest -m 'not integration' tests"
+"lint:all" = "pylint app tests"
+"pylint:all" = "pylint app"
+"isort:all" = "isort --profile black ."
+"format:all" = "black ."
+precommit = "pre-commit run --all-files"
+migrate = "alembic upgrade head"
+"migrate:create" = "alembic revision --autogenerate -m 'auto migration'"
+"migrate:history" = "alembic history"
+"migrate:current" = "alembic current"
+seed = "python -m app.scripts.seed"
+"test:docker" = "docker compose run --rm test"
+"test:docker:cov" = "docker compose run --rm test-cov"

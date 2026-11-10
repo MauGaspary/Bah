@@ -1,0 +1,16 @@
+[MASTER]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    unused-argument,
+    import-error,
+    line-too-long,
+    too-many-positional-arguments
+
+[FORMAT]
+max-line-length=88
+
+[MESSAGES CONTROL]
+confidence=HIGH

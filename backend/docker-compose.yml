@@ -1,0 +1,228 @@
+services:
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: bah_db_dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bah_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-bah_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bah_network
+
+  db_test:
+    image: pgvector/pgvector:pg15
+    container_name: bah_db_test
+    environment:
+      POSTGRES_DB: bah_db_test
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d bah_db_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bah_network
+    profiles:
+      - testing
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_migrate_dev
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-bah_db}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
+    volumes:
+      - .:/app
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - bah_network
+
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_seed_dev
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-bah_db}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
+    volumes:
+      - .:/app
+    command: python -m app.scripts.seed
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - bah_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_app_dev
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-bah_db}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      ENVIRONMENT: development
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bah_network
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_test
+    privileged: true
+    environment:
+      DOCKER_ENV: "true"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db_test:5432/bah_db_test
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: pytest tests -vv --show-capture=all
+    depends_on:
+      db_test:
+        condition: service_healthy
+    networks:
+      - bah_network
+    profiles:
+      - testing
+
+  test-cov:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_test_cov
+    privileged: true
+    environment:
+      DOCKER_ENV: "true"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db_test:5432/bah_db_test
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+      MODEL_DIMENSIONS: ${MODEL_DIMENSIONS:-768}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: pytest --cov=app --cov-report=term-missing --cov-fail-under=80 tests
+    depends_on:
+      db_test:
+        condition: service_healthy
+    networks:
+      - bah_network
+    profiles:
+      - testing
+
+  quality:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bah_quality
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-36000}
+      JWT_ISS: ${JWT_ISS:-bah_backend}
+    volumes:
+      - .:/app
+    command: sh -c "black . && isort --profile black . && pylint app && mypy app"
+    networks:
+      - bah_network
+    profiles:
+      - testing
+
+  adminer:
+    image: adminer
+    container_name: bah_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - bah_network
+    profiles:
+      - tools
+
+  umami-db:
+    image: postgres:15
+    container_name: umami-db
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: ${UMAMI_DATABASE_USER}
+      POSTGRES_PASSWORD: ${UMAMI_DATABASE_PASSWORD}
+    volumes:
+      - umami_data:/var/lib/postgresql/data
+    ports:
+      - "5000:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    container_name: umami
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${UMAMI_DATABASE}
+      APP_SECRET: ${UMAMI_APP_SECRET}
+    depends_on:
+      umami-db:
+        condition: service_healthy
+
+
+volumes:
+  postgres_data_dev:
+  umami_data:
+
+networks:
+  bah_network:
+    driver: bridge
